@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runGame } from '../../src/engine.js';
 import { validateTape } from '../../src/tape.js';
-import { fixedAgents, makeOracle, ofType, powersWith, reply } from './helpers.js';
+import { fixedAgents, makeOracle, ofType, pitEscape, powersWith, reply } from './helpers.js';
 
 const opposite = (side) => (side === 'L' ? 'R' : 'L');
 const stagesRun = (tape) => ofType(tape.events, 'stage_start').map((e) => e.stage);
@@ -53,15 +53,20 @@ test('two alive after the bridge: ledge with places 1 and 2 only', async () => {
   assert.deepEqual(placed(tape).map(([place]) => place), [1, 2]);
 });
 
-test('four alive after the bridge: the crusher runs, and the disc runs only if more than 3 remain', async () => {
+test('four alive after the bridge: each later stage runs only if more than 3 remain', async () => {
   const hold = (view) => (view.stage === 'crusher' ? reply('hold_lever') : reply(view.legalActions.find((a) => ['stay', 'wait', 'brace'].includes(a)) ?? view.legalActions[0]));
   for (const seed of [1, 2, 3, 4, 5, 6]) {
     const tape = await bridgeKeeps(4, { seed, later: (view) => (view.phase === 'pick' ? reply(`tile:${view.alive.indexOf(view.you) + 1}`) : hold(view)) });
     const stages = stagesRun(tape);
     assert.equal(stages[1], 'crusher');
-    const afterCrusher = ofType(tape.events, 'stage_end').find((e) => e.stage === 'crusher').survivors.length;
-    assert.equal(stages.includes('disc'), afterCrusher > 3);
-    assert.equal(stages.includes('ledge'), (afterCrusher > 3 ? 3 : afterCrusher) >= 2 || stages.includes('disc'));
+    const survivorsOf = (stage) => ofType(tape.events, 'stage_end').find((e) => e.stage === stage).survivors.length;
+    const afterCrusher = survivorsOf('crusher');
+    assert.equal(stages.includes('pit'), afterCrusher > 3);
+    const afterPit = stages.includes('pit') ? survivorsOf('pit') : afterCrusher;
+    assert.ok(afterPit >= Math.min(afterCrusher, 3));
+    assert.equal(stages.includes('disc'), afterPit > 3);
+    const afterDisc = stages.includes('disc') ? survivorsOf('disc') : afterPit;
+    assert.equal(stages.includes('ledge'), afterDisc >= 2);
     assert.ok(placed(tape).length <= 3);
   }
 });
@@ -72,6 +77,7 @@ test('the disc leaves three on the ledge (four when the feather catches someone)
     learn(view);
     if (view.stage === 'bridge' && view.legalActions.includes('step:L')) return reply(`step:${oracle.safe[view.round - 1]}`);
     if (view.stage === 'crusher') return reply(view.legalActions.includes('jam_lever') ? 'jam_lever' : 'stay');
+    if (view.stage === 'pit') return pitEscape(view);
     if (view.phase === 'pick') return reply(`tile:${view.alive.indexOf(view.you) + 1}`);
     return reply(view.legalActions.find((a) => ['wait', 'brace', 'hold'].includes(a)) ?? view.legalActions[0]);
   };

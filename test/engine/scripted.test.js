@@ -63,3 +63,33 @@ test('bots only ever pick legal actions (random kinds produce no invalid actions
   }
   assert.ok(views.length > 500);
 });
+
+test('pit personalities: saint offers then reaches down, coward waits then climbs, liar and shover push, all read only their view', async () => {
+  const bot = (kind) => createScriptedAgents(1, kind).Ash;
+  const down = (round, extra = []) => ({ ...crossingView('nothing'), stage: 'pit', phase: 'play', round, legalActions: ['wait', 'climb', 'offer_back', 'push_base:Bex', 'push_base:Cole', ...extra] });
+  const based = (round) => ({ ...down(round), legalActions: ['wait', 'climb'] });
+  const out = { ...crossingView('nothing'), stage: 'pit', phase: 'play', round: 3, legalActions: ['leave', 'reach_down'] };
+  const base = { ...crossingView('nothing'), stage: 'pit', phase: 'play', round: 2, legalActions: ['wait'] };
+  assert.equal((await bot('saint').act(down(1))).action, 'offer_back');
+  assert.equal((await bot('saint').act(based(2))).action, 'climb');
+  assert.equal((await bot('saint').act(out)).action, 'reach_down');
+  assert.equal((await bot('saint').act(base)).action, 'wait');
+  assert.equal((await bot('coward').act(down(1))).action, 'wait');
+  assert.equal((await bot('coward').act(down(3))).action, 'climb');
+  assert.equal((await bot('coward').act(out)).action, 'leave');
+  assert.match((await bot('liar').act(down(1))).action, /^push_base:/);
+  assert.match((await bot('shover').act(down(1))).action, /^push_base:/);
+  assert.equal((await bot('shover').act(based(2))).action, 'climb');
+  assert.equal((await bot('shover').act(out)).action, 'leave');
+  assert.ok(down(1).legalActions.includes((await bot('random').act(down(1))).action));
+});
+
+test('bots never send an illegal action in the pit', async () => {
+  for (const kind of ['random', 'saint', 'coward', 'liar', 'shover']) {
+    for (let seed = 1; seed <= 25; seed++) {
+      const tape = await runGame({ seed, agents: createScriptedAgents(seed, kind) });
+      const bad = tape.events.filter((e) => e.stage === 'pit' && e.type === 'action' && !e.valid);
+      assert.equal(bad.length, 0, `${kind} seed ${seed}: ${JSON.stringify(bad[0])}`);
+    }
+  }
+});

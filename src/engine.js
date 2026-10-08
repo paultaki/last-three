@@ -1,4 +1,4 @@
-// runGame({ seed, agents, config }) -> tape. Orchestrates the four stages in order (spec section 4).
+// runGame({ seed, agents, config }) -> tape. Orchestrates the five stages in order (spec section 4).
 //
 // config (all optional): id, createdAt (fixed defaults keep tapes byte-reproducible; callers that
 // want real timestamps pass one), agentTimeoutMs, and two test hooks: powers (seat -> power id)
@@ -7,13 +7,14 @@
 import { Game, SEATS } from './game.js';
 import { runBridge } from './stages/bridge.js';
 import { runCrusher } from './stages/crusher.js';
+import { runPit } from './stages/pit.js';
 import { runDisc } from './stages/disc.js';
 import { runLedge } from './stages/ledge.js';
 
 export { SEATS };
 
-/** Bumped whenever the rules change in a way that makes old tapes incomparable. v2: Wedge dive, no repeated ledge defence. */
-export const RULES_VERSION = 2;
+/** Bumped whenever the rules change in a way that makes old tapes incomparable. v2: Wedge dive, no repeated ledge defence. v3: the Pit and its rope, the landed-shoves ledge tie-break, rivals wording. */
+export const RULES_VERSION = 3;
 
 const DEFAULT_DATE = '20261008';
 const DEFAULT_CREATED_AT = '2026-10-08T00:00:00.000Z';
@@ -22,6 +23,7 @@ const DEFAULT_CREATED_AT = '2026-10-08T00:00:00.000Z';
 const STAGES = [
   { run: runBridge, canRun: () => true },
   { run: runCrusher, canRun: (g) => g.alive.size > 3 },
+  { run: runPit, canRun: (g) => g.alive.size > 3 },
   { run: runDisc, canRun: (g) => g.alive.size > 3 },
   { run: runLedge, canRun: (g) => g.alive.size >= 2 },
 ];

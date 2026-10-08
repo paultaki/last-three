@@ -22,6 +22,19 @@ export function idle(view) {
   return reply(legal[0]);
 }
 
+/**
+ * A pit policy where nobody dies: `base` offers to be the step, everyone else climbs, and the base is
+ * roped out as soon as it is the only one left down (an agent that is out throws it).
+ */
+export function pitEscape(view, base = 'Hana') {
+  const legal = view.legalActions;
+  const state = view.stageState;
+  if (legal.includes('offer_back') && view.you === base) return reply('offer_back');
+  if (legal.includes('reach_down') && state.down.length === 1) return reply('reach_down');
+  if (legal.includes('climb')) return reply('climb');
+  return reply(legal[0]);
+}
+
 export const agentFor = (name, act) => ({ name, model: 'test/fixed', act });
 
 /** Eight agents sharing `policy`, with per-seat overrides. Every policy receives a view. */

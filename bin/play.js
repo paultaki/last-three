@@ -10,7 +10,7 @@ import { BOT_KINDS, createScriptedAgents } from '../src/scripted.js';
 import { validateTape } from '../src/tape.js';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const STAGES = ['bridge', 'crusher', 'disc', 'ledge'];
+const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
 const USAGE = `Usage: node bin/play.js [--seed N] [--kinds ${BOT_KINDS.join(',')}] [--out file] [--id name]`;
 
 function parseArgs(argv) {

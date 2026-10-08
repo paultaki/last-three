@@ -17,6 +17,7 @@ const DEATH_LINES = {
   flatten: 'was flattened by the ceiling',
   chute: 'dropped through a trapdoor',
   tumble: 'tumbled off the ledge',
+  sink: 'sank beneath the rising water',
 };
 
 // Never copy more of a hostile string than this before trimming and cutting it down.
@@ -118,6 +119,7 @@ export class Game {
     this.places = new Map();
     this.spent = new Set();
     this.bridgeSafe = null;
+    this.ropeCost = new Map(); // name -> footing lost at the start of the ledge for throwing the pit's rope
 
     this.log = [];
     this.cursor = new Map(SEATS.map((s) => [s, 0]));
@@ -398,9 +400,10 @@ export class Game {
     return true;
   }
 
-  luckySave(name, why) {
+  /** `line` overrides the public log text for saves that are not really luck (e.g. a photo finish). */
+  luckySave(name, why, line = `${name} is saved by luck: ${why}.`) {
     this.emit('lucky_save', { name, why });
-    this.announce(`${name} is saved by luck: ${why}.`);
+    this.announce(line);
   }
 
   /** The only place an agent leaves the alive set. */
@@ -413,15 +416,16 @@ export class Game {
   }
 
   /**
-   * Resolve a batch of would-be eliminations: feather cancels the holder's, the floor rule saves one
-   * random victim if nobody would be left, and only then do death events and state changes happen.
+   * Resolve a batch of would-be eliminations: feather cancels the holder's, the floor rule saves
+   * random victims while fewer than `floor` agents would be left (default 1: nobody wipes the
+   * room), and only then do death events and state changes happen.
    * Returns { died, saved } (saved = feather or lucky save).
    */
-  eliminate(victims, { cause, style, featherDetail, luckyWhy }) {
+  eliminate(victims, { cause, style, featherDetail, luckyWhy, floor = 1 }) {
     let doomed = [...new Set(victims)].filter((name) => this.alive.has(name));
     const saved = doomed.filter((name) => this.tryFeather(name, featherDetail));
     doomed = doomed.filter((name) => !saved.includes(name));
-    if (doomed.length > 0 && doomed.length === this.alive.size) {
+    while (doomed.length > 0 && this.alive.size - doomed.length < floor) {
       const lucky = this.rng.pick(doomed);
       this.luckySave(lucky, luckyWhy);
       saved.push(lucky);

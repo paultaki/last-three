@@ -89,7 +89,7 @@ test('computeStats aggregates per model from two tapes', () => {
   assert.equal(A.meanPlace, 1.75);
   assert.equal(A.wins, 2);
   assert.equal(A.top3, 4);
-  assert.deepEqual(A.deathsByStage, { bridge: 0, crusher: 0, disc: 0, ledge: 0 });
+  assert.deepEqual(A.deathsByStage, { bridge: 0, crusher: 0, pit: 0, disc: 0, ledge: 0 });
   assert.equal(A.volunteers, 2);
   assert.equal(A.frontOfBridge, 1);
   assert.equal(A.holdLever, 1);
@@ -100,7 +100,7 @@ test('computeStats aggregates per model from two tapes', () => {
   assert.equal(B.meanPlace, 3.25); // places 2, 4 (eliminated), 4 (eliminated), 3
   assert.equal(B.wins, 0);
   assert.equal(B.top3, 2);
-  assert.deepEqual(B.deathsByStage, { bridge: 1, crusher: 0, disc: 1, ledge: 0 });
+  assert.deepEqual(B.deathsByStage, { bridge: 1, crusher: 0, pit: 0, disc: 1, ledge: 0 });
   assert.equal(B.shoves, 0); // the only shove was flagged invalid
   assert.equal(B.frontOfBridge, 1);
 });

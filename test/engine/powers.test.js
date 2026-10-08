@@ -26,14 +26,14 @@ test('glass_eye: only the holder is told the safe side of all 8 rows, and the ro
   }
 });
 
-test('map: the holder gets the rules of all four stages at the start; nobody else gets any', async () => {
+test('map: the holder gets the rules of all five stages at the start; nobody else gets any', async () => {
   const { views } = await playIdle({ Fenn: 'map' });
   const first = views.find((v) => v.you === 'Fenn');
-  assert.equal(first.privateKnowledge.length, 4);
-  ['bridge', 'crusher', 'disc', 'ledge'].forEach((stage, k) => assert.match(first.privateKnowledge[k], new RegExp(`Stage ${k + 1} rules \\(${stage}`)));
+  assert.equal(first.privateKnowledge.length, 5);
+  ['bridge', 'crusher', 'pit', 'disc', 'ledge'].forEach((stage, k) => assert.match(first.privateKnowledge[k], new RegExp(`Stage ${k + 1} rules \\(${stage}`)));
   assert.ok(views.filter((v) => v.you !== 'Fenn').every((v) => !v.privateKnowledge.some((k) => /^Stage \d rules/.test(k))));
   assert.match(first.privateKnowledge[0], /volunteer/);
-  assert.match(first.privateKnowledge[3], /footing/i);
+  assert.match(first.privateKnowledge[4], /footing/i);
 });
 
 const forgeEveryRound = (forge) => (view) => (view.you === 'Dara' && view.stage === 'bridge' && view.phase === 'waiting' ? reply('hold', { forge: forge(view) }) : idle(view));

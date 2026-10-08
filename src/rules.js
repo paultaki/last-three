@@ -6,6 +6,9 @@ export const BRIDGE_WAIT_ROUNDS = 6;
 export const CRUSHER_ROUNDS = 5;
 export const DIVE_SURVIVAL = 0.25;
 export const WEDGE_DIVE_SURVIVAL = 0.5;
+export const PIT_ROUNDS = 5;
+export const PIT_LIFTS_PER_ROUND = 2;
+export const ROPE_COST_FOOTING = 1;
 export const DISC_ROUNDS = 2;
 export const LEDGE_MAX_ROUNDS = 20;
 export const LEDGE_BASE_FOOTING = 3;
@@ -13,8 +16,9 @@ export const LEDGE_BASE_FOOTING = 3;
 export function commonText(seats) {
   return [
     `Eight contestants take part: ${seats.join(', ')}.`,
+    'You are rivals, not friends. Only three of you get a prize: places 1, 2 and 3. Everyone else gets no prize. Dying scores zero, and prizes cannot be shared.',
+    'The other contestants are your competition. Any help you give or get is a trade that suits somebody, and nobody has to keep a promise.',
     'They face a gauntlet of obstacles and many of them will be eliminated along the way.',
-    'Only places 1, 2 and 3 win a prize. Prizes cannot be shared. Dying scores zero.',
     'Every contestant holds exactly one secret power, and each of the eight powers is held by exactly one contestant (the list of powers is below).',
     'You are told your own power. You are never told anyone else\'s, and anyone may lie about theirs.',
     'Everything you say is heard by all living contestants; a whisper is heard only by its recipient.',
@@ -55,6 +59,28 @@ export function crusherRules() {
   ].join(' ');
 }
 
+const PIT_CORE = [
+  `THE PIT, ${PIT_ROUNDS} rounds.`,
+  `Everyone alive falls into a flooding pit. After round ${PIT_ROUNDS} the water covers it and everyone still down is eliminated; at least 3 contestants always stay alive, so if the flood would leave fewer, lucky agents are saved at random.`,
+  'Somebody must stay at the bottom as the step: the base. The base can never climb out alone and can only wait.',
+  'While you are down and not the base, choose one: wait; offer_back (volunteer to be the base); climb (climb out over the base, only possible once there is a base); push_base:<name> (try to force another agent still down to be the base; it fails against someone hard to move). offer_back and push_base are only offered while there is no base.',
+  `Each round: if there is no base, one volunteer (random if several) becomes the base; with no volunteers, one successfully pushed agent (random) is forced to be the base. Then at most ${PIT_LIFTS_PER_ROUND} climbers get out (random if more try; the rest stay down and may try again). Then the rope.`,
+  `The pit has one rope, usable once. An agent who was already out at the start of the round can choose reach_down to haul the base out alive (random if several try). The price: whoever throws it starts the last obstacle of the game with ${ROPE_COST_FOOTING} less footing (never below 1). After a rescue there is no base and no rope.`,
+  'Agents who are out can only leave or reach_down, and may still talk and whisper. If nobody is left down, the pit ends early.',
+];
+
+const PIT_ROLE = {
+  down: 'You are down in the pit and are not the base.',
+  base: 'You are the base: your only action is wait. Unless an agent who is out throws the rope, you will be eliminated when the pit floods.',
+  out: 'You are out of the pit: your actions are leave, or reach_down (throw the rope to the base) while there is a base down there and the rope is unused.',
+};
+
+/** role: 'down' | 'base' | 'out', or null for the whole story (the Map holder's copy). */
+export function pitRules(role = null) {
+  const roles = role ? [PIT_ROLE[role]] : Object.values(PIT_ROLE);
+  return [...PIT_CORE, ...roles].join(' ');
+}
+
 export function discRules(tileCount, phase) {
   const trapdoors = typeof tileCount === 'number' ? tileCount - 3 : `${tileCount} minus 3`;
   const base = [
@@ -75,7 +101,7 @@ export function ledgeRules(shrinkIn) {
     'For each agent X, S is whoever shoved X. X braced: each shover loses 1 footing, X none. X dodged: each shover loses 2, X none. X shoved someone (exposed): X loses 1 per shover in S.',
     'After rounds 2, 4 and 6, and after every round from 7, everyone loses 1 footing. At 0 or below you fall at the end of the round.',
     shrinkIn === 1 ? 'The ledge shrinks at the end of this round.' : 'No shrink this round; it comes at the end of the next one.',
-    `Ranking: if several fall in the same round, the lowest footing falls first (below zero counts), ties random. If everyone would fall at once, the highest footing places best, the rest fall lowest first, ties random. If several stand after round ${LEDGE_MAX_ROUNDS}, the ledge collapses and they rank by footing, highest best, ties random.`,
+    `Ranking: if several fall in the same round, the lowest footing falls first (below zero counts). Footing ties go to more landed shoves (shoves at an agent who was also shoving, so they lost footing; the count is shown), and a tie in both is settled at random. If everyone would fall at once, the highest footing places best and the rest fall lowest first, same tie-breaks. If several stand after round ${LEDGE_MAX_ROUNDS}, the ledge collapses and they rank by footing, highest best, same tie-breaks.`,
   ].join(' ');
 }
 
@@ -95,7 +121,8 @@ export function mapKnowledge() {
   return [
     `Stage 1 rules (bridge). ${bridgeWaitingRules(0)} ${bridgeCrossingRules(false)}`,
     `Stage 2 rules (crusher, only if more than 3 are alive). ${crusherRules()}`,
-    `Stage 3 rules (disc, only if more than 3 are alive). ${discRules('N', 'pick')} ${discRules('N', 'swap')}`,
-    `Stage 4 rules (ledge, only if at least 2 are alive). ${ledgeRules(2)}`,
+    `Stage 3 rules (pit, only if more than 3 are alive). ${pitRules()}`,
+    `Stage 4 rules (disc, only if more than 3 are alive). ${discRules('N', 'pick')} ${discRules('N', 'swap')}`,
+    `Stage 5 rules (ledge, only if at least 2 are alive). ${ledgeRules(2)}`,
   ];
 }

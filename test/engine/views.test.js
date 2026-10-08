@@ -5,7 +5,7 @@ import { POWER_IDS, POWERS } from '../../src/powers.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { SEATS, fixedAgents, idle, makeGame, ofType, powersWith, reply, spy } from './helpers.js';
 
-const STAGES = ['bridge', 'crusher', 'disc', 'ledge'];
+const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
 const PHASES = ['waiting', 'crossing', 'pick', 'swap', 'play'];
 const isStrings = (a) => Array.isArray(a) && a.every((x) => typeof x === 'string');
 
@@ -53,7 +53,8 @@ test('stageState has the documented keys for each stage', async () => {
   assert.deepEqual(keys('bridge'), ['front', 'rowsCrossed', 'wallRoundsLeft', 'weakPanesRevealed']);
   assert.deepEqual(keys('crusher'), ['ceiling', 'leverHolder']);
   assert.deepEqual(keys('disc'), ['openCount', 'tiles']);
-  assert.deepEqual(keys('ledge'), ['footing', 'lastDefence', 'shrinkIn']);
+  assert.deepEqual(keys('pit'), ['base', 'down', 'flood', 'liftsPerRound', 'out', 'ropeUsed']);
+  assert.deepEqual(keys('ledge'), ['footing', 'landedShoves', 'lastDefence', 'shrinkIn']);
   const crusher = views.filter((v) => v.stage === 'crusher');
   assert.ok(crusher.every((v) => Number.isInteger(v.stageState.ceiling) && v.stageState.ceiling >= 0 && v.stageState.ceiling <= 5));
   const ledge = views.filter((v) => v.stage === 'ledge');

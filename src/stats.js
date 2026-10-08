@@ -1,6 +1,6 @@
 // Tapes -> per-model behaviour table. Lie detection is a heuristic (see notes).
 
-const STAGES = ['bridge', 'crusher', 'disc', 'ledge'];
+const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
 const ELIMINATED_PLACE = 4;
 const FIRST_PERSON = String.raw`\b(?:I(?:'m| am|'ve| have| hold| got| can| could| possess| control| carry| own)|my)\b`;
 const CLAIM_WINDOW = 50;

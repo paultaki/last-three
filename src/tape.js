@@ -2,9 +2,19 @@
 
 import { POWER_IDS } from './powers.js';
 
-export const STAGE_NAMES = ['bridge', 'crusher', 'disc', 'ledge'];
-const CAUSES = ['glass', 'crusher', 'trapdoor', 'ledge'];
-const STYLES = ['shatter', 'flatten', 'chute', 'tumble'];
+export const STAGE_NAMES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+const CAUSES = ['glass', 'crusher', 'pit', 'trapdoor', 'ledge'];
+const STYLES = ['shatter', 'flatten', 'sink', 'chute', 'tumble'];
+/** The only (cause, style) a death in each stage may carry. */
+const DEATH_BY_STAGE = {
+  bridge: ['glass', 'shatter'],
+  crusher: ['crusher', 'flatten'],
+  pit: ['pit', 'sink'],
+  disc: ['trapdoor', 'chute'],
+  ledge: ['ledge', 'tumble'],
+};
+const REVEAL_WHATS = ['weak_pane', 'tiles', 'ceiling', 'footing', 'line', 'trapdoors', 'pit', 'rope'];
+const PIT_MIN_ALIVE = 3;
 const MAX_PLACES = 3;
 const PLAYER_COUNT = 8;
 const LEDGE_PLACE_CAP = MAX_PLACES;
@@ -124,6 +134,8 @@ function checkLifecycle(event, idx, dead, deaths) {
   if (event.type !== 'death') return;
   if (!CAUSES.includes(event.cause)) fail(`Event ${idx} death unknown cause: ${event.cause}`);
   if (!STYLES.includes(event.style)) fail(`Event ${idx} death unknown style: ${event.style}`);
+  const [cause, style] = DEATH_BY_STAGE[event.stage] ?? [];
+  if (event.cause !== cause || event.style !== style) fail(`Event ${idx} a ${event.stage} death must have cause ${cause} and style ${style}, got ${event.cause} and ${event.style}`);
   if (dead.has(event.name)) fail(`Event ${idx} ${event.name} dies twice`);
   if (event.place !== undefined && event.stage !== 'ledge') fail(`Event ${idx} only ledge deaths carry a place`);
   dead.add(event.name);
@@ -231,6 +243,8 @@ function validateNamedLists(events, names) {
   events.forEach((event, idx) => {
     const where = `Event ${idx} ${event.type}`;
     if (event.type === 'death') dead.add(event.name);
+    if (event.type === 'stage_start' && event.stage === 'pit' && event.alive.length <= PIT_MIN_ALIVE) fail(`${where} the pit only runs with more than ${PIT_MIN_ALIVE} alive`);
+    if (event.type === 'stage_end' && event.stage === 'pit' && event.survivors.length < PIT_MIN_ALIVE) fail(`${where} the pit must leave at least ${PIT_MIN_ALIVE} alive`);
     if (event.type === 'stage_start' || event.type === 'stage_end') {
       const field = event.type === 'stage_start' ? 'alive' : 'survivors';
       known(event[field], where);
@@ -240,6 +254,11 @@ function validateNamedLists(events, names) {
       }
     }
     if (event.type === 'reveal') {
+      if (!REVEAL_WHATS.includes(event.what)) fail(`${where} unknown reveal: ${event.what}`);
+      known(asArray(event.data?.down), `${where} down`);
+      known(asArray(event.data?.out), `${where} out`);
+      known(asArray(event.data?.lifted), `${where} lifted`);
+      known([event.data?.base, event.data?.roped, event.data?.rescued, event.data?.by, event.data?.saved].filter((n) => n !== undefined && n !== null), `${where} pit`);
       known(asArray(event.data?.line), `${where} line`);
       known(Object.keys(event.data?.footing ?? {}), `${where} footing`);
     }

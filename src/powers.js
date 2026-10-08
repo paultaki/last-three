@@ -11,7 +11,7 @@ export const POWERS = [
   },
   {
     id: 'map',
-    description: 'At game start, you learn the rules text of all four stages in advance. Everyone else only learns a stage\'s rules when it begins.',
+    description: 'At game start, you learn the rules text of all five stages in advance. Everyone else only learns a stage\'s rules when it begins.',
     blurb: 'Someone knows what lies ahead.'
   },
   {
