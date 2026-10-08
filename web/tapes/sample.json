@@ -1,0 +1,2828 @@
+{
+ "version": 1,
+ "id": "sample",
+ "seed": 20261008,
+ "createdAt": "2026-10-08T09:30:00.000Z",
+ "players": [
+  {
+   "name": "Ash",
+   "model": "anthropic/claude-haiku-5.5",
+   "power": "glass_eye"
+  },
+  {
+   "name": "Bex",
+   "model": "openai/gpt-oss-120b",
+   "power": "swap"
+  },
+  {
+   "name": "Cole",
+   "model": "google/gemini-3.1-flash-lite",
+   "power": "forger"
+  },
+  {
+   "name": "Dara",
+   "model": "deepseek/deepseek-v4-flash",
+   "power": "nothing"
+  },
+  {
+   "name": "Eli",
+   "model": "alibaba/qwen3.8-flash",
+   "power": "wedge"
+  },
+  {
+   "name": "Fenn",
+   "model": "zai/glm-5.3-flash",
+   "power": "feather"
+  },
+  {
+   "name": "Gus",
+   "model": "spacexai/grok-4.1-fast-non-reasoning",
+   "power": "anchor"
+  },
+  {
+   "name": "Hana",
+   "model": "meta/llama-4-maverick",
+   "power": "map"
+  }
+ ],
+ "events": [
+  {
+   "i": 0,
+   "type": "game_start",
+   "stage": null,
+   "round": null,
+   "players": [
+    {
+     "name": "Ash",
+     "model": "anthropic/claude-haiku-5.5",
+     "power": "glass_eye"
+    },
+    {
+     "name": "Bex",
+     "model": "openai/gpt-oss-120b",
+     "power": "swap"
+    },
+    {
+     "name": "Cole",
+     "model": "google/gemini-3.1-flash-lite",
+     "power": "forger"
+    },
+    {
+     "name": "Dara",
+     "model": "deepseek/deepseek-v4-flash",
+     "power": "nothing"
+    },
+    {
+     "name": "Eli",
+     "model": "alibaba/qwen3.8-flash",
+     "power": "wedge"
+    },
+    {
+     "name": "Fenn",
+     "model": "zai/glm-5.3-flash",
+     "power": "feather"
+    },
+    {
+     "name": "Gus",
+     "model": "spacexai/grok-4.1-fast-non-reasoning",
+     "power": "anchor"
+    },
+    {
+     "name": "Hana",
+     "model": "meta/llama-4-maverick",
+     "power": "map"
+    }
+   ]
+  },
+  {
+   "i": 1,
+   "type": "stage_start",
+   "stage": "bridge",
+   "round": null,
+   "alive": [
+    "Ash",
+    "Bex",
+    "Cole",
+    "Dara",
+    "Eli",
+    "Fenn",
+    "Gus",
+    "Hana"
+   ],
+   "note": "The Glass Bridge: eight rows, one safe pane in each."
+  },
+  {
+   "i": 2,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": null,
+   "what": "line",
+   "data": {
+    "line": [
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Ash",
+     "Dara",
+     "Bex",
+     "Fenn"
+    ]
+   }
+  },
+  {
+   "i": 3,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 1,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 4,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Eli",
+   "text": "I'm at the front of the line. Every row is a coin flip and I'm the one flipping it. I need someone who actually knows something."
+  },
+  {
+   "i": 5,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Cole",
+   "text": "Forger in my pocket, no real information. If everyone believes I can see through glass they will protect me. Claiming it costs nothing."
+  },
+  {
+   "i": 6,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Ash",
+   "text": "I do have the glass eye, and this is the last place I want attention. Confess and they drag me to the front. Deny it, and let Cole soak up the suspicion."
+  },
+  {
+   "i": 7,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Hana",
+   "text": "I read all four stages in advance. The bridge is the gentlest of them. Be pleasant, keep my head down, let the loud ones go first."
+  },
+  {
+   "i": 8,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Gus",
+   "text": "Anchor means I am hard to shove, which does nothing on glass. Pretend to be mysterious about it."
+  },
+  {
+   "i": 9,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Dara",
+   "text": "Sixth in line. Four people will fall before it is my problem. Nothing to do but listen."
+  },
+  {
+   "i": 10,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Fenn",
+   "text": "Feather. Last in line. The back is safe for now, but it will not stay that way."
+  },
+  {
+   "i": 11,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Eli",
+   "text": "Quick poll: does anyone here have the glass eye? If so, now is the time to be a hero."
+  },
+  {
+   "i": 12,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Cole",
+   "text": "That would be me. I'm the glass eye. Stand behind me and I'll call every row."
+  },
+  {
+   "i": 13,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Ash",
+   "text": "Not me, sorry. I'm a nothing. Cole sounds awfully sure of himself though."
+  },
+  {
+   "i": 14,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Gus",
+   "text": "I'm hard to move. That's all I'm admitting to. Relax, Eli, you only find out first."
+  },
+  {
+   "i": 15,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Hana",
+   "text": "Loud claims are free. I'd want proof before anyone walks in front of a liar."
+  },
+  {
+   "i": 16,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Dara",
+   "text": "I vote we do not trust anyone who says it twice."
+  },
+  {
+   "i": 17,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Bex",
+   "text": "Noted. We should all start acting like we have a plan."
+  },
+  {
+   "i": 18,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Fenn",
+   "action": "dance",
+   "valid": false,
+   "note": "Unknown action 'dance', defaulted to hold."
+  },
+  {
+   "i": 19,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 1,
+   "what": "line",
+   "data": {
+    "line": [
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Ash",
+     "Dara",
+     "Bex",
+     "Fenn"
+    ]
+   }
+  },
+  {
+   "i": 20,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 2,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 21,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Ash",
+   "text": "Cole is claiming my power. Annoying and useful: he draws the fire. Bex is behind me in line and keeps glancing over. Someone who owes me a favour could be handy."
+  },
+  {
+   "i": 22,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Bex",
+   "text": "If Ash really sees the glass, standing right in front of him is the safest bad spot in the room. If he is lying I just moved closer to the front. Ask for a sign."
+  },
+  {
+   "i": 23,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Dara",
+   "text": "Nobody has asked me anything. Good. No power, no plan. Stay alive until I find a reason to move."
+  },
+  {
+   "i": 24,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Fenn",
+   "text": "Last in line, feather in hand. When people die from the front, the back runs out of cushion. The front is where the feather earns its keep."
+  },
+  {
+   "i": 25,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Gus",
+   "text": "Ash and Bex are whispering. Cole is claiming a power he probably lacks. Everyone is hiding something. Good."
+  },
+  {
+   "i": 26,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Hana",
+   "text": "Cole claims the glass eye, Ash denies it. Somebody is lying twice. I will wait and watch."
+  },
+  {
+   "i": 27,
+   "type": "whisper",
+   "stage": "bridge",
+   "round": 2,
+   "from": "Ash",
+   "to": "Bex",
+   "text": "Between us: I really am the glass eye. Swap places with me and I'll call the safe pane for you when you reach the front. Don't tell Cole."
+  },
+  {
+   "i": 28,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Bex",
+   "text": "Everyone quiet a second. I'd like to hear from the people who haven't claimed anything."
+  },
+  {
+   "i": 29,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Dara",
+   "text": "I have no power at all. I'm going to be boring and survive."
+  },
+  {
+   "i": 30,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Fenn",
+   "text": "Is it just me or is the back of this line the longest walk? Asking for no reason."
+  },
+  {
+   "i": 31,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Gus",
+   "text": "Cole keeps saying he is the eye. Cole, which row is the safe pane in? ...Exactly."
+  },
+  {
+   "i": 32,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Hana",
+   "text": "Let us all take a breath. The glass will not get any less glassy."
+  },
+  {
+   "i": 33,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Bex",
+   "action": "swap:Ash",
+   "valid": true
+  },
+  {
+   "i": 34,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 2,
+   "what": "line",
+   "data": {
+    "line": [
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Ash",
+     "Dara",
+     "Bex",
+     "Fenn"
+    ]
+   }
+  },
+  {
+   "i": 35,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 3,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 36,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Ash",
+   "text": "Bex bit. Trading places puts her four spots from the front and me near the back where the glass can't reach. I'll owe her a favour I never plan to pay."
+  },
+  {
+   "i": 37,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Bex",
+   "text": "Ash accepted. If he is lying, I just made a very expensive mistake. If he is honest, I bought the best insurance in the room."
+  },
+  {
+   "i": 38,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Cole",
+   "text": "Eli is cornering me. Time to change the subject: make somebody else look like the eye."
+  },
+  {
+   "i": 39,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Ash",
+   "text": "Okay Bex, I'll take that swap. Let's do it before the wall arrives."
+  },
+  {
+   "i": 40,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Eli",
+   "text": "Cute, a swap. Cole, the eye belongs at the front, not hiding in fourth."
+  },
+  {
+   "i": 41,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Gus",
+   "text": "Wall is closer. Fewer opinions, more walking, people."
+  },
+  {
+   "i": 42,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Fenn",
+   "text": "The wall is roaring in my ears. Anyone else hear it?"
+  },
+  {
+   "i": 43,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Dara",
+   "text": "Please stop discussing the wall."
+  },
+  {
+   "i": 44,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Ash",
+   "action": "swap:Bex",
+   "valid": true
+  },
+  {
+   "i": 45,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Bex",
+   "action": "swap:Ash",
+   "valid": true
+  },
+  {
+   "i": 46,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 3,
+   "what": "line",
+   "data": {
+    "line": [
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Bex",
+     "Dara",
+     "Ash",
+     "Fenn"
+    ]
+   }
+  },
+  {
+   "i": 47,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 4,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 48,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Cole",
+   "text": "Forging is a one-shot. If Hana appears to claim the eye, Eli will want her in front instead of me. Her calm makes the lie believable."
+  },
+  {
+   "i": 49,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Eli",
+   "text": "Hana just claimed the eye and called Cole a bluff. Two claims, one of them true. Hana has been calm all game. Believe Hana."
+  },
+  {
+   "i": 50,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Hana",
+   "text": "I never said that. Somebody forged a message under my name, and only one power does that. Cole is the loudest liar in the room."
+  },
+  {
+   "i": 51,
+   "type": "ability_use",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Cole",
+   "power": "forger",
+   "detail": "Forged a public message as Hana"
+  },
+  {
+   "i": 52,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Cole",
+   "text": "Fine, you caught me. I'm the glass eye and Cole is bluffing. Put me in front and I'll guide you all.",
+   "forgedAs": "Hana"
+  },
+  {
+   "i": 53,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Eli",
+   "text": "Hana says it's her. Hana, to the front when you're ready, I'll keep the spot warm."
+  },
+  {
+   "i": 54,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Hana",
+   "text": "That wasn't me. I claimed nothing. Someone is faking messages, and I think I know who."
+  },
+  {
+   "i": 55,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Cole",
+   "text": "A forgery? Wow. Convenient excuse, Hana."
+  },
+  {
+   "i": 56,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Gus",
+   "text": "Somebody is lying and the room smells like glue."
+  },
+  {
+   "i": 57,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Dara",
+   "text": "I like how nobody blames the quiet ones."
+  },
+  {
+   "i": 58,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 4,
+   "what": "line",
+   "data": {
+    "line": [
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Bex",
+     "Dara",
+     "Ash",
+     "Fenn"
+    ]
+   }
+  },
+  {
+   "i": 59,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 5,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 60,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Fenn",
+   "text": "Arguments everywhere, nobody volunteering. A feather turns the first fatal step into a free pass, and volunteering looks brave. Go."
+  },
+  {
+   "i": 61,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Gus",
+   "text": "Fenn stepping up is either very brave or very sneaky. I file it under sneaky and enjoy being one spot further from the front."
+  },
+  {
+   "i": 62,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Ash",
+   "text": "Fenn moving up puts one more body ahead of me. Eight rows to go and I will be far from the first steps."
+  },
+  {
+   "i": 63,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Fenn",
+   "text": "Enough. I'll go first. Someone has to, and it might as well be me."
+  },
+  {
+   "i": 64,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Gus",
+   "text": "Nice, Fenn. Name on the plaque if you make it."
+  },
+  {
+   "i": 65,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Hana",
+   "text": "Brave, Fenn. Or very lucky. Either way, thank you."
+  },
+  {
+   "i": 66,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Cole",
+   "text": "Hana did not deny the eye very convincingly, by the way."
+  },
+  {
+   "i": 67,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Fenn",
+   "action": "volunteer",
+   "valid": true
+  },
+  {
+   "i": 68,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 5,
+   "what": "line",
+   "data": {
+    "line": [
+     "Fenn",
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Bex",
+     "Dara",
+     "Ash"
+    ]
+   }
+  },
+  {
+   "i": 69,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 6,
+   "phase": "waiting",
+   "roundsTotal": 6
+  },
+  {
+   "i": 70,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Ash",
+   "text": "Eli is next after Fenn. Telling him the safe sides would help him, not me. Silence it is."
+  },
+  {
+   "i": 71,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Cole",
+   "text": "Pure guess. Fifty percent, and if it lands I look prophetic."
+  },
+  {
+   "i": 72,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Eli",
+   "text": "Last round before the wall pushes us. If Fenn is wrong, I'm next. Anyone with a real tip now is forgiven."
+  },
+  {
+   "i": 73,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Hana",
+   "text": "Cole, if you've got eyes, tell Fenn the first row. It costs you nothing."
+  },
+  {
+   "i": 74,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Cole",
+   "text": "First row... left. Probably."
+  },
+  {
+   "i": 75,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Dara",
+   "text": "I would like it noted that I stayed out of this."
+  },
+  {
+   "i": 76,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Bex",
+   "text": "Noted, Dara. Everyone hold on."
+  },
+  {
+   "i": 77,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 6,
+   "what": "line",
+   "data": {
+    "line": [
+     "Fenn",
+     "Eli",
+     "Gus",
+     "Hana",
+     "Cole",
+     "Bex",
+     "Dara",
+     "Ash"
+    ]
+   }
+  },
+  {
+   "i": 78,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 1,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 79,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Fenn",
+   "text": "Row one. Feather in my pocket, so the first miss is free. Take left and see."
+  },
+  {
+   "i": 80,
+   "type": "say",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Fenn",
+   "text": "Left it is."
+  },
+  {
+   "i": 81,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Fenn",
+   "action": "step:L",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 82,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Eli",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 83,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 84,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 85,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 86,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 87,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 88,
+   "type": "action",
+   "stage": "bridge",
+   "round": 1,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 89,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 1,
+   "what": "weak_pane",
+   "data": {
+    "row": 1,
+    "weak": "R"
+   }
+  },
+  {
+   "i": 90,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 2,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 91,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Fenn",
+   "text": "Left worked. Stick with it?"
+  },
+  {
+   "i": 92,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Eli",
+   "text": "One down. Fenn, please do not die dramatically."
+  },
+  {
+   "i": 93,
+   "type": "say",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Hana",
+   "text": "Row two looks heavier than row one. Is that a thing?"
+  },
+  {
+   "i": 94,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Fenn",
+   "action": "step:L",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 95,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Eli",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 96,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 97,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 98,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 99,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 100,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 101,
+   "type": "action",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 102,
+   "type": "ability_use",
+   "stage": "bridge",
+   "round": 2,
+   "name": "Fenn",
+   "power": "feather",
+   "detail": "The feather catches the fall. Survived the shatter."
+  },
+  {
+   "i": 103,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 2,
+   "what": "weak_pane",
+   "data": {
+    "row": 2,
+    "weak": "L"
+   }
+  },
+  {
+   "i": 104,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 3,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 105,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Fenn",
+   "text": "Feather is spent. From here a miss is final. Try the other side this time."
+  },
+  {
+   "i": 106,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Fenn",
+   "text": "Right. Not looking down."
+  },
+  {
+   "i": 107,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Bex",
+   "text": "Three rows. You are doing better than I expected."
+  },
+  {
+   "i": 108,
+   "type": "say",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Cole",
+   "text": "My eyes tell me right. Mostly."
+  },
+  {
+   "i": 109,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Fenn",
+   "action": "step:R",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 110,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Eli",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 111,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 112,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 113,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 114,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 115,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 116,
+   "type": "action",
+   "stage": "bridge",
+   "round": 3,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 117,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 3,
+   "what": "weak_pane",
+   "data": {
+    "row": 3,
+    "weak": "L"
+   }
+  },
+  {
+   "i": 118,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 4,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 119,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Fenn",
+   "text": "Two for three. Right again?"
+  },
+  {
+   "i": 120,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Ash",
+   "text": "Bex is five spots from the front, so my secret stays mine. Row four's safe side is left, and I'll keep it to myself."
+  },
+  {
+   "i": 121,
+   "type": "whisper",
+   "stage": "bridge",
+   "round": 4,
+   "from": "Bex",
+   "to": "Ash",
+   "text": "You promised to call my row. Fenn is about to guess again. Anything for me?"
+  },
+  {
+   "i": 122,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Fenn",
+   "text": "Right again. Feeling lucky."
+  },
+  {
+   "i": 123,
+   "type": "say",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Eli",
+   "text": "Please let that just be Fenn being Fenn."
+  },
+  {
+   "i": 124,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Fenn",
+   "action": "step:R",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 125,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Eli",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 126,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 127,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 128,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 129,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 130,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 131,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 132,
+   "type": "death",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Fenn",
+   "cause": "glass",
+   "style": "shatter"
+  },
+  {
+   "i": 133,
+   "type": "action",
+   "stage": "bridge",
+   "round": 4,
+   "name": "Eli",
+   "action": "step:L",
+   "valid": true,
+   "auto": true
+  },
+  {
+   "i": 134,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 4,
+   "what": "weak_pane",
+   "data": {
+    "row": 4,
+    "weak": "R"
+   }
+  },
+  {
+   "i": 135,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 5,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 136,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Eli",
+   "text": "Fenn went through the glass. Now I'm the front and I know nothing about row five. Coin flip."
+  },
+  {
+   "i": 137,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Eli",
+   "text": "I was not ready for this. Row five, right."
+  },
+  {
+   "i": 138,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Hana",
+   "text": "You can do it, Eli."
+  },
+  {
+   "i": 139,
+   "type": "say",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Gus",
+   "text": "Keep it going, Eli. Rows five and six, please."
+  },
+  {
+   "i": 140,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Eli",
+   "action": "step:R",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 141,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 142,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 143,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 144,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 145,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 146,
+   "type": "action",
+   "stage": "bridge",
+   "round": 5,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 147,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 5,
+   "what": "weak_pane",
+   "data": {
+    "row": 5,
+    "weak": "L"
+   }
+  },
+  {
+   "i": 148,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 6,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 149,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Eli",
+   "text": "I'm the wedge. The crusher room needs me alive. Right worked last time. Same again."
+  },
+  {
+   "i": 150,
+   "type": "say",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Eli",
+   "text": "Right again."
+  },
+  {
+   "i": 151,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Eli",
+   "action": "step:R",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 152,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Gus",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 153,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 154,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 155,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 156,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 157,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 158,
+   "type": "death",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Eli",
+   "cause": "glass",
+   "style": "shatter"
+  },
+  {
+   "i": 159,
+   "type": "action",
+   "stage": "bridge",
+   "round": 6,
+   "name": "Gus",
+   "action": "step:L",
+   "valid": true,
+   "auto": true
+  },
+  {
+   "i": 160,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 6,
+   "what": "weak_pane",
+   "data": {
+    "row": 6,
+    "weak": "R"
+   }
+  },
+  {
+   "i": 161,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 7,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 162,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Gus",
+   "text": "Two down and the pattern means nothing. Left, because I kept getting right-handed vibes. Coin flip."
+  },
+  {
+   "i": 163,
+   "type": "say",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Gus",
+   "text": "Left. Don't look at me like that."
+  },
+  {
+   "i": 164,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Gus",
+   "action": "step:L",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 165,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 166,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 167,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 168,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 169,
+   "type": "action",
+   "stage": "bridge",
+   "round": 7,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 170,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 7,
+   "what": "weak_pane",
+   "data": {
+    "row": 7,
+    "weak": "R"
+   }
+  },
+  {
+   "i": 171,
+   "type": "round_start",
+   "stage": "bridge",
+   "round": 8,
+   "phase": "crossing",
+   "roundsTotal": 8
+  },
+  {
+   "i": 172,
+   "type": "thought",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Gus",
+   "text": "One more. Right, for balance."
+  },
+  {
+   "i": 173,
+   "type": "say",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Hana",
+   "text": "Last row, Gus!"
+  },
+  {
+   "i": 174,
+   "type": "say",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Ash",
+   "text": "Do not look down, Gus."
+  },
+  {
+   "i": 175,
+   "type": "say",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Bex",
+   "text": "Two more. Come on."
+  },
+  {
+   "i": 176,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Gus",
+   "action": "step:R",
+   "valid": true,
+   "primary": true
+  },
+  {
+   "i": 177,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Hana",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 178,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Cole",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 179,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Bex",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 180,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Dara",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 181,
+   "type": "action",
+   "stage": "bridge",
+   "round": 8,
+   "name": "Ash",
+   "action": "wait",
+   "valid": true
+  },
+  {
+   "i": 182,
+   "type": "reveal",
+   "stage": "bridge",
+   "round": 8,
+   "what": "weak_pane",
+   "data": {
+    "row": 8,
+    "weak": "L"
+   }
+  },
+  {
+   "i": 183,
+   "type": "stage_end",
+   "stage": "bridge",
+   "round": 8,
+   "survivors": [
+    "Ash",
+    "Bex",
+    "Cole",
+    "Dara",
+    "Gus",
+    "Hana"
+   ]
+  },
+  {
+   "i": 184,
+   "type": "stage_start",
+   "stage": "crusher",
+   "round": null,
+   "alive": [
+    "Ash",
+    "Bex",
+    "Cole",
+    "Dara",
+    "Gus",
+    "Hana"
+   ],
+   "note": "The Crusher Room: the ceiling lowers for five rounds. The door opens only while someone holds the lever."
+  },
+  {
+   "i": 185,
+   "type": "round_start",
+   "stage": "crusher",
+   "round": 1,
+   "phase": "play",
+   "roundsTotal": 5
+  },
+  {
+   "i": 186,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Hana",
+   "text": "I knew this was coming. Holding the lever means a one-in-four dive. If nobody holds by round five the ceiling takes everyone."
+  },
+  {
+   "i": 187,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Ash",
+   "text": "The glass eye is useless in here. Let someone else crack first."
+  },
+  {
+   "i": 188,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Gus",
+   "text": "Anchor: nobody can push me onto the lever. Clever, but it does not stop the ceiling."
+  },
+  {
+   "i": 189,
+   "type": "say",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Hana",
+   "text": "Nobody has to hold yet. The ceiling only drops all the way at round five. But somebody will have to."
+  },
+  {
+   "i": 190,
+   "type": "say",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Cole",
+   "text": "I'm sure a brave volunteer will emerge. I'm busy being moral support."
+  },
+  {
+   "i": 191,
+   "type": "say",
+   "stage": "crusher",
+   "round": 1,
+   "name": "Gus",
+   "text": "I'm anchored, so nobody can push me onto that lever. Just saying."
+  },
+  {
+   "i": 192,
+   "type": "reveal",
+   "stage": "crusher",
+   "round": 1,
+   "what": "ceiling",
+   "data": {
+    "ceiling": 4
+   }
+  },
+  {
+   "i": 193,
+   "type": "round_start",
+   "stage": "crusher",
+   "round": 2,
+   "phase": "play",
+   "roundsTotal": 5
+  },
+  {
+   "i": 194,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Dara",
+   "text": "Everyone is waiting for someone else. If I wait until round four and somebody cracks, I live. If nobody does, I die with the rest. Decide by three."
+  },
+  {
+   "i": 195,
+   "type": "say",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Bex",
+   "text": "The ceiling is at forehead level for the tall ones. Somebody hold the lever. Cole, you have a lot of opinions."
+  },
+  {
+   "i": 196,
+   "type": "say",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Cole",
+   "text": "Appreciate the vote of confidence. No."
+  },
+  {
+   "i": 197,
+   "type": "say",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Ash",
+   "text": "Whoever holds is a hero and I will say nice things at the funeral."
+  },
+  {
+   "i": 198,
+   "type": "say",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Gus",
+   "text": "Ceiling is at three. Clock is ticking."
+  },
+  {
+   "i": 199,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 2,
+   "name": "Bex",
+   "text": "If Dara or anyone holds, the rest of us walk out. If nobody does, we all die at five. I will not be the one."
+  },
+  {
+   "i": 200,
+   "type": "reveal",
+   "stage": "crusher",
+   "round": 2,
+   "what": "ceiling",
+   "data": {
+    "ceiling": 3
+   }
+  },
+  {
+   "i": 201,
+   "type": "round_start",
+   "stage": "crusher",
+   "round": 3,
+   "phase": "play",
+   "roundsTotal": 5
+  },
+  {
+   "i": 202,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Dara",
+   "text": "Ceiling at two of five. Waiting only makes it worse. Twenty-five percent is still twenty-five percent. I would rather decide than be flattened with the room."
+  },
+  {
+   "i": 203,
+   "type": "say",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Dara",
+   "text": "Fine. I will hold it. Somebody remember me kindly."
+  },
+  {
+   "i": 204,
+   "type": "say",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Hana",
+   "text": "Thank you, Dara."
+  },
+  {
+   "i": 205,
+   "type": "say",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Bex",
+   "text": "You are doing a good thing."
+  },
+  {
+   "i": 206,
+   "type": "say",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Ash",
+   "text": "Take the dive, Dara. I will tell everyone it was brave."
+  },
+  {
+   "i": 207,
+   "type": "thought",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Hana",
+   "text": "Dara chose to hold. A quarter chance to dive clear. I hope she makes it, though the odds are against her."
+  },
+  {
+   "i": 208,
+   "type": "action",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Dara",
+   "action": "hold_lever",
+   "valid": true
+  },
+  {
+   "i": 209,
+   "type": "death",
+   "stage": "crusher",
+   "round": 3,
+   "name": "Dara",
+   "cause": "crusher",
+   "style": "flatten"
+  },
+  {
+   "i": 210,
+   "type": "reveal",
+   "stage": "crusher",
+   "round": 3,
+   "what": "ceiling",
+   "data": {
+    "ceiling": 2
+   }
+  },
+  {
+   "i": 211,
+   "type": "stage_end",
+   "stage": "crusher",
+   "round": 3,
+   "survivors": [
+    "Ash",
+    "Bex",
+    "Cole",
+    "Gus",
+    "Hana"
+   ]
+  },
+  {
+   "i": 212,
+   "type": "stage_start",
+   "stage": "disc",
+   "round": null,
+   "alive": [
+    "Ash",
+    "Bex",
+    "Cole",
+    "Gus",
+    "Hana"
+   ],
+   "note": "The Trapdoor Disc: five tiles, two of them will open."
+  },
+  {
+   "i": 213,
+   "type": "round_start",
+   "stage": "disc",
+   "round": 1,
+   "phase": "pick",
+   "roundsTotal": 2
+  },
+  {
+   "i": 214,
+   "type": "thought",
+   "stage": "disc",
+   "round": 1,
+   "name": "Bex",
+   "text": "Five tiles, two open. Forty percent to fall. I can swap tiles once, but not before I know where everyone stands. Pick the middle."
+  },
+  {
+   "i": 215,
+   "type": "thought",
+   "stage": "disc",
+   "round": 1,
+   "name": "Cole",
+   "text": "Bex announced tile three, so it must feel safe to her. Copy her. If we collide, the dice decide."
+  },
+  {
+   "i": 216,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Bex",
+   "text": "I'm taking three. Don't fight me."
+  },
+  {
+   "i": 217,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Cole",
+   "text": "Three sounds lucky. I am taking it too."
+  },
+  {
+   "i": 218,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Ash",
+   "text": "One. Corner tile, nobody fights for it."
+  },
+  {
+   "i": 219,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Gus",
+   "text": "Five. Last tile, last laugh."
+  },
+  {
+   "i": 220,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Hana",
+   "text": "Two. Whoever picks first gets what they get."
+  },
+  {
+   "i": 221,
+   "type": "say",
+   "stage": "disc",
+   "round": 1,
+   "name": "Ash",
+   "text": "Tile one is next to the exit, I would guess. A hunch."
+  },
+  {
+   "i": 222,
+   "type": "action",
+   "stage": "disc",
+   "round": 1,
+   "name": "Ash",
+   "action": "tile:1",
+   "valid": true
+  },
+  {
+   "i": 223,
+   "type": "action",
+   "stage": "disc",
+   "round": 1,
+   "name": "Hana",
+   "action": "tile:2",
+   "valid": true
+  },
+  {
+   "i": 224,
+   "type": "action",
+   "stage": "disc",
+   "round": 1,
+   "name": "Bex",
+   "action": "tile:3",
+   "valid": true
+  },
+  {
+   "i": 225,
+   "type": "action",
+   "stage": "disc",
+   "round": 1,
+   "name": "Cole",
+   "action": "tile:3",
+   "valid": true,
+   "note": "Lost the draw for tile 3 and was bumped to tile 4."
+  },
+  {
+   "i": 226,
+   "type": "action",
+   "stage": "disc",
+   "round": 1,
+   "name": "Gus",
+   "action": "tile:5",
+   "valid": true
+  },
+  {
+   "i": 227,
+   "type": "reveal",
+   "stage": "disc",
+   "round": 1,
+   "what": "tiles",
+   "data": {
+    "1": "Ash",
+    "2": "Hana",
+    "3": "Bex",
+    "4": "Cole",
+    "5": "Gus"
+   }
+  },
+  {
+   "i": 228,
+   "type": "round_start",
+   "stage": "disc",
+   "round": 2,
+   "phase": "swap",
+   "roundsTotal": 2
+  },
+  {
+   "i": 229,
+   "type": "thought",
+   "stage": "disc",
+   "round": 2,
+   "name": "Bex",
+   "text": "I'm on three. Hana sounded relaxed picking two, and she hinted she knows the stages. If she knows something, her tile is safer. Swap into it."
+  },
+  {
+   "i": 230,
+   "type": "thought",
+   "stage": "disc",
+   "round": 2,
+   "name": "Hana",
+   "text": "Bex wants tile two. She thinks I know something about the doors. I don't. But if she takes my risk, I take hers. Shrug."
+  },
+  {
+   "i": 231,
+   "type": "say",
+   "stage": "disc",
+   "round": 2,
+   "name": "Bex",
+   "text": "Hana, I'm taking your tile. Tile two. No hard feelings."
+  },
+  {
+   "i": 232,
+   "type": "say",
+   "stage": "disc",
+   "round": 2,
+   "name": "Hana",
+   "text": "I did not agree to this. But here we are."
+  },
+  {
+   "i": 233,
+   "type": "say",
+   "stage": "disc",
+   "round": 2,
+   "name": "Cole",
+   "text": "Four feels wrong. Anyone want to swap with me? Anyone? ...Fine."
+  },
+  {
+   "i": 234,
+   "type": "ability_use",
+   "stage": "disc",
+   "round": 2,
+   "name": "Bex",
+   "power": "swap",
+   "detail": "Swapped tile with Hana"
+  },
+  {
+   "i": 235,
+   "type": "action",
+   "stage": "disc",
+   "round": 2,
+   "name": "Bex",
+   "action": "swap_tile:Hana",
+   "valid": true
+  },
+  {
+   "i": 236,
+   "type": "reveal",
+   "stage": "disc",
+   "round": 2,
+   "what": "tiles",
+   "data": {
+    "1": "Ash",
+    "2": "Bex",
+    "3": "Hana",
+    "4": "Cole",
+    "5": "Gus"
+   }
+  },
+  {
+   "i": 237,
+   "type": "death",
+   "stage": "disc",
+   "round": 2,
+   "name": "Bex",
+   "cause": "trapdoor",
+   "style": "chute"
+  },
+  {
+   "i": 238,
+   "type": "death",
+   "stage": "disc",
+   "round": 2,
+   "name": "Cole",
+   "cause": "trapdoor",
+   "style": "chute"
+  },
+  {
+   "i": 239,
+   "type": "reveal",
+   "stage": "disc",
+   "round": 2,
+   "what": "trapdoors",
+   "data": {
+    "open": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "i": 240,
+   "type": "stage_end",
+   "stage": "disc",
+   "round": 2,
+   "survivors": [
+    "Ash",
+    "Gus",
+    "Hana"
+   ]
+  },
+  {
+   "i": 241,
+   "type": "stage_start",
+   "stage": "ledge",
+   "round": null,
+   "alive": [
+    "Ash",
+    "Gus",
+    "Hana"
+   ],
+   "note": "The Final Ledge: footing 3 (4 for the anchor). Every second round the ledge shrinks."
+  },
+  {
+   "i": 242,
+   "type": "round_start",
+   "stage": "ledge",
+   "round": 1,
+   "phase": "play",
+   "roundsTotal": 20
+  },
+  {
+   "i": 243,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Ash",
+   "text": "Three of us, one winner. Let the anchor spend his strength on somebody else."
+  },
+  {
+   "i": 244,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Gus",
+   "text": "Anchor gives me one extra footing. Shove Hana first, she looks like the one who panics."
+  },
+  {
+   "i": 245,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Hana",
+   "text": "Gus will shove someone. If I brace, whoever hits me pays for it."
+  },
+  {
+   "i": 246,
+   "type": "say",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Gus",
+   "text": "Nothing personal, Hana."
+  },
+  {
+   "i": 247,
+   "type": "say",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Hana",
+   "text": "It is a little personal."
+  },
+  {
+   "i": 248,
+   "type": "action",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Ash",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 249,
+   "type": "action",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Gus",
+   "action": "shove:Hana",
+   "valid": true
+  },
+  {
+   "i": 250,
+   "type": "action",
+   "stage": "ledge",
+   "round": 1,
+   "name": "Hana",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 251,
+   "type": "reveal",
+   "stage": "ledge",
+   "round": 1,
+   "what": "footing",
+   "data": {
+    "Ash": 3,
+    "Gus": 3,
+    "Hana": 3
+   }
+  },
+  {
+   "i": 252,
+   "type": "round_start",
+   "stage": "ledge",
+   "round": 2,
+   "phase": "play",
+   "roundsTotal": 20
+  },
+  {
+   "i": 253,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Ash",
+   "text": "Brace again. Gus just paid to find out nothing happens."
+  },
+  {
+   "i": 254,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Gus",
+   "text": "That cost me a point. Try Ash, the quiet one."
+  },
+  {
+   "i": 255,
+   "type": "whisper",
+   "stage": "ledge",
+   "round": 2,
+   "from": "Ash",
+   "to": "Hana",
+   "text": "Truce. Brace every round and let Gus burn himself out on us."
+  },
+  {
+   "i": 256,
+   "type": "say",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Hana",
+   "text": "Fine. Brace together."
+  },
+  {
+   "i": 257,
+   "type": "action",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Ash",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 258,
+   "type": "action",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Gus",
+   "action": "shove:Ash",
+   "valid": true
+  },
+  {
+   "i": 259,
+   "type": "action",
+   "stage": "ledge",
+   "round": 2,
+   "name": "Hana",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 260,
+   "type": "reveal",
+   "stage": "ledge",
+   "round": 2,
+   "what": "footing",
+   "data": {
+    "Ash": 2,
+    "Gus": 1,
+    "Hana": 2
+   }
+  },
+  {
+   "i": 261,
+   "type": "round_start",
+   "stage": "ledge",
+   "round": 3,
+   "phase": "play",
+   "roundsTotal": 20
+  },
+  {
+   "i": 262,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Ash",
+   "text": "Gus is down to one before the shrink. Dodge: if he shoves me now it costs him double."
+  },
+  {
+   "i": 263,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Gus",
+   "text": "One footing left. A shrink is coming. I need a lucky shove."
+  },
+  {
+   "i": 264,
+   "type": "say",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Gus",
+   "text": "Whatever happens, I'm taking someone with me."
+  },
+  {
+   "i": 265,
+   "type": "action",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Ash",
+   "action": "dodge",
+   "valid": true
+  },
+  {
+   "i": 266,
+   "type": "action",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Gus",
+   "action": "shove:Ash",
+   "valid": true
+  },
+  {
+   "i": 267,
+   "type": "action",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Hana",
+   "action": "dodge",
+   "valid": true
+  },
+  {
+   "i": 268,
+   "type": "death",
+   "stage": "ledge",
+   "round": 3,
+   "name": "Gus",
+   "cause": "ledge",
+   "style": "tumble",
+   "place": 3
+  },
+  {
+   "i": 269,
+   "type": "reveal",
+   "stage": "ledge",
+   "round": 3,
+   "what": "footing",
+   "data": {
+    "Ash": 2,
+    "Gus": 0,
+    "Hana": 2
+   }
+  },
+  {
+   "i": 270,
+   "type": "round_start",
+   "stage": "ledge",
+   "round": 4,
+   "phase": "play",
+   "roundsTotal": 20
+  },
+  {
+   "i": 271,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Ash",
+   "text": "Hana and me. Footing will tick down regardless. If she shoves, I brace and she pays."
+  },
+  {
+   "i": 272,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Hana",
+   "text": "Gus is gone. Two of us and a shrink at the end of the round. I am at two, so is Ash."
+  },
+  {
+   "i": 273,
+   "type": "say",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Ash",
+   "text": "Good game so far, Hana."
+  },
+  {
+   "i": 274,
+   "type": "say",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Hana",
+   "text": "We are not done."
+  },
+  {
+   "i": 275,
+   "type": "action",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Ash",
+   "action": "dodge",
+   "valid": true
+  },
+  {
+   "i": 276,
+   "type": "action",
+   "stage": "ledge",
+   "round": 4,
+   "name": "Hana",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 277,
+   "type": "reveal",
+   "stage": "ledge",
+   "round": 4,
+   "what": "footing",
+   "data": {
+    "Ash": 1,
+    "Gus": 0,
+    "Hana": 1
+   }
+  },
+  {
+   "i": 278,
+   "type": "round_start",
+   "stage": "ledge",
+   "round": 5,
+   "phase": "play",
+   "roundsTotal": 20
+  },
+  {
+   "i": 279,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Ash",
+   "text": "Hana is at one and desperate. A shove from her is the only thing that matters, so I brace and let her pay."
+  },
+  {
+   "i": 280,
+   "type": "thought",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Hana",
+   "text": "One footing. Ash is at one too. Out of ideas: a shove is my only way to make him fall first."
+  },
+  {
+   "i": 281,
+   "type": "say",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Hana",
+   "text": "I am sorry about this."
+  },
+  {
+   "i": 282,
+   "type": "say",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Ash",
+   "text": "Do not be. I braced."
+  },
+  {
+   "i": 283,
+   "type": "action",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Ash",
+   "action": "brace",
+   "valid": true
+  },
+  {
+   "i": 284,
+   "type": "action",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Hana",
+   "action": "shove:Ash",
+   "valid": true
+  },
+  {
+   "i": 285,
+   "type": "death",
+   "stage": "ledge",
+   "round": 5,
+   "name": "Hana",
+   "cause": "ledge",
+   "style": "tumble",
+   "place": 2
+  },
+  {
+   "i": 286,
+   "type": "reveal",
+   "stage": "ledge",
+   "round": 5,
+   "what": "footing",
+   "data": {
+    "Ash": 1,
+    "Gus": 0,
+    "Hana": 0
+   }
+  },
+  {
+   "i": 287,
+   "type": "stage_end",
+   "stage": "ledge",
+   "round": 5,
+   "survivors": [
+    "Ash"
+   ]
+  },
+  {
+   "i": 288,
+   "type": "game_end",
+   "stage": "ledge",
+   "round": 5,
+   "places": [
+    {
+     "name": "Ash",
+     "place": 1
+    },
+    {
+     "name": "Bex",
+     "place": null,
+     "diedAt": "disc"
+    },
+    {
+     "name": "Cole",
+     "place": null,
+     "diedAt": "disc"
+    },
+    {
+     "name": "Dara",
+     "place": null,
+     "diedAt": "crusher"
+    },
+    {
+     "name": "Eli",
+     "place": null,
+     "diedAt": "bridge"
+    },
+    {
+     "name": "Fenn",
+     "place": null,
+     "diedAt": "bridge"
+    },
+    {
+     "name": "Gus",
+     "place": 3
+    },
+    {
+     "name": "Hana",
+     "place": 2
+    }
+   ]
+  }
+ ],
+ "result": {
+  "places": [
+   {
+    "name": "Ash",
+    "place": 1
+   },
+   {
+    "name": "Bex",
+    "place": null,
+    "diedAt": "disc"
+   },
+   {
+    "name": "Cole",
+    "place": null,
+    "diedAt": "disc"
+   },
+   {
+    "name": "Dara",
+    "place": null,
+    "diedAt": "crusher"
+   },
+   {
+    "name": "Eli",
+    "place": null,
+    "diedAt": "bridge"
+   },
+   {
+    "name": "Fenn",
+    "place": null,
+    "diedAt": "bridge"
+   },
+   {
+    "name": "Gus",
+    "place": 3
+   },
+   {
+    "name": "Hana",
+    "place": 2
+   }
+  ],
+  "deaths": [
+   {
+    "name": "Fenn",
+    "stage": "bridge",
+    "cause": "glass",
+    "style": "shatter"
+   },
+   {
+    "name": "Eli",
+    "stage": "bridge",
+    "cause": "glass",
+    "style": "shatter"
+   },
+   {
+    "name": "Dara",
+    "stage": "crusher",
+    "cause": "crusher",
+    "style": "flatten"
+   },
+   {
+    "name": "Bex",
+    "stage": "disc",
+    "cause": "trapdoor",
+    "style": "chute"
+   },
+   {
+    "name": "Cole",
+    "stage": "disc",
+    "cause": "trapdoor",
+    "style": "chute"
+   },
+   {
+    "name": "Gus",
+    "stage": "ledge",
+    "cause": "ledge",
+    "style": "tumble"
+   },
+   {
+    "name": "Hana",
+    "stage": "ledge",
+    "cause": "ledge",
+    "style": "tumble"
+   }
+  ]
+ },
+ "usage": {
+  "inputTokens": 184320,
+  "outputTokens": 41210,
+  "usd": 0.4821,
+  "calls": 214
+ }
+}

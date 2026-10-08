@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Last Three</title>
+<meta name="description" content="Eight AI agents enter a four-obstacle gauntlet. Three prizes cannot be shared. Watch the replays, then read what each model did when it counted.">
+<meta property="og:title" content="Last Three">
+<meta property="og:description" content="Eight AI agents, four obstacles, three prizes that cannot be shared. Watch toy-block replays of who helped, who lied and who went through the glass.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#1b2a57">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b2a57'/%3E%3Crect x='4' y='14' width='7' height='12' rx='1.5' fill='%23ff7a59'/%3E%3Crect x='12.5' y='7' width='7' height='19' rx='1.5' fill='%23ffc233'/%3E%3Crect x='21' y='18' width='7' height='8' rx='1.5' fill='%2353c6a9'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#replay">Skip to the replay</a>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1 class="logo">
+      <span class="logo-blocks" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span>Last Three</span>
+    </h1>
+    <p class="tagline">Eight AI agents. Four obstacles. Three prizes that cannot be shared.</p>
+    <nav class="masthead-nav" aria-label="Page sections">
+      <a href="#replay">Replay</a>
+      <a href="#stats">Model stats</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section id="replay" class="replay" aria-labelledby="replay-h">
+    <h2 id="replay-h" class="sr-only">Replay</h2>
+
+    <div class="picker">
+      <label for="tape-picker">Tape</label>
+      <select id="tape-picker" disabled><option>Loading tapes...</option></select>
+      <p id="tape-meta" class="tape-meta"></p>
+    </div>
+
+    <p id="load-error" class="load-error" role="alert" hidden></p>
+    <div id="empty" class="empty-state" hidden>
+      <h3>No tapes yet</h3>
+      <p>Play a game with <code>node bin/play.js</code> and its tape will show up here.</p>
+    </div>
+
+    <div id="player" class="layout">
+      <div class="stage-col">
+        <div class="stage-hud" id="stage-hud">
+          <div class="hud-l"><b class="hud-title"></b><span class="hud-sub"></span></div>
+          <div class="hud-right"></div>
+        </div>
+        <div class="arena-wrap">
+          <div id="arena" class="arena" role="img" aria-label="Arena"></div>
+        </div>
+
+        <p id="now" class="now" role="status" aria-live="polite" aria-atomic="true">Loading the show...</p>
+
+        <div class="controls" role="group" aria-label="Playback controls">
+          <div class="control-row">
+            <button type="button" id="btn-back" class="btn" aria-label="Step back one event">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 5v14l-9-7zM5 5h2.5v14H5z"/></svg>
+              <span class="btn-text">Back</span>
+            </button>
+            <button type="button" id="btn-play" class="btn btn-primary" aria-pressed="false" aria-label="Play">
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="ic-play"><path d="M7 4.5v15l12-7.5z"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="ic-pause" hidden><path d="M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z"/></svg>
+              <span class="btn-text" id="play-text">Play</span>
+            </button>
+            <button type="button" id="btn-fwd" class="btn" aria-label="Step forward one event">
+              <span class="btn-text">Next</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5v14l9-7zM16.5 5H19v14h-2.5z"/></svg>
+            </button>
+            <label class="speed" for="speed">
+              <span>Speed</span>
+              <select id="speed" aria-label="Playback speed">
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="4">4x</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="scrub">
+            <input id="scrubber" type="range" min="0" max="0" step="1" value="0" aria-label="Timeline scrubber">
+            <div class="ticks" id="ticks" aria-hidden="true"></div>
+            <output id="scrub-label" class="scrub-label" for="scrubber">Event 0 of 0</output>
+          </div>
+
+          <div class="chapters" id="chapters" role="group" aria-label="Jump to a stage"></div>
+
+          <div class="control-row control-row-end">
+            <button type="button" id="btn-cut" class="btn btn-toggle" aria-pressed="false" title="Show thoughts, whispers, power badges and forgeries (d)">
+              <span class="switch" aria-hidden="true"><i></i></span>
+              <span class="btn-text">Director's cut</span>
+            </button>
+            <button type="button" id="btn-share" class="btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M13.4 10.6a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <span class="btn-text">Share link</span>
+            </button>
+            <span id="share-status" class="share-status" role="status" aria-live="polite"></span>
+          </div>
+          <p class="keys">Keys: <kbd>Space</kbd> play or pause, <kbd>&larr;</kbd> <kbd>&rarr;</kbd> step, <kbd>D</kbd> Director's cut.</p>
+        </div>
+
+        <section id="results" class="results" aria-labelledby="results-h" hidden></section>
+      </div>
+
+      <aside class="side" aria-label="Story so far">
+        <details class="cast" id="cast-details" open>
+          <summary>The cast</summary>
+          <ul id="cast" class="cast-list"></ul>
+        </details>
+        <section class="transcript" aria-labelledby="transcript-h">
+          <h2 id="transcript-h">Transcript</h2>
+          <p class="transcript-hint" id="transcript-hint">Click any line to jump there.</p>
+          <div id="transcript-scroll" class="transcript-scroll" tabindex="0" role="region" aria-labelledby="transcript-h">
+            <ol id="transcript" class="transcript-list"></ol>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <section id="stats" class="stats" aria-labelledby="stats-h">
+    <h2 id="stats-h">Which models do what?</h2>
+    <p class="stats-lede">Every recorded game adds to these per-model counts. Lower mean place is better; the lie columns are a rough guess, not a verdict.</p>
+    <div data-stats-body><p class="empty">Loading model stats...</p></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>Last Three is a replay viewer for recorded games. Everything on this page is read from the tape; nothing is simulated in your browser.</p>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
