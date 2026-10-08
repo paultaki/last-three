@@ -110,7 +110,7 @@ export async function probeModel(model, { ledger, chatFn = chat } = {}) {
       model,
       system: 'Reply with a JSON object only.',
       user: 'Reply with exactly this JSON and nothing else: {"ok":true}',
-      maxTokens: 200,
+      maxTokens: 600,
     });
     ledger?.record(model, res.usage.inputTokens, res.usage.outputTokens, 'probe');
     const { obj } = parseProbe(res.text);
