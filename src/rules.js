@@ -68,12 +68,12 @@ export function discRules(tileCount, phase) {
 
 export function ledgeRules(shrinkIn) {
   return [
-    'THE FINAL LEDGE.',
-    `A shrinking ledge over a pit. Each agent has footing (the current numbers are shown). Last one standing is 1st; those who fall are placed in reverse order of falling. At most ${LEDGE_MAX_ROUNDS} rounds.`,
-    'Each round every agent chooses simultaneously: shove:<name>, brace, or dodge (default brace).',
-    'For each agent X, let S be the agents who shoved X this round. If X chose brace, each shover loses 1 footing and X loses none. If X chose dodge, each shover loses 2 footing and X loses none. If X chose shove (X is exposed), X loses 1 footing for every shover in S.',
-    'At the end of every 2nd round (rounds 2, 4, 6) every agent loses 1 footing; from round 7 onward every round does. An agent at 0 footing or below falls at the end of the round.',
-    shrinkIn === 1 ? 'The ledge shrinks at the end of this round.' : 'The ledge does not shrink this round; it shrinks at the end of the next one.',
+    `THE FINAL LEDGE, at most ${LEDGE_MAX_ROUNDS} rounds. Each agent has footing (shown). Last one standing is 1st; the first to fall places lowest.`,
+    'Each round everyone chooses at once: shove:<name>, brace (default) or dodge.',
+    'For each agent X, S is whoever shoved X. X braced: each shover loses 1 footing, X none. X dodged: each shover loses 2, X none. X shoved someone (exposed): X loses 1 per shover in S.',
+    'After rounds 2, 4 and 6, and after every round from 7, everyone loses 1 footing. At 0 or below you fall at the end of the round.',
+    shrinkIn === 1 ? 'The ledge shrinks at the end of this round.' : 'No shrink this round; it comes at the end of the next one.',
+    `Ranking: if several fall in the same round, the lowest footing falls first (below zero counts), ties random. If everyone would fall at once, the highest footing places best, the rest fall lowest first, ties random. If several stand after round ${LEDGE_MAX_ROUNDS}, the ledge collapses and they rank by footing, highest best, ties random.`,
   ].join(' ');
 }
 

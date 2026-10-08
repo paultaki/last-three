@@ -7,6 +7,14 @@ const CAUSES = ['glass', 'crusher', 'trapdoor', 'ledge'];
 const STYLES = ['shatter', 'flatten', 'chute', 'tumble'];
 const MAX_PLACES = 3;
 const PLAYER_COUNT = 8;
+const LEDGE_PLACE_CAP = MAX_PLACES;
+
+/** Value types for fields that must not just be present but well formed. */
+const FIELD_TYPES = {
+  alive: 'array', survivors: 'array', players: 'array', places: 'array',
+  text: 'string', note: 'string', detail: 'string', why: 'string', power: 'string', action: 'string', what: 'string', phase: 'string',
+  valid: 'boolean', roundsTotal: 'number',
+};
 
 /** Required fields per event type; `names` lists fields that must hold a player name. */
 const EVENT_SHAPES = {
@@ -18,7 +26,7 @@ const EVENT_SHAPES = {
   whisper: { fields: ['from', 'to', 'text'], names: ['from', 'to'] },
   action: { fields: ['name', 'action', 'valid'], names: ['name'] },
   reveal: { fields: ['what', 'data'] },
-  ability_use: { fields: ['name', 'power'], names: ['name'] },
+  ability_use: { fields: ['name', 'power', 'detail'], names: ['name'] },
   lucky_save: { fields: ['name', 'why'], names: ['name'] },
   death: { fields: ['name', 'cause', 'style'], names: ['name'], stage: true },
   stage_end: { fields: ['survivors'], stage: true },
@@ -35,7 +43,10 @@ export function validateTape(tape) {
   validateHeader(tape);
   const names = validatePlayers(tape.players);
   const deaths = validateEvents(tape.events, names);
+  validateStartPlayers(tape);
   validateResult(tape, names, deaths);
+  validateLedgeOutcome(tape, names, deaths);
+  validateNamedLists(tape.events, names);
   validateUsage(tape.usage);
 }
 
@@ -77,13 +88,18 @@ function validateEvents(events, names) {
     validateStageRound(event, idx, shape);
     for (const field of shape.fields) {
       if (!present(event[field])) fail(`Event ${idx} ${event.type} missing ${field}`);
+      const expected = FIELD_TYPES[field];
+      const actual = Array.isArray(event[field]) ? 'array' : typeof event[field];
+      if (expected && actual !== expected) fail(`Event ${idx} ${event.type} ${field} must be a ${expected}`);
     }
+    if (event.forgedAs !== undefined && !names.has(event.forgedAs)) fail(`Event ${idx} ${event.type} unknown player: ${event.forgedAs}`);
     for (const field of shape.names ?? []) {
       if (!names.has(event[field])) fail(`Event ${idx} ${event.type} unknown player: ${event[field]}`);
     }
     checkLifecycle(event, idx, dead, deaths);
   });
   if (events[0].type !== 'game_start') fail('First event must be game_start');
+  if (events[0].i !== 0) fail(`First event index must be 0, got ${events[0].i}`);
   if (events.at(-1).type !== 'game_end') fail('Last event must be game_end');
   if (events.filter((e) => e.type === 'game_start').length !== 1) fail('Exactly one game_start required');
   if (events.filter((e) => e.type === 'game_end').length !== 1) fail('Exactly one game_end required');
@@ -121,7 +137,10 @@ function validatePlaceEntries(places, names) {
     if (!p || !names.has(p.name)) fail(`Unknown player in places: ${p?.name}`);
     if (seen.has(p.name)) fail(`Player listed twice in places: ${p.name}`);
     seen.add(p.name);
-    if (p.place === null) continue;
+    if (p.place === null) {
+      if (!STAGE_NAMES.includes(p.diedAt)) fail(`Player ${p.name} has no place, so diedAt must name a stage, got ${p.diedAt}`);
+      continue;
+    }
     if (!Number.isInteger(p.place) || p.place < 1 || p.place > MAX_PLACES) fail(`Place must be 1-3 or null, got ${p.place}`);
     if (byPlace.has(p.place)) fail(`Duplicate place assignment: ${p.place}`);
     byPlace.set(p.place, p.name);
@@ -156,17 +175,82 @@ function validateResult(tape, names, deathEvents) {
     }
     if (death && death.place !== undefined && death.place !== p.place) fail(`Agent ${p.name} death place differs from result`);
     if (p.place === null && !death) fail(`Agent ${p.name} survived but has no place`);
-    if (p.place === null && p.diedAt !== undefined && p.diedAt !== death.stage) fail(`Agent ${p.name} diedAt differs from death stage`);
+    if (p.place === null && p.diedAt !== death.stage) fail(`Agent ${p.name} diedAt differs from death stage`);
   }
   const winner = result.places.find((p) => p.place === 1);
   if (!winner || winner.name !== survivors[0]) fail('Place 1 must go to the sole survivor');
 }
 
+/** game_start.players is the same roster as tape.players. */
+function validateStartPlayers({ players, events }) {
+  const started = events[0].players;
+  if (!Array.isArray(started) || started.length !== PLAYER_COUNT) fail(`game_start must list exactly ${PLAYER_COUNT} players`);
+  const plain = (list) => JSON.stringify(list.map((p) => [p?.name, p?.model, p?.power]));
+  if (plain(started) !== plain(players)) fail('game_start players differ from tape.players');
+}
+
+/**
+ * Places must follow from the events: everyone on the ledge ranks by the order they fell
+ * (the j-th faller of k placed k - j, only 1 to 3 pay), the survivor is 1st, and nobody else ranks.
+ */
+function validateLedgeOutcome(tape, names, deathEvents) {
+  const { events, result } = tape;
+  const starts = events.filter((e) => e.type === 'stage_start' && e.stage === 'ledge');
+  if (starts.length > 1) fail('The ledge can only start once');
+  const onLedge = new Set(starts[0]?.alive ?? []);
+  const expected = new Map(); // name -> expected place (null = none)
+  const survivor = [...names].find((n) => !deathEvents.some((d) => d.name === n));
+  const fallers = deathEvents.filter((d) => d.stage === 'ledge');
+  fallers.forEach((death, j) => {
+    if (!onLedge.has(death.name)) fail(`Agent ${death.name} died on the ledge without being on it`);
+    const standing = onLedge.size - j;
+    const place = standing <= LEDGE_PLACE_CAP ? standing : null;
+    if ((death.place ?? null) !== place) fail(`Agent ${death.name} fell ${ordinal(j + 1)} of ${onLedge.size} on the ledge so its place must be ${place}, got ${death.place ?? null}`);
+    expected.set(death.name, place);
+  });
+  if (starts.length === 1 && !onLedge.has(survivor)) fail(`Survivor ${survivor} was not on the ledge`);
+  if (starts.length === 1 && fallers.length !== onLedge.size - 1) fail('Everyone on the ledge but the survivor must fall on it');
+  expected.set(survivor, 1);
+  for (const p of result.places) {
+    const want = expected.get(p.name) ?? null;
+    if (p.place !== want) fail(`Agent ${p.name} should have place ${want} from the events, got ${p.place}`);
+  }
+}
+
+const ordinal = (n) => `#${n}`;
+
+const asArray = (value) => (Array.isArray(value) ? value : []);
+
+/** Every name in a list or map anywhere in the tape is a player, and alive lists match the deaths so far. */
+function validateNamedLists(events, names) {
+  const dead = new Set();
+  const known = (list, where) => {
+    for (const n of list) if (!names.has(n)) fail(`${where} unknown player: ${n}`);
+  };
+  events.forEach((event, idx) => {
+    const where = `Event ${idx} ${event.type}`;
+    if (event.type === 'death') dead.add(event.name);
+    if (event.type === 'stage_start' || event.type === 'stage_end') {
+      const field = event.type === 'stage_start' ? 'alive' : 'survivors';
+      known(event[field], where);
+      const expected = [...names].filter((n) => !dead.has(n));
+      if (new Set(event[field]).size !== event[field].length || event[field].length !== expected.length || expected.some((n) => !event[field].includes(n))) {
+        fail(`${where} ${field} does not match who is alive`);
+      }
+    }
+    if (event.type === 'reveal') {
+      known(asArray(event.data?.line), `${where} line`);
+      known(Object.keys(event.data?.footing ?? {}), `${where} footing`);
+    }
+    if (event.type === 'game_end') known(event.places.map((p) => p?.name), where);
+  });
+}
+
 const stripDeath = ({ name, stage, cause, style }) => ({ name, stage, cause, style });
 
 function validateUsage(usage) {
-  if (!usage) return;
+  if (!usage || typeof usage !== 'object') fail('Missing usage object');
   for (const key of ['inputTokens', 'outputTokens', 'usd', 'calls']) {
-    if (typeof usage[key] !== 'number') fail('Invalid usage object');
+    if (!Number.isFinite(usage[key]) || usage[key] < 0) fail(`Invalid usage.${key}: must be a finite, non-negative number`);
   }
 }

@@ -19,12 +19,81 @@ const DEATH_LINES = {
   tumble: 'tumbled off the ledge',
 };
 
+// Never copy more of a hostile string than this before trimming and cutting it down.
+const READ_LIMIT = 4 * TEXT_LIMIT;
+const ACTION_LIMIT = 200;
+
 const clip = (value, max) => String(value).slice(0, max);
 
+/** An error (or any thrown value) as text. Never throws, whatever was thrown. */
+export function describeError(error) {
+  try {
+    if (typeof error === 'string') return error;
+    const message = error !== null && typeof error === 'object' ? error.message : undefined;
+    if (typeof message === 'string' && message) return message;
+    return String(error);
+  } catch {
+    return 'unprintable error';
+  }
+}
+
+const isObject = (value) => typeof value === 'object' && value !== null;
+
+/** Inert, trimmed, bounded text, or null. */
 function cleanText(value) {
   if (typeof value !== 'string') return null;
-  const text = value.trim();
+  const text = value.slice(0, READ_LIMIT).trim();
   return text ? text.slice(0, TEXT_LIMIT) : null;
+}
+
+const boundedString = (value, max = READ_LIMIT) => (typeof value === 'string' ? value.slice(0, max) : '');
+
+/**
+ * Copy an agent's response into plain, inert data. Every field is read exactly once inside a
+ * try/catch and coerced to a primitive, so getters, proxies, cycles and giant strings cannot
+ * reach the rest of the engine. Problems are appended to `notes`; the result is null when the
+ * response is not an object at all.
+ */
+function snapshotResponse(value, notes) {
+  try {
+    if (!isObject(value) || Array.isArray(value)) {
+      notes.push('response was not an object');
+      return null;
+    }
+  } catch (error) {
+    notes.push(`unreadable response: ${clip(describeError(error), NOTE_LIMIT)}`);
+    return null;
+  }
+  const read = (source, key) => {
+    try {
+      return source[key];
+    } catch (error) {
+      notes.push(`unreadable ${key}: ${clip(describeError(error), NOTE_LIMIT)}`);
+      return undefined;
+    }
+  };
+  const action = read(value, 'action');
+  const whisper = read(value, 'whisper');
+  const forge = read(value, 'forge');
+  return {
+    thought: cleanText(read(value, 'thought')),
+    say: cleanText(read(value, 'say')),
+    whisper: isObject(whisper) ? { to: boundedString(read(whisper, 'to')), text: cleanText(read(whisper, 'text')) } : null,
+    forge: snapshotForge(forge, read),
+    action: boundedString(action, ACTION_LIMIT).trim(),
+  };
+}
+
+function snapshotForge(forge, read) {
+  if (forge === undefined || forge === null) return null;
+  if (!isObject(forge)) return { malformed: true, as: '', to: null, text: null };
+  const to = read(forge, 'to');
+  return {
+    malformed: false,
+    as: boundedString(read(forge, 'as')),
+    to: typeof to === 'string' ? to.slice(0, READ_LIMIT) : null,
+    text: cleanText(read(forge, 'text')),
+  };
 }
 
 export class Game {
@@ -163,8 +232,8 @@ export class Game {
   async #callAgent(name, view) {
     let timer;
     const timeout = new Promise((_, reject) => {
+      // Deliberately ref'd: a never-settling agent must not let the process exit before this fires.
       timer = setTimeout(() => reject(new Error('agent timed out')), this.timeoutMs);
-      timer.unref?.();
     });
     try {
       const value = await Promise.race([(async () => this.agents[name].act(structuredClone(view)))(), timeout]);
@@ -187,27 +256,20 @@ export class Game {
   }
 
   #normalize(raw, view, name, fallbackFor) {
-    const result = { thought: null, say: null, whisper: null, forge: null, action: '', valid: false, notes: [] };
+    const result = { thought: null, say: null, whisper: null, forge: null, forgeRejected: false, action: '', valid: false, notes: [] };
     let response = null;
     if (!raw.ok) {
-      result.notes.push(`agent error: ${clip(raw.error?.message ?? raw.error, NOTE_LIMIT)}`);
-    } else if (!raw.value || typeof raw.value !== 'object' || Array.isArray(raw.value)) {
-      result.notes.push('response was not an object');
+      result.notes.push(`agent error: ${clip(describeError(raw.error), NOTE_LIMIT)}`);
     } else {
-      response = raw.value;
+      response = snapshotResponse(raw.value, result.notes);
     }
-    let proposed = '';
     if (response) {
-      try {
-        result.thought = cleanText(response.thought);
-        result.say = cleanText(response.say);
-        result.whisper = this.#readWhisper(response.whisper);
-        result.forge = this.#readForge(response.forge);
-        proposed = typeof response.action === 'string' ? response.action.trim() : '';
-      } catch (error) {
-        result.notes.push(`unreadable response: ${clip(error?.message, NOTE_LIMIT)}`);
-      }
+      result.thought = response.thought;
+      result.say = response.say;
+      result.whisper = response.whisper?.text ? response.whisper : null;
+      result.forge = response.forge;
     }
+    const proposed = response?.action ?? '';
     result.valid = proposed !== '' && view.legalActions.includes(proposed);
     if (result.valid) {
       result.action = proposed;
@@ -218,61 +280,79 @@ export class Game {
     return result;
   }
 
-  #readWhisper(value) {
-    if (!value || typeof value !== 'object') return null;
-    const text = cleanText(value.text);
-    return text ? { to: typeof value.to === 'string' ? value.to : '', text } : null;
-  }
-
-  #readForge(value) {
-    if (!value || typeof value !== 'object') return null;
-    return {
-      as: typeof value.as === 'string' ? value.as : '',
-      to: typeof value.to === 'string' ? value.to : 'all',
-      text: cleanText(value.text),
-    };
-  }
-
   // ---- speech --------------------------------------------------------------------------
 
-  /** thought, say, whisper, forge for each asker, in seat order, before any action resolves. */
+  /**
+   * thought, say, whisper, forge for each asker, in seat order, before any action resolves.
+   *
+   * Events record the real sender. What the other agents receive is ordered by APPARENT sender
+   * (a forged line sits in the slot of the name it was forged as, right after that agent's own
+   * line), so the order of delivery never reveals the forger.
+   */
   speak(names, results) {
+    const publicLines = [];
+    const whispers = [];
     for (const name of names) {
       const r = results[name];
-      if (r.thought) this.emit('thought', { name, text: r.thought });
-      if (r.say) {
-        this.emit('say', { name, text: r.say });
-        this.announce(`${name}: ${r.say}`);
+      try {
+        if (r.thought) this.emit('thought', { name, text: r.thought });
+        if (r.say) {
+          this.emit('say', { name, text: r.say });
+          publicLines.push({ as: name, forged: false, text: r.say });
+        }
+        if (r.whisper) this.#deliverWhisper(name, r, whispers);
+        if (r.forge) this.#deliverForge(name, r, publicLines, whispers);
+      } catch (error) {
+        r.notes.push(`delivery failed: ${clip(describeError(error), NOTE_LIMIT)}`);
       }
-      if (r.whisper) this.#deliverWhisper(name, r);
-      if (r.forge) this.#deliverForge(name, r);
     }
+    for (const line of this.#inApparentOrder(publicLines)) this.announce(`${line.as}: ${line.text}`);
+    for (const whisper of this.#inApparentOrder(whispers)) this.inbox.get(whisper.to).push({ from: whisper.as, text: whisper.text });
   }
 
-  #deliverWhisper(name, r) {
+  /** Seat order of the apparent sender; a forged line follows the genuine one. Stable otherwise. */
+  #inApparentOrder(items) {
+    const seat = (item) => SEATS.indexOf(item.as);
+    return items
+      .map((item, k) => ({ item, k }))
+      .sort((a, b) => seat(a.item) - seat(b.item) || Number(a.item.forged) - Number(b.item.forged) || a.k - b.k)
+      .map(({ item }) => item);
+  }
+
+  #deliverWhisper(name, r, whispers) {
     const to = this.resolveSeat(r.whisper.to);
     if (!to || to === name || !this.alive.has(to)) {
       r.notes.push('whisper dropped: recipient is not another living agent');
       return;
     }
     this.emit('whisper', { from: name, to, text: r.whisper.text });
-    this.inbox.get(to).push({ from: name, text: r.whisper.text });
+    whispers.push({ to, as: name, forged: false, text: r.whisper.text });
+  }
+
+  /** `to` must be exactly "all" or a living agent other than the forger and the forged name. */
+  #forgeTarget(raw) {
+    if (typeof raw !== 'string') return null;
+    return raw.trim().toLowerCase() === 'all' ? 'all' : this.resolveSeat(raw);
   }
 
   #forgeProblem(name, forge, as, to) {
     if (this.power[name] !== 'forger') return 'you are not the forger';
     if (this.spent.has(name)) return 'the forge is already spent';
+    if (forge.malformed) return 'forge must be an object';
     if (!as || as === name || !this.alive.has(as)) return 'must forge as a different living agent';
     if (!forge.text) return 'empty text';
-    if (to !== 'all' && (!to || to === name || to === as || !this.alive.has(to))) return 'bad recipient';
+    if (to !== 'all' && (!to || to === name || to === as || !this.alive.has(to))) {
+      return 'bad destination: "to" must be "all" or another living agent';
+    }
     return null;
   }
 
-  #deliverForge(name, r) {
+  #deliverForge(name, r, publicLines, whispers) {
     const as = this.resolveSeat(r.forge.as);
-    const to = r.forge.to.trim().toLowerCase() === 'all' ? 'all' : this.resolveSeat(r.forge.to);
+    const to = this.#forgeTarget(r.forge.to);
     const problem = this.#forgeProblem(name, r.forge, as, to);
     if (problem) {
+      r.forgeRejected = true;
       r.notes.push(`forge ignored: ${problem}`);
       return;
     }
@@ -284,10 +364,10 @@ export class Game {
     });
     if (to === 'all') {
       this.emit('say', { name, text: r.forge.text, forgedAs: as });
-      this.announce(`${as}: ${r.forge.text}`);
+      publicLines.push({ as, forged: true, text: r.forge.text });
     } else {
       this.emit('whisper', { from: name, to, text: r.forge.text, forgedAs: as });
-      this.inbox.get(to).push({ from: as, text: r.forge.text });
+      whispers.push({ to, as, forged: true, text: r.forge.text });
     }
   }
 
@@ -300,6 +380,7 @@ export class Game {
         name,
         action: r.action,
         valid: r.valid,
+        ...(r.forgeRejected ? { forgeRejected: true } : {}),
         ...(notes.length ? { note: notes.join('; ') } : {}),
       });
     }

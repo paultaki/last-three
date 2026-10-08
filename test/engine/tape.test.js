@@ -116,7 +116,7 @@ test('exactly one agent survives and takes 1st', () => {
     const i = t.events.findIndex((e) => e.type === 'death' && e.stage === 'bridge');
     const [removed] = t.events.splice(i, 1);
     t.result.deaths = t.result.deaths.filter((d) => d.name !== removed.name);
-    t.result.places.find((p) => p.name === removed.name).diedAt = undefined;
+    t.result.places.find((p) => p.name === removed.name).diedAt = 'bridge';
     t.events.forEach((e, k) => { e.i = k; });
     t.events.at(-1).places = structuredClone(t.result.places);
   }, /Exactly one agent must survive, found 2/);

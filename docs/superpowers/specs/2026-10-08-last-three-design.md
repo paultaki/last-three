@@ -92,7 +92,7 @@ States: `alive`, `dead`. The game runs stages in order, skipping a stage when it
 }
 ```
 
-`forge` is honoured only for the `forger` holder, only once, only if `as` is a different alive agent. Otherwise it is ignored and logged as an invalid action. Text fields are truncated to 280 characters. At most one whisper per round. Invalid or missing actions become the stage default and are flagged `valid: false`.
+`forge` is honoured only for the `forger` holder, only once, only if `as` is a different alive agent and `to` is exactly the string `"all"` or the name of a living agent other than `as` and the forger. A missing, null or non-string `to` is never read as a broadcast. Otherwise the forge is ignored (the power is not spent) and logged on the action event as `forgeRejected: true` with a note; the action itself stays valid. Forged lines are delivered in the slot of the name they were forged as (after that agent's own line that round), never in the forger's own slot, so the order of delivery does not reveal the forger. Text fields are truncated to 280 characters. At most one whisper per round. Invalid or missing actions become the stage default and are flagged `valid: false`.
 
 ### 4.1 Bridge ("The Glass Bridge")
 
@@ -102,7 +102,7 @@ States: `alive`, `dead`. The game runs stages in order, skipping a stage when it
   - If the front agent picks the safe pane, they advance and **stay at the front** for the next row.
   - If they pick the weak pane, it shatters and they are eliminated (cause `glass`, style `shatter`). The weak pane is publicly revealed, so the safe pane of that row is now known. The next agent in line steps onto the safe pane automatically (emitted as an `action` with `auto: true`, no decision, no risk), and that agent is now the front for the following rows.
   - A row therefore kills at most one agent. After every row, emit a `reveal` (`weak_pane`) for that row.
-- **Finish:** after row 8 is crossed, the agents still alive survive the bridge. Expected deaths are about 4 of 8. The floor rules in section 4 apply.
+- **Finish:** after row 8 is crossed, the agents still alive survive the bridge. Expected deaths are about 4 of 8. The floor rules in section 4 apply. If only one agent remains on the bridge mid-crossing, the stage ends there and the game ends immediately: that agent is 1st, and the rows not yet reached are not revealed (no further `weak_pane` events).
 - **Stage default action:** waiting room `hold`; crossing front `step` on a seeded random side; others `wait`.
 - **Glass Eye** holder receives the full safe-side array at stage start in `privateKnowledge`.
 
@@ -141,7 +141,10 @@ Runs when alive >= 2 (normally 3). A shrinking ledge over a pit. Last standing i
   - Footing never gains.
 - **Shrink:** at the end of every 2nd round (rounds 2, 4, 6, ...), every alive agent loses 1 footing. From round 7 onward, every round shrinks.
 - An agent whose footing reaches 0 or below falls at the end of the round (cause `ledge`, style `tumble`). Falls in one round are ordered by (lowest footing first, then seeded RNG); the first to fall places 3rd (with 3 alive), the second places 2nd, the last standing places 1st. If everyone alive would fall in the same round, order by footing descending for places, ties by RNG.
+- The shown footing never goes below 0, but ranking uses the true value (an agent at -2 falls before one at 0). The ledge rules text given to agents (and to the Map holder) states all of this ranking: first to fall places lowest, lowest footing falls first within a round, highest footing places best if everyone would fall at once, ties at random, and the round-20 collapse ranks by footing.
 - With exactly 2 alive, the first to fall is 2nd, the survivor 1st. Maximum 20 rounds; at round 20 the ledge collapses: order by footing descending, ties by RNG.
+- **Four on the ledge.** The feather can legitimately leave 4 survivors after the disc (the cancelled trapdoor victim stays), and then 4 agents start the ledge. Only places 1 to 3 pay, so the last three standing take 1st, 2nd and 3rd; the first of the four to fall earns no place and is recorded exactly like an earlier death: `place: null` with `diedAt: "ledge"`, and its `death` event carries no `place`. In general the j-th agent to fall with k on the ledge takes place k - j + 1 if that is 3 or better, else none (validated by `validateTape`).
+- **Public information, accepted.** The starting footing (4 for the anchor holder, 1 for a feather holder whose feather is already spent) and the public log line announcing a spent feather are visible to everyone, and may reveal those two holders. This is accepted game design, not a leak.
 - **Feather:** the first time the holder would fall, they instead stay at footing 1 and the feather is spent (emit `ability_use`). Feather applies to every stage's eliminations (bridge, crusher, trapdoor, ledge): the elimination is cancelled.
 
 ## 5. Views (what the engine shows each agent)
@@ -184,6 +187,10 @@ For every ask, the engine builds a plain-JSON `view` and passes it to `agent.act
 
 `act` may throw or return garbage; the engine catches it and applies the default action (flagged invalid, with the error text in the event `note`). The engine never trusts the response: it normalises strings, checks the action against `legalActions`, enforces power constraints, and truncates text. `runGame({ seed, agents, config })` takes `agents` as an object keyed by seat name; each value is an Agent. The seeded RNG decides power assignment. Within a round the engine calls `Promise.all` over the active agents.
 
+Agents run in the engine's process, so `act` must not block the event loop: a synchronous infinite loop cannot be interrupted by the per-call timeout (a documented limitation; agents are not run in workers). A never-settling promise is timed out and defaulted, and the timeout timer keeps the process alive until it fires. The engine reads each response exactly once into plain data (getters, proxies, cycles and oversized strings are neutralised) before using any of it, and no malformed response or thrown value can abort the game.
+
+**Secrecy note.** The seed is public in the tape and all hidden state (powers, safe panes, lever and trapdoor draws) is derived from it. That is acceptable because agents are language models with no code execution and never see the seed; a future version can mix in a secret salt.
+
 `createScriptedAgents(seed, kinds)` in `src/scripted.js` builds the free bots: `random`, `saint` (volunteers, holds levers), `coward` (holds back, never volunteers), `liar` (claims powers it lacks, whispers lies), `shover` (always shoves on the ledge). Scripted bots must read their own `view` only.
 
 ## 7. Tape format
@@ -219,20 +226,20 @@ Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null,
 | `say` | `name`, `text`, `forgedAs`? (the real sender is `name`; `forgedAs` is who recipients saw) |
 | `whisper` | `from`, `to`, `text`, `forgedAs`? |
 | `action` | `name`, `action`, `valid`, `auto`?, `note`? |
-| `reveal` | `what` (`weak_pane`, `tiles`, `ceiling`, `footing`, `line`, `trapdoors`), `data` |
+| `reveal` | `what` (`weak_pane`, `tiles`, `ceiling`, `footing`, `line`, `trapdoors`), `data`. `line` has `data: { line: [...names] }`, front first, and is emitted at the start of the bridge waiting room (before round 1), after each waiting-room round resolves, and at the start of the crossing phase (`round: null`). |
 | `ability_use` | `name`, `power`, `detail` |
 | `lucky_save` | `name`, `why` |
 | `death` | `name`, `stage`, `cause` (`glass`, `crusher`, `trapdoor`, `ledge`), `style` (`shatter`, `flatten`, `chute`, `tumble`), `place`? |
 | `stage_end` | `stage`, `survivors` |
 | `game_end` | `places` |
 
-`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, non-increasing `i`, unknown event type, missing required fields, names not in `players`, deaths without a stage, places not forming 1..3 for the survivors, or a power assigned twice.
+`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, a first event index other than 0, non-increasing `i`, unknown event type, missing or mistyped required fields (including `ability_use.detail`, `lucky_save.why`, `stage_start.note`), a missing or non-finite `usage`, a `game_start` roster that is not the eight `players`, names not in `players` anywhere (alive lists, survivors, `forgedAs`, whisper ends, deaths, places, line and footing reveals), alive lists that disagree with the deaths so far, deaths without a stage, a null place without `diedAt`, places that do not follow from who reached the ledge and the order they fell in, places not forming 1..3 for the survivors, or a power assigned twice.
 
 ## 8. LLM agents
 
 - **Transport:** Vercel AI Gateway, OpenAI-compatible: `POST https://ai-gateway.vercel.sh/v1/chat/completions`, `Authorization: Bearer <token>`. Token = `AI_GATEWAY_API_KEY` env var if set, else `VERCEL_OIDC_TOKEN` read from `.env.local`. On HTTP 401, run `vercel env pull .env.local --yes --scope pauls-projects-667765b0` once and retry. Zero dependencies; use global `fetch`.
-- **Request:** `temperature: 1.0`, `max_tokens: 500`, `response_format: {"type":"json_object"}` (fall back to plain text if a model rejects it). System prompt = static (rules intro, objective, response schema). User prompt = the view serialised compactly. Parse JSON; if parse fails, try extracting the first `{...}`; if still failing, one retry with a short repair instruction; then give up (default action, `valid: false`).
-- **Models (default 8-seat roster, varied makers):** `anthropic/claude-haiku-5.5`, `openai/gpt-oss-120b`, `google/gemini-3.1-flash-lite`, `deepseek/deepseek-v4-flash`, `alibaba/qwen3.8-flash`, `zai/glm-5.3-flash`, `spacexai/grok-4.1-fast-non-reasoning`, `meta/llama-4-maverick`. The roster rotates which model sits in which seat per game (seeded) so seat effects average out. Any model that fails to answer a basic probe is replaced from a reserve list: `openai/gpt-5-nano`, `google/gemini-2.5-flash-lite`, `mistral/mistral-small`.
+- **Request:** `temperature: 1.0`, `max_tokens: 800`, `reasoning: {enabled: false}` (hidden thinking made 4 of 8 cheap models return empty completions; if a model rejects the param the client retries without it), `response_format: {"type":"json_object"}` (fall back to plain text if a model rejects it). System prompt = static (rules intro, objective, response schema). User prompt = the view serialised compactly. Parse JSON; if parse fails, try extracting the first `{...}`; if still failing, one retry with a short repair instruction; then give up (default action, `valid: false`).
+- **Models (default 8-seat roster, varied makers):** `anthropic/claude-haiku-5.5`, `openai/gpt-oss-120b`, `google/gemini-2.5-flash-lite`, `deepseek/deepseek-v4-flash`, `alibaba/qwen3.8-flash`, `zai/glm-5.3-flash`, `spacexai/grok-4.1-fast-non-reasoning`, `meta/llama-4-maverick`. The roster rotates which model sits in which seat per game (seeded) so seat effects average out. Any model that fails to answer a basic probe is replaced from a reserve list: `openai/gpt-5-nano`, `google/gemini-3.1-flash-lite`, `mistral/mistral-small`. A second **heavy** roster (`batch.js --tier heavy`: `anthropic/claude-sonnet-5.5`, `google/gemini-3.1-pro-preview`, `openai/gpt-5.6-luna`, `moonshotai/kimi-k2.6`, `deepseek/deepseek-v4-pro`, `minimax/minimax-m3`, `spacexai/grok-4.1-fast-reasoning`, `zai/glm-5.3-flashx`) costs roughly 10 to 20 times more per game and is used sparingly; index entries carry a `tier` field.
 - **Concurrency:** up to 8 parallel calls (one per active agent per round); each with a 60 s timeout and 2 retries on 429/5xx with backoff.
 - **Spend control (hard rules):** `src/llm/ledger.js` keeps a running total in `.ledger/spend.json` using the gateway's `/v1/models` price table (cached) and each response's `usage`. Before every call it checks the cap: **default cap $12 total across all runs, hard stop (throws `SpendCapError`)**, overridable by `--cap` but never above $18. `batch.js` also takes `--games N` and `--per-game-cap` (default $0.60). Print running totals after each game.
 - **No secrets in git:** `.env*` and `.ledger/` are in `.gitignore`.

@@ -16,6 +16,10 @@ export async function runBridge(g) {
     await waitingRound(g, line, round);
   }
 
+  // The viewer redraws the line from this reveal, so the crossing opens with it.
+  g.round = null;
+  g.emit('reveal', { what: 'line', data: { line: [...line] } });
+
   const weakPanes = [];
   for (let row = 1; row <= BRIDGE_ROWS; row++) {
     await crossingRow(g, line, row, weakPanes);

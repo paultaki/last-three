@@ -27,7 +27,7 @@ export async function runGame({ seed, agents, config = {} }) {
   const g = new Game({ seed, agents, config });
   const players = SEATS.map((name) => ({
     name,
-    model: String(agents[name].model ?? 'unknown'),
+    model: modelName(agents[name]),
     power: g.powerOf(name),
   }));
   g.emit('game_start', { players });
@@ -63,6 +63,16 @@ export async function runGame({ seed, agents, config = {} }) {
     },
     usage: sumUsage(agents),
   };
+}
+
+/** The agent's model label as a plain string; a hostile `model` can never throw here. */
+function modelName(agent) {
+  try {
+    const model = agent.model;
+    return model === undefined || model === null ? 'unknown' : String(model).slice(0, 200);
+  } catch {
+    return 'unknown';
+  }
 }
 
 /** Agents may expose usage() (LLM agents do); scripted bots do not. */
