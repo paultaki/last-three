@@ -62,6 +62,8 @@ export function normalizeStats(raw) {
       bridge: bridgeDeaths,
       top3: num(grab(r, 'top3')),
       crusher: stageDeaths(r, deaths, 'crusher'),
+      // stats written before the Pit existed have no pit key: nobody died there, so that is a 0
+      pit: stageDeaths(r, deaths, 'pit') ?? (deaths && typeof deaths === 'object' ? 0 : null),
       disc: stageDeaths(r, deaths, 'disc'),
       ledge: stageDeaths(r, deaths, 'ledge'),
       vol: num(grab(r, 'vol')),
@@ -76,6 +78,22 @@ export function normalizeStats(raw) {
   return rows;
 }
 
+// "Stats for rules v3 (6 games). Older rules: v1 24 games, v2 8 games, not counted here."
+export function rulesLine(raw) {
+  const v = Number(raw && raw.rulesVersion);
+  if (!Number.isInteger(v) || v < 1) return null;
+  const by = raw.tapesByRules && typeof raw.tapesByRules === 'object' ? raw.tapesByRules : {};
+  const games = (n) => `${n} game${n === 1 ? '' : 's'}`;
+  const n = Number.isFinite(Number(by[v])) ? Number(by[v]) : Number(raw.games);
+  const older = Object.keys(by)
+    .map(Number)
+    .filter((k) => k !== v && by[k] > 0)
+    .sort((a, b) => a - b)
+    .map((k) => `v${k} ${games(by[k])}`);
+  const head = `Stats for rules v${v}${Number.isFinite(n) ? ` (${games(n)})` : ''}.`;
+  return older.length ? `${head} Older rules: ${older.join(', ')}, not counted here.` : head;
+}
+
 const COLUMNS = [
   { key: 'model', label: 'Model' },
   { key: 'games', label: 'Games' },
@@ -84,6 +102,7 @@ const COLUMNS = [
   { key: 'top3', label: 'Top 3', optional: true },
   { key: 'bridge', label: 'Out: bridge' },
   { key: 'crusher', label: 'Out: crusher', optional: true },
+  { key: 'pit', label: 'Out: pit', title: 'Eliminated when the pit flooded', optional: true },
   { key: 'disc', label: 'Out: disc', optional: true },
   { key: 'ledge', label: 'Out: ledge', optional: true },
   { key: 'vol', label: 'Volunteers' },
@@ -106,7 +125,7 @@ export class StatsPanel {
 
   setData(raw) {
     this.rows = normalizeStats(raw);
-    this.meta = raw && typeof raw === 'object' ? { games: raw.games, generatedAt: raw.generatedAt, notes: Array.isArray(raw.notes) ? raw.notes : [] } : { notes: [] };
+    this.meta = raw && typeof raw === 'object' ? { games: raw.games, generatedAt: raw.generatedAt, notes: Array.isArray(raw.notes) ? raw.notes : [], rules: rulesLine(raw) } : { notes: [] };
     this.render();
   }
 
@@ -131,6 +150,12 @@ export class StatsPanel {
       // ties: more wins first, then name, so the order never looks random
       return d || (b.wins || 0) - (a.wins || 0) || a.model.localeCompare(b.model);
     });
+    if (this.meta && this.meta.rules) {
+      const line = document.createElement('p');
+      line.className = 'stats-rules';
+      line.textContent = this.meta.rules;
+      this.body.append(line);
+    }
     const wrap = document.createElement('div');
     wrap.className = 'table-wrap';
     const table = document.createElement('table');

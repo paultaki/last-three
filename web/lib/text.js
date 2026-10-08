@@ -6,11 +6,12 @@
 export const STAGE_TITLES = {
   bridge: 'The Glass Bridge',
   crusher: 'The Crusher Room',
+  pit: 'The Pit',
   disc: 'The Trapdoor Disc',
   ledge: 'The Final Ledge',
 };
 
-export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', disc: 'Disc', ledge: 'Ledge', results: 'Results', start: 'Start' };
+export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', pit: 'Pit', disc: 'Disc', ledge: 'Ledge', results: 'Results', start: 'Start' };
 
 export const POWER_NAMES = {
   glass_eye: 'Glass Eye',
@@ -26,7 +27,7 @@ export const POWER_NAMES = {
 export const POWER_BLURBS = {
   glass_eye: 'Sees the safe pane in every bridge row.',
   wedge: 'Can jam the crusher lever open, once.',
-  map: 'Knows the rules of all four stages in advance.',
+  map: 'Knows the rules of every stage in advance.',
   feather: 'Survives the first deadly fall.',
   swap: 'Can swap disc tiles with someone, once.',
   anchor: 'Starts the ledge with extra footing.',
@@ -89,14 +90,19 @@ const DEATH_LINES = {
     (n) => `${n} dropped out of the game, in style`,
     (n) => `${n} whooshed down the hatch`,
   ],
+  sink: [
+    (n) => `${n} was left in the pit`,
+    (n) => `${n} was left in the pit to think it over`,
+    (n) => `${n} was left in the pit, glub glub`,
+  ],
   tumble: [
-    (n) => `${n} cartwheeled into the pit`,
+    (n) => `${n} cartwheeled into the dark`,
     (n) => `${n} tumbled off the ledge`,
-    (n) => `${n} took a long, slow bow into the pit`,
+    (n) => `${n} took a long, slow bow into the dark`,
   ],
 };
 
-export const DEATH_ONOMATOPOEIA = { shatter: 'CRASH!', flatten: 'SPLAT!', chute: 'WHEEE!', tumble: 'BONK!' };
+export const DEATH_ONOMATOPOEIA = { shatter: 'CRASH!', flatten: 'SPLAT!', chute: 'WHEEE!', tumble: 'BONK!', sink: 'GLUB!' };
 
 export function deathCaption(name, style, key = 0, place) {
   const list = DEATH_LINES[style] || [(n) => `${n} is out`];
@@ -113,6 +119,7 @@ export function roundLabel(stage, phase, round, total) {
     return `Waiting room, round ${round} of ${total || 6}`;
   }
   if (stage === 'crusher') return `The ceiling lowers (round ${round} of ${total || 5})`;
+  if (stage === 'pit') return `The water rises (round ${round} of ${total || 5})`;
   if (stage === 'disc') return phase === 'swap' ? 'Round 2: swap tiles or wait' : 'Round 1: pick a tile';
   if (stage === 'ledge') return `Ledge, round ${round}`;
   return round != null ? `Round ${round}` : '';
@@ -152,8 +159,17 @@ function actionText(ev, state) {
       return { pub: `${name} braces` };
     case 'dodge':
       return { pub: `${name} dodges` };
+    case 'offer_back':
+      return { pub: `${name} offers to be the step` };
+    case 'climb':
+      return { pub: `${name} tries to climb out` };
+    case 'push_base':
+      return { pub: `${name} tries to shove ${arg} down as the step` };
+    case 'reach_down':
+      return { pub: `${name} reaches down with the rope` };
     case 'hold':
     case 'wait':
+    case 'leave':
     case 'stay':
       return { pub: null, cut: null };
     default:
@@ -162,13 +178,37 @@ function actionText(ev, state) {
   }
 }
 
+const joinNames = (list) => (list.length < 2 ? list.join('') : `${list.slice(0, -1).join(', ')} and ${list[list.length - 1]}`);
+
+function luckyText(ev) {
+  const why = String(ev.why || '');
+  if (/^won the photo finish/.test(why)) return `${ev.name} ${why.replace('shoves landed', 'shoves')}.`;
+  if (why === 'a last toe-hold') return `${ev.name} hangs on with a last toe-hold.`;
+  if (why === 'a plank floats by') return `A plank floats by, and ${ev.name} climbs onto it.`;
+  return `${ev.name} gets a lucky break: ${why || 'the dice say so'}.`;
+}
+
+// One pit round resolved: who became the step (and how), who climbed out, and the water level.
+function describePit(d, next) {
+  const p = next.pit || {};
+  const lifted = Array.isArray(d.lifted) ? d.lifted : [];
+  const parts = [];
+  if (p.baseNew && d.base) parts.push(p.baseHow === 'pushed' ? `${d.base} is shoved down as the step.` : `${d.base} volunteers to be the step.`);
+  if (lifted.length) parts.push(`${joinNames(lifted)} climb${lifted.length === 1 ? 's' : ''} out over ${d.base || 'the step'}.`);
+  else if (!d.roped && !p.baseNew) parts.push(d.base ? 'Nobody climbs out this round.' : 'Nobody has a step to climb on.');
+  if (d.roped && d.rescued) parts.push(`${d.rescued} is out. The rope is gone.`);
+  if (Number.isFinite(d.flood)) parts.push(`Water level ${d.flood} of ${p.total || 5}.`);
+  return { pub: parts.join(' '), kind: 'reveal' };
+}
+
 export function describeEvent(ev, next, prev) {
   if (!ev || !ev.type) return null;
   const players = (next && next.players) || {};
   switch (ev.type) {
     case 'game_start': {
       const n = Array.isArray(ev.players) ? ev.players.length : Object.keys(players).length;
-      return { pub: `${n} contestants walk on. Four obstacles. Three prizes. Nobody shares.`, kind: 'stage' };
+      const count = next && next.rules >= 3 ? 'Five' : 'Four';
+      return { pub: `${n} contestants walk on. ${count} obstacles. Three prizes. Nobody shares.`, kind: 'stage' };
     }
     case 'stage_start': {
       const title = STAGE_TITLES[ev.stage] || ev.stage;
@@ -220,6 +260,12 @@ export function describeEvent(ev, next, prev) {
             .map((n) => `${n} ${src[n]}`);
           return parts.length ? { pub: `Footing: ${parts.join(', ')}.`, kind: 'reveal' } : null;
         }
+        case 'rope': {
+          if (!d || !d.by) return null;
+          return { pub: `The rope: ${d.by} hauls ${d.saved || 'the step'} out of the pit. ${d.by}'s hands are burned (-${d.cost || 1} footing later).`, kind: 'reveal' };
+        }
+        case 'pit':
+          return d && typeof d === 'object' ? describePit(d, next, prev) : null;
         default:
           return null;
       }
@@ -231,11 +277,15 @@ export function describeEvent(ev, next, prev) {
       let pub = null;
       if (ev.power === 'wedge') pub = 'The lever jams open. Nobody gets crushed!';
       else if (ev.power === 'swap') pub = 'Two players trade tiles.';
-      else if (ev.power === 'feather') pub = `${ev.name} should have fallen, but bounces right back!`;
+      else if (ev.power === 'feather') pub = ev.stage === 'pit' ? `${ev.name} should have gone under, but floats right out of the pit!` : `${ev.name} should have fallen, but bounces right back!`;
+      else if (ev.power === 'anchor' && ev.stage === 'pit') {
+        const by = next && next.pit && next.pit.pushFail && next.pit.pushFail.by;
+        pub = `${by ? `${by} tried to push ${ev.name} down as the step, but ${ev.name}` : ev.name} would not budge.`;
+      }
       return { pub, cut, kind: 'ability', name: ev.name };
     }
     case 'lucky_save':
-      return { pub: `${ev.name} gets a lucky break: ${ev.why || 'the dice say so'}.`, kind: 'lucky', name: ev.name };
+      return { pub: luckyText(ev), kind: 'lucky', name: ev.name };
     case 'death': {
       const style = ev.style || 'shatter';
       return { pub: deathCaption(ev.name, style, ev.i || 0, typeof ev.place === 'number' ? ev.place : null), kind: 'death', name: ev.name, style };

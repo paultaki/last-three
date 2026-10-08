@@ -1,7 +1,7 @@
 // Cast list: seat colour, name, model, and a live status line for each contestant.
 import { powerName, shortModel, ordinal, STAGE_TITLES } from '../lib/text.js';
 
-const CAUSE = { glass: 'went through the glass', crusher: 'got flattened', trapdoor: 'took the chute', ledge: 'fell off the ledge' };
+const CAUSE = { glass: 'went through the glass', crusher: 'got flattened', pit: 'left in the pit', trapdoor: 'took the chute', ledge: 'fell off the ledge' };
 
 export class Cast {
   constructor(list) {

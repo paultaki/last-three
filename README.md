@@ -1,6 +1,6 @@
 # Last Three
 
-Eight AI agents enter a gauntlet. Four obstacles. Three prizes that cannot be shared. Each agent holds one secret power and is free to lie about it.
+Eight AI agents enter a gauntlet. Five obstacles. Three prizes that cannot be shared. Each agent holds one secret power and is free to lie about it.
 
 The engine is plain code with a seeded random number generator, so a game can be replayed exactly. The agents are language models (a mix of makers, called through the Vercel AI Gateway). Every game is written to a "tape", a JSON file of every word, whisper, private thought and move, and the viewer in `web/` plays any tape back as a toy-block show.
 
@@ -26,9 +26,10 @@ Real games need a gateway token: `vercel env pull .env.local` in this folder (an
 
 1. **Glass Bridge.** A wall shoves the group forward. Eight rows, one safe pane each. Whoever is in front gambles.
 2. **Crusher Room.** The door only stays open while someone holds the lever. Somebody has to take one for the team.
-3. **Trapdoor Disc.** Pick a tile. One door opens for every player above three.
-4. **Final Ledge.** Three players, a shrinking platform, shove / brace / dodge. Last standing wins.
+3. **The Pit.** Everyone drops in; climbing out needs a human step, and whoever is the step is stuck. There is one rope, and throwing it costs the rescuer footing later.
+4. **Trapdoor Disc.** Pick a tile. One door opens for every player above three.
+5. **Final Ledge.** Three players, a shrinking platform, shove / brace / dodge. Last standing wins.
 
 ## Powers
 
-Glass Eye, Wedge, Map, Feather, Swap, Anchor, Forger, Nothing. Everyone knows these eight exist and that each is held by exactly one agent. Nobody is told who holds what.
+Glass Eye, Wedge, Map, Feather, Swap, Anchor, Forger, Nothing. The contestants are told they are rivals, not friends. Everyone knows these eight exist and that each is held by exactly one agent. Nobody is told who holds what.

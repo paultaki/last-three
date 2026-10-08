@@ -74,6 +74,51 @@ function confettiBurst(layer, env, x, y, speed) {
   }
 }
 
+// Sinking: bubbles rise, a hand waves above the waterline, the figure slips under and its tag goes with it.
+function sinkFx(fig, layer, env, x, y, sp) {
+  const u = env.u;
+  const wy = env.waterY != null ? env.waterY : y - 14; // % of the arena
+  const dur = 2500 / sp;
+  const rise = ((y - wy) / 100) * env.H;
+  for (let k = 0; k < 9; k++) {
+    const b = h('i', 'fx-bubble');
+    b.style.width = b.style.height = `${u * rnd(0.14, 0.3)}px`;
+    b.style.left = `${x + rnd(-3, 3)}%`;
+    b.style.top = `${y - 6}%`;
+    layer.append(b);
+    const a = b.animate(
+      [
+        { transform: 'translate(-50%,0) scale(.4)', opacity: 0 },
+        { transform: `translate(calc(-50% + ${rnd(-8, 8)}px), ${-rise * 0.5}px)`, opacity: 0.95, offset: 0.5 },
+        { transform: `translate(calc(-50% + ${rnd(-10, 10)}px), ${-rise - u * 0.3}px) scale(1.2)`, opacity: 0 },
+      ],
+      { duration: dur * rnd(0.6, 1), delay: (k * 170) / sp, easing: 'ease-out', fill: 'both' }
+    );
+    a.finished.then(() => b.remove(), () => b.remove());
+  }
+  const hand = h('div', 'fx-hand');
+  Object.assign(hand.style, { left: `${x}%`, top: `${wy}%`, width: `${u * 0.5}px`, height: `${u * 1.1}px` });
+  hand.style.setProperty('--c', `var(--seat-${seatOf(fig)})`);
+  hand.append(h('i', 'arm'), h('i', 'palm'));
+  layer.append(hand);
+  const wave = (deg, offset, opacity = 1) => ({ transform: `translate(-50%,-100%) rotate(${deg}deg)`, opacity, offset });
+  const w = hand.animate(
+    [{ transform: 'translate(-50%,-4%)', opacity: 0 }, wave(-16, 0.15), wave(18, 0.3), wave(-18, 0.45), wave(18, 0.6), wave(-8, 0.78), { transform: 'translate(-50%,-4%)', opacity: 0 }],
+    { duration: dur, easing: 'ease-in-out', fill: 'both' }
+  );
+  w.finished.then(() => hand.remove(), () => hand.remove());
+  for (const part of [fig.tag, fig.act, fig.note]) part.animate([{ opacity: 1 }, { opacity: 1, offset: 0.45 }, { opacity: 0 }], { duration: dur, fill: 'forwards' });
+  return fig.inner.animate(
+    [
+      { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+      { transform: `translateY(${-u * 0.3}px) rotate(-5deg)`, offset: 0.25 },
+      { transform: `translateY(${u * 0.05}px) rotate(5deg)`, offset: 0.5 },
+      { transform: `translateY(${u * 1.5}px)`, opacity: 0.2 },
+    ],
+    { duration: dur, easing: 'ease-in-out', fill: 'forwards' }
+  ).finished;
+}
+
 // Plays the death style and resolves when the figure may be hidden.
 export function playDeath(style, fig, layer, env, speed = 1) {
   const x = fig.last.x;
@@ -93,6 +138,7 @@ export function playDeath(style, fig, layer, env, speed = 1) {
     );
     return a.finished;
   }
+  if (style === 'sink') return sinkFx(fig, layer, env, x, y, sp);
   if (style === 'chute') {
     confettiBurst(layer, env, x, y, sp);
     const a = fig.inner.animate(

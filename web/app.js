@@ -97,7 +97,7 @@ function describeEntry(e) {
   const winner = e.winner ? `${e.winner}${model} wins` : 'no winner';
   const tier = tierName(e.tier);
   // tier and winner first: a phone's picker only has room for the start of the label
-  return `${tier ? `${tier} \u2022 ` : ''}${winner} \u2022 ${head}`;
+  return `${tier ? `${tier} \u2022 ` : ''}${winner} \u2022 ${head}${Number(e.rules) >= 3 ? ` \u2022 v${Number(e.rules)}` : ''}`;
 }
 
 // The winner and model from the tape itself, for index entries that do not carry them.
@@ -160,6 +160,8 @@ async function loadTape(id, startAt = 0) {
       badge.textContent = tierName(entry.tier);
       els.meta.append(badge);
     }
+    const rules = Number.isInteger(tape.rulesVersion) ? tape.rulesVersion : Number(entry && entry.rules) || 1;
+    if (rules >= 3) els.meta.append(Object.assign(document.createElement('span'), { className: 'rules-badge', textContent: `rules v${rules}` }));
     highlightsUi.setTape(tape);
     highlightsUi.render(app.cut);
     goto(startAt, { animate: false });
@@ -280,6 +282,11 @@ function dwell(ev) {
     case 'round_start':
       return 500;
     case 'reveal':
+      if (ev.what === 'pit') {
+        const d = ev.data || {};
+        return (d.lifted && d.lifted.length) || d.rescued || d.base ? 1800 : 1000;
+      }
+      if (ev.what === 'rope') return 1500;
       return ev.what === 'weak_pane' ? 1100 : ev.what === 'ceiling' || ev.what === 'trapdoors' ? 1200 : 600;
     case 'ability_use':
       return app.cut ? 1700 : 1400;

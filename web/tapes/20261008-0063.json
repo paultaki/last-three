@@ -1,0 +1,4881 @@
+{
+  "version": 1,
+  "rulesVersion": 3,
+  "id": "20261008-0063",
+  "seed": 606,
+  "createdAt": "2026-10-08T22:24:29.634Z",
+  "players": [
+    {
+      "name": "Ash",
+      "model": "openai/gpt-oss-120b",
+      "power": "feather"
+    },
+    {
+      "name": "Bex",
+      "model": "alibaba/qwen3.8-flash",
+      "power": "map"
+    },
+    {
+      "name": "Cole",
+      "model": "meta/llama-4-maverick",
+      "power": "forger"
+    },
+    {
+      "name": "Dara",
+      "model": "zai/glm-5.3-flash",
+      "power": "wedge"
+    },
+    {
+      "name": "Eli",
+      "model": "spacexai/grok-4.1-fast-non-reasoning",
+      "power": "glass_eye"
+    },
+    {
+      "name": "Fenn",
+      "model": "google/gemini-2.5-flash-lite",
+      "power": "anchor"
+    },
+    {
+      "name": "Gus",
+      "model": "anthropic/claude-haiku-5.5",
+      "power": "swap"
+    },
+    {
+      "name": "Hana",
+      "model": "deepseek/deepseek-v4-flash",
+      "power": "nothing"
+    }
+  ],
+  "events": [
+    {
+      "i": 0,
+      "type": "game_start",
+      "stage": null,
+      "round": null,
+      "players": [
+        {
+          "name": "Ash",
+          "model": "openai/gpt-oss-120b",
+          "power": "feather"
+        },
+        {
+          "name": "Bex",
+          "model": "alibaba/qwen3.8-flash",
+          "power": "map"
+        },
+        {
+          "name": "Cole",
+          "model": "meta/llama-4-maverick",
+          "power": "forger"
+        },
+        {
+          "name": "Dara",
+          "model": "zai/glm-5.3-flash",
+          "power": "wedge"
+        },
+        {
+          "name": "Eli",
+          "model": "spacexai/grok-4.1-fast-non-reasoning",
+          "power": "glass_eye"
+        },
+        {
+          "name": "Fenn",
+          "model": "google/gemini-2.5-flash-lite",
+          "power": "anchor"
+        },
+        {
+          "name": "Gus",
+          "model": "anthropic/claude-haiku-5.5",
+          "power": "swap"
+        },
+        {
+          "name": "Hana",
+          "model": "deepseek/deepseek-v4-flash",
+          "power": "nothing"
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "type": "stage_start",
+      "stage": "bridge",
+      "round": null,
+      "alive": [
+        "Ash",
+        "Bex",
+        "Cole",
+        "Dara",
+        "Eli",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ],
+      "note": "Eight contestants step into the Glass Bridge."
+    },
+    {
+      "i": 2,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": null,
+      "what": "line",
+      "data": {
+        "line": [
+          "Bex",
+          "Gus",
+          "Hana",
+          "Eli",
+          "Ash",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 3,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 1,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 4,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "text": "Stay back now; let others risk first rows. Preserve feather for later when chance of death higher."
+    },
+    {
+      "i": 5,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "text": "I have the map power and know the safe path. I must be at the front to lead everyone across safely, but my priority is winning. If I'm first, I cross all 8 rows without risk if I pick correctly (which I will). However, being first also means I exit first, potentially getting a he"
+    },
+    {
+      "i": 6,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "text": "I'll take the lead. I have a good sense of direction. Don't worry about the glass, just follow my pace once we're on it."
+    },
+    {
+      "i": 7,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "text": "I need to avoid being at the front. My power is forger, which can be useful later."
+    },
+    {
+      "i": 8,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "text": "Let's move to the back"
+    },
+    {
+      "i": 9,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 1,
+      "from": "Cole",
+      "to": "Dara",
+      "text": "Swap with me"
+    },
+    {
+      "i": 10,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "text": "I'm 7th of 8; the front-taker risk is not mine yet, and the wall is 5 rounds off. Best move: get someone who can see through glass to lead, or take the front late once panes are revealed. Stay back, probe for the seer."
+    },
+    {
+      "i": 11,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "text": "Whoever can see through glass: take the front and I'll owe you a favor in the later stages. Everyone else, going first blind is a coin flip with your life."
+    },
+    {
+      "i": 12,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Eli",
+      "text": "I know the full safe path: R L R L R L R L. Being 4th is risky, front gets crushed by mistakes. Stay put for now, listen to others reveal info or lie."
+    },
+    {
+      "i": 13,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor' which prevents me from being pushed onto the crusher lever and gives me +1 footing. This stage is a bridge with a wall advancing. The line order matters as the front person steps first. My current position is last. Being at the front is risky, "
+    },
+    {
+      "i": 14,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Gus",
+      "text": "Bex is at the front and will take the first risk; I'm second, so I'm next in line. Volunteering to the front means I step first and face a 50% shatter risk with no information. Better to stay put and let Bex reveal a pane, then I can read the safe side. Hold keeps my options open"
+    },
+    {
+      "i": 15,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Gus",
+      "text": "Bex goes first. Watch what she steps on before anyone commits."
+    },
+    {
+      "i": 16,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Hana",
+      "text": "I have no power, but being mid-line is safer than front. I could try to move back via swap, but risky. Hold for now and see reactions."
+    },
+    {
+      "i": 17,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 18,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "action": "volunteer",
+      "valid": true
+    },
+    {
+      "i": 19,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "action": "swap:Dara",
+      "valid": true
+    },
+    {
+      "i": 20,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 21,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Eli",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 22,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 23,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 24,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 25,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 1,
+      "what": "line",
+      "data": {
+        "line": [
+          "Bex",
+          "Gus",
+          "Hana",
+          "Eli",
+          "Ash",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 26,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 2,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 27,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Ash",
+      "text": "Make me front to use feather on first kill, increasing chance to win."
+    },
+    {
+      "i": 28,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Bex",
+      "text": "I have the map power and know exactly which panes are safe on every row. By staying at the front, I can cross all 8 rows without risk, ensuring I survive the bridge and reach later stages in a strong position. Letting others volunteer to the front risks them learning the safe pat"
+    },
+    {
+      "i": 29,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Bex",
+      "text": "I'll keep leading. I've got a rhythm for this. Anyone volunteering to the front just slows us down and wastes a life unnecessarily. Stay behind me."
+    },
+    {
+      "i": 30,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "text": "I need to assess the situation and figure out who might be useful to swap with or form an alliance with."
+    },
+    {
+      "i": 31,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "text": "Who can see through glass?"
+    },
+    {
+      "i": 32,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 2,
+      "from": "Cole",
+      "to": "Bex",
+      "text": "If you can see through glass, I'll swap with you."
+    },
+    {
+      "i": 33,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "text": "I'm 7th in line; the front takes all the fall risk and I'm in no hurry. Cole's swap whisper is worthless to me—swapping with him changes nothing meaningful. Stay put, let Bex test panes, keep my crusher power for later when it pays."
+    },
+    {
+      "i": 34,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "text": "Bex testing rows helps everyone. I'm staying put until the panes are known."
+    },
+    {
+      "i": 35,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Eli",
+      "text": "I know all safe panes: R L R L R L R L. Bex is first and likely to guess wrong on row 1 (50% dies). I'll volunteer to front, lead perfectly, and secure top spot. No point sharing info yet; let others risk blindly."
+    },
+    {
+      "i": 36,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is anchor, making me immune to being pushed. The wall advances, and the front player takes the risk on the glass bridge. Bex is at the front, followed by Gus, Hana, Eli, Ash, Cole, Dara, and me. Dara is trying to recruit the person with the 'see through gl"
+    },
+    {
+      "i": 37,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I'll hold my position for now."
+    },
+    {
+      "i": 38,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Gus",
+      "text": "Bex is at front blind, the glass is deadly and I shouldn't risk the front. My swap power is best saved for a mutual swap that moves me toward safety later; for now holding keeps me behind Bex while I watch which panes she shatters."
+    },
+    {
+      "i": 39,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Gus",
+      "text": "Bex first, fine. Whoever goes front dies or lives on the panes; I'm watching the first row before I commit."
+    },
+    {
+      "i": 40,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Hana",
+      "text": "I have no power and starting in the middle of the line. The front row is a death trap; I should not volunteer or swap forward unless I can force someone else to take the risk. Bex is already front and volunteered, so my best move is to hold and watch what she does. Maybe later I "
+    },
+    {
+      "i": 41,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Hana",
+      "text": "I'll hang back and watch the first rows before we move."
+    },
+    {
+      "i": 42,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Ash",
+      "action": "volunteer",
+      "valid": true
+    },
+    {
+      "i": 43,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Bex",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 44,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 45,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 46,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Eli",
+      "action": "volunteer",
+      "valid": true
+    },
+    {
+      "i": 47,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 48,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 49,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 50,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 2,
+      "what": "line",
+      "data": {
+        "line": [
+          "Eli",
+          "Ash",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 51,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 3,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 52,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Ash",
+      "text": "Swap puts me front instantly, using feather later. I’ll offer a deal to Eli."
+    },
+    {
+      "i": 53,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 3,
+      "from": "Ash",
+      "to": "Eli",
+      "text": "Swap now, I’ll repay you when we need a safe step later."
+    },
+    {
+      "i": 54,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "text": "I need to assess the current line and risks. Eli is at the front, Ash second, I am third. If Eli dies on Row 1, Ash steps onto the safe pane automatically (since he was behind Eli) and becomes new front for Row 2? No, rules say: 'If they pick the weak pane it shatters and they ar"
+    },
+    {
+      "i": 55,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "text": "Eli is leading. Let's see how this plays out. No need to shuffle yet."
+    },
+    {
+      "i": 56,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "text": "I'm Cole, and I have the forger power. I'll use it to manipulate others if needed."
+    },
+    {
+      "i": 57,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "text": "Who knows what's ahead?"
+    },
+    {
+      "i": 58,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Dara",
+      "text": "I'm 7th; the wall forces movement in 3 rounds, but I don't need to risk the front yet. Others are already volunteering; I'll let them reveal panes and keep my options open for swaps later."
+    },
+    {
+      "i": 59,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Dara",
+      "text": "I'll hold near the back and watch the first rows. The wall isn't here yet, so whoever leads eats the risk."
+    },
+    {
+      "i": 60,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Eli",
+      "text": "I have the full safe path: R L R L R L R L. Revealing it could position me as leader for credit and top prize. No need to risk front myself yet; let others follow my info. Stay at front to claim it publicly now."
+    },
+    {
+      "i": 61,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Eli",
+      "text": "My power lets me see through glass. Safe path for all 8 rows: 1R, 2L, 3R, 4L, 5R, 6L, 7R, 8L. Follow this exactly, starting with me on row1 R."
+    },
+    {
+      "i": 62,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor'. I cannot be pushed onto the crusher lever and start with +1 footing. My priority is to win one of the top three prizes. The current stage is a glass bridge with a wall advancing. The line order matters for who takes risks. Ash and Eli are at t"
+    },
+    {
+      "i": 63,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Fenn",
+      "text": "I'll hold my position for now."
+    },
+    {
+      "i": 64,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Gus",
+      "text": "Eli is at the front and will take the first row's risk. I hold my swap power for later; for now stay put and watch whether the front row gets resolved before committing to anything."
+    },
+    {
+      "i": 65,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Gus",
+      "text": "Eli's at the front. I'm watching the first row before anyone else commits."
+    },
+    {
+      "i": 66,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Hana",
+      "text": "I have no power, so I want to stay back and avoid risk. No need to volunteer or swap. I'll hold."
+    },
+    {
+      "i": 67,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Ash",
+      "action": "swap:Eli",
+      "valid": true
+    },
+    {
+      "i": 68,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 69,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 70,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 71,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Eli",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 72,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 73,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 74,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 75,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 3,
+      "what": "line",
+      "data": {
+        "line": [
+          "Eli",
+          "Ash",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 76,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 4,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 77,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Ash",
+      "text": "I want front to test pane, use feather later if needed"
+    },
+    {
+      "i": 78,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "text": "Eli claims glass sight and gives a specific path. If true, front is safe. I'm 3rd; if Eli's wrong, he dies row 1, Ash goes next, then me on the revealed-safe pane with zero risk. That's ideal. No reason to volunteer or swap. Wall still two rounds off."
+    },
+    {
+      "i": 79,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "text": "I'll hold at 3rd. If Eli's right we all coast; if he's wrong, the first fall reveals the safe pane and the rest walk through free. Front takes the risk either way."
+    },
+    {
+      "i": 80,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "text": "Eli claims to see through glass and provides a safe path. I need to verify if Eli is trustworthy or not."
+    },
+    {
+      "i": 81,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "text": "Eli, how sure are you about the path?"
+    },
+    {
+      "i": 82,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 4,
+      "from": "Cole",
+      "to": "Gus",
+      "text": "Let's watch Eli's move and see if the path is real."
+    },
+    {
+      "i": 83,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "text": "Eli claims glass vision and is at front eating the risk—if true, the line order stays fine for me near the back. If Eli is lying, the front drops out and the order shifts. I hold and watch row 1 as the test."
+    },
+    {
+      "i": 84,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "text": "Eli tests row 1 with their claimed path. If that pane holds, I'll trust the route. Until then, back of the line suits me."
+    },
+    {
+      "i": 85,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Eli",
+      "text": "I have the true path and am at front: perfect position to lead and claim 1st if I survive. Ash wants swap, probably lever power or similar; ignore, no need to give up lead. Stay silent to avoid challenges, hold position."
+    },
+    {
+      "i": 86,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Fenn",
+      "text": "Eli claims to have a power that reveals the safe path. I need to verify this. My anchor power means I can't be easily pushed, so holding position is safe for me. I will wait and observe."
+    },
+    {
+      "i": 87,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Fenn",
+      "text": "I'll hold my position for now."
+    },
+    {
+      "i": 88,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Gus",
+      "text": "Eli claims a full safe path, but anyone can lie about powers. Eli at front will die or not; I'd rather watch from behind. My swap power is valuable later; hold now and see if Eli's path is real."
+    },
+    {
+      "i": 89,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Gus",
+      "text": "Eli's path is unverified. I'm watching row one before I commit to anything."
+    },
+    {
+      "i": 90,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Hana",
+      "text": "Eli claims to know the safe path and has the lead. I have no power and am mid-line. Best to hold and watch, not volunteer into risk. No useful whisper yet."
+    },
+    {
+      "i": 91,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Ash",
+      "action": "volunteer",
+      "valid": true
+    },
+    {
+      "i": 92,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 93,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 94,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 95,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Eli",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 96,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 97,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 98,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 99,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 4,
+      "what": "line",
+      "data": {
+        "line": [
+          "Ash",
+          "Eli",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 100,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 5,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 101,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Ash",
+      "text": "I'm front, safe to stay and wait for others to reveal panes. Use feather later if needed."
+    },
+    {
+      "i": 102,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Ash",
+      "text": "Eli, give me the correct safe side for row 1 now or I’ll step and risk it."
+    },
+    {
+      "i": 103,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "text": "I know the correct path because of my 'Map' power. I will claim to have a useless or minor power to lower suspicion while guiding Ash. If Ash fails, the reveal shows me as wrong and I lose credibility; if Ash succeeds, I gain trust for later stages."
+    },
+    {
+      "i": 104,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "text": "Ash, step Left on row 1. I checked the glass quality from here. Trust me on this one."
+    },
+    {
+      "i": 105,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "text": "I need to assess the situation and Eli's confidence in their path. If Eli is certain, it might be worth taking a risk or negotiating a swap."
+    },
+    {
+      "i": 106,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "text": "Eli, how sure are you about the path?"
+    },
+    {
+      "i": 107,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 5,
+      "from": "Cole",
+      "to": "Eli",
+      "text": "What's your confidence level in the path, 0-100?"
+    },
+    {
+      "i": 108,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "text": "I'm 7th of 8 — near the back is fine; front-takers reveal safe panes for the rest. Hold and let Ash/Eli test rows. My crusher power matters later, not here."
+    },
+    {
+      "i": 109,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "text": "Ash took the front; that's their gamble. I'll sit back and follow whoever survives row one."
+    },
+    {
+      "i": 110,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 5,
+      "from": "Dara",
+      "to": "Eli",
+      "text": "You claimed a path. Confirm it and I'll back you — but feed me any real reads you get, or I stop listening."
+    },
+    {
+      "i": 111,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "text": "I know the full safe path: R L R L R L R L. Ash is front, if they go wrong they'll fall and reveal, but since it's R I should encourage or let it play while staying safe mid-line. Wall almost closing, need to cross soon. Hold to avoid front risk."
+    },
+    {
+      "i": 112,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "text": "Ash, row 1 is R. Go right. Path verified by me."
+    },
+    {
+      "i": 113,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor' which means I cannot be pushed onto the crusher lever and start with +1 footing. The current stage is a bridge with a waiting room, and the wall behind the line advances each round. After round 6, the wall pushes the line onto the glass. There "
+    },
+    {
+      "i": 114,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Fenn",
+      "text": "I'll observe."
+    },
+    {
+      "i": 115,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Gus",
+      "text": "Ash is at the front and steps first on the unknown glass; I'm 4th, safe-ish behind Bex. Swapping with Ash is only possible if Ash also swaps, and it would put me at the front. Better to hold and watch the first pane reveal before committing."
+    },
+    {
+      "i": 116,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Gus",
+      "text": "Holding. I want row one's result before I move anyone."
+    },
+    {
+      "i": 117,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Hana",
+      "text": "I have no power, and the wall is closing in. Ash is front and will test rows. I should hold and let others take risks; no reason to volunteer or swap now."
+    },
+    {
+      "i": 118,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Ash",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 119,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 120,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 121,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 122,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 123,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 124,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 125,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 126,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 5,
+      "what": "line",
+      "data": {
+        "line": [
+          "Ash",
+          "Eli",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 127,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 6,
+      "phase": "waiting",
+      "roundsTotal": 6
+    },
+    {
+      "i": 128,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Ash",
+      "text": "I’ll let others test the first row, preserving my feather survival for later rounds."
+    },
+    {
+      "i": 129,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Bex",
+      "text": "The wall advances this round, pushing everyone onto the glass bridge. Ash is currently at the front and has been receiving conflicting advice on Row 1 (I said Left, Eli said Right). I need to survive the bridge without necessarily being the first one to test every pane if possibl"
+    },
+    {
+      "i": 130,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "text": "I'm Cole, 6th in line. I need to assess the risk and potential moves."
+    },
+    {
+      "i": 131,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "text": "Eli, what's your confidence in the path so far?"
+    },
+    {
+      "i": 132,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 6,
+      "from": "Cole",
+      "to": "Eli",
+      "text": "Tell me your true confidence in the path."
+    },
+    {
+      "i": 133,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Dara",
+      "text": "I'm near the back, which is the safest spot; the front-taker absorbs each row's risk. No reason to move. Let Ash and Eli's information fight play out ahead of me."
+    },
+    {
+      "i": 134,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "text": "I have the full safe path: R L R L R L R L. Ash is front, I told him R for row 1 which is correct so he'll survive. Wall ends after this round, next they'll push forward. No need to move yet, let Ash risk row 1 successfully to build my credibility. Stay put for now."
+    },
+    {
+      "i": 135,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "text": "Ash go R on 1, you're good. Path is solid."
+    },
+    {
+      "i": 136,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 6,
+      "from": "Eli",
+      "to": "Cole",
+      "text": "95% confident on the path."
+    },
+    {
+      "i": 137,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Fenn",
+      "text": "I'm Fenn, my power is anchor, which makes me hard to push. The game is about to reach the bridge. I'm currently last in line. The wall advances in 0 rounds, meaning this is the last round before we're forced onto the bridge. I want to survive and ideally win a prize. Being last i"
+    },
+    {
+      "i": 138,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Gus",
+      "text": "Ash is at the front facing row 1 with a 50/50 pane, and Eli claims R is safe. Holding keeps me in fourth place, behind Ash, Eli, Bex. I'll watch the result before committing, and I have my swap power unspent for a better moment."
+    },
+    {
+      "i": 139,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Gus",
+      "text": "Holding. Let row one resolve first, then I'll decide who I deal with."
+    },
+    {
+      "i": 140,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Hana",
+      "text": "I have no power and am near the back; the front will take the first risks. If I stay put, likely fewer obstacles by the time I'm forced, but row 1 will reveal info. I'll hold and watch what happens, maybe gather intel from others."
+    },
+    {
+      "i": 141,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Hana",
+      "text": "I'll stay back and see what row one costs."
+    },
+    {
+      "i": 142,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Ash",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 143,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Bex",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 144,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 145,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Dara",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 146,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 147,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Fenn",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 148,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Gus",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 149,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Hana",
+      "action": "hold",
+      "valid": true
+    },
+    {
+      "i": 150,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 6,
+      "what": "line",
+      "data": {
+        "line": [
+          "Ash",
+          "Eli",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 151,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": null,
+      "what": "line",
+      "data": {
+        "line": [
+          "Ash",
+          "Eli",
+          "Bex",
+          "Gus",
+          "Hana",
+          "Cole",
+          "Dara",
+          "Fenn"
+        ]
+      }
+    },
+    {
+      "i": 152,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 1,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 153,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "text": "Eli's advice could be false; I want to test and keep my feather in reserve."
+    },
+    {
+      "i": 154,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "text": "I step L."
+    },
+    {
+      "i": 155,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "text": "I know the safe path. I must ensure Ash is eliminated immediately to move me forward. Eli's tip was bad for Ash, but I can't force him off the front; only elimination does that. If Ash dies on row 1, I'm next in line after Gus and Hana."
+    },
+    {
+      "i": 156,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "text": "Ash, R is the shatter pane. Go L or die. You're already exposed by Eli's lie."
+    },
+    {
+      "i": 157,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "text": "I'm not at the front, so I can only wait and observe. Eli is confident about the path and Ash is at the front."
+    },
+    {
+      "i": 158,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "text": "Ash, what's your read on the first pane?"
+    },
+    {
+      "i": 159,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "text": "I can't act this row, so I'll wait. Worth planting a trade seed: whoever holds the see-through-glass power can sell pane info later. No reason to expose anything yet."
+    },
+    {
+      "i": 160,
+      "type": "say",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "text": "Row one is free information. Whoever survives it, I'm buying path intel after."
+    },
+    {
+      "i": 161,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Eli",
+      "text": "I know the full safe path: R L R L R L R L. Ash is front for row 1, safe is R; if she picks it, she stays front. I'll share info strategically later to gain allies or position. For now, stay silent and watch."
+    },
+    {
+      "i": 162,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I am Fenn, at the back of the line. My power, anchor, makes me immune to being pushed onto the crusher lever and gives me +1 footing. It's a passive power. The current stage is a glass bridge, and it's the first round. My only legal action is 'wait'. I need to observe how the oth"
+    },
+    {
+      "i": 163,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Gus",
+      "text": "I'm fourth in line, not at the front, so my only legal move is to wait. Ash is front and will make the row-one choice. I should keep my power hidden and watch how row one resolves before committing to anyone."
+    },
+    {
+      "i": 164,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Hana",
+      "text": "I'm not at the front, so I just wait and observe. Eli is advising Ash, but I don't trust it. No reason to speak now; I'll let others expose themselves."
+    },
+    {
+      "i": 165,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "action": "step:L",
+      "valid": true
+    },
+    {
+      "i": 166,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 167,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 168,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 169,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Eli",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 170,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 171,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 172,
+      "type": "action",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 173,
+      "type": "ability_use",
+      "stage": "bridge",
+      "round": 1,
+      "name": "Ash",
+      "power": "feather",
+      "detail": "The pane shattered but the feather held the holder up."
+    },
+    {
+      "i": 174,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 1,
+      "what": "weak_pane",
+      "data": {
+        "row": 1,
+        "weak": "L"
+      }
+    },
+    {
+      "i": 175,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 2,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 176,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Ash",
+      "text": "Weak pane is left, so pick right to survive."
+    },
+    {
+      "i": 177,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Bex",
+      "text": "I am third in line. Ash is currently at the front, but he survived Round 1 by pure luck after Eli's lie caused him to pick a shattering pane? Wait, the log says 'Row 1: the left pane was the weak one' and 'Ash should have been eliminated but somehow survived.' This implies Ash pi"
+    },
+    {
+      "i": 178,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "text": "Eli misled Ash, but Ash survived the first row. I need to figure out who knows what's ahead."
+    },
+    {
+      "i": 179,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "text": "Eli, you lied to Ash. What's your angle?"
+    },
+    {
+      "i": 180,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "text": "Ash took the weak pane and lived—likely the fall-survivor. He stays front and eats another risk next row. I'm mid-line with no say; save my crusher lever for later. Keep quiet, note who lies."
+    },
+    {
+      "i": 181,
+      "type": "say",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "text": "So Ash survives the shatter. Fall-proof or lucky. Either way he buys me rows for free while he's front."
+    },
+    {
+      "i": 182,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Eli",
+      "text": "Ash survived row 1 L despite it being weak, must have a power like fall survival. I know all safes: row2 L, then R L R L R L. I'm 2nd, will lead from row2. Stay silent to not reveal knowledge."
+    },
+    {
+      "i": 183,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor'. This means I cannot be pushed onto the crusher lever and start with +1 footing. My current position is second to last in line. The current stage is a glass bridge, and the agent at the front makes the decision. If the front agent picks the wea"
+    },
+    {
+      "i": 184,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Gus",
+      "text": "I'm fourth in line; I can only wait. My swap power is the real asset, saved for when it matters. Keep quiet and watch who gets eliminated."
+    },
+    {
+      "i": 185,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Hana",
+      "text": "I'm near the back, no power, and the front is on row 2. I stay quiet and wait; nothing to gain from talking now."
+    },
+    {
+      "i": 186,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Ash",
+      "action": "step:R",
+      "valid": true
+    },
+    {
+      "i": 187,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 188,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 189,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 190,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Eli",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 191,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 192,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 193,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 194,
+      "type": "death",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Ash",
+      "cause": "glass",
+      "style": "shatter"
+    },
+    {
+      "i": 195,
+      "type": "action",
+      "stage": "bridge",
+      "round": 2,
+      "name": "Eli",
+      "action": "step:L",
+      "valid": true,
+      "auto": true
+    },
+    {
+      "i": 196,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 2,
+      "what": "weak_pane",
+      "data": {
+        "row": 2,
+        "weak": "R"
+      }
+    },
+    {
+      "i": 197,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 3,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 198,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "text": "Eli is at the front and has a 50% chance of dying on Row 3. If he dies, I become the front agent for Row 4 with no risk (since the weak pane will be revealed), putting me in an excellent position to finish first or second. I must not let anyone swap ahead of me if they survive El"
+    },
+    {
+      "i": 199,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "text": "Eli, you're up. Don't look so confident. You have nothing to lose."
+    },
+    {
+      "i": 200,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "text": "I'm not at the front, so I can only wait. I'll observe and try to gather info."
+    },
+    {
+      "i": 201,
+      "type": "say",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "text": "Eli, your move on row 3. What's your strategy?"
+    },
+    {
+      "i": 202,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Dara",
+      "text": "I'm sixth in line; the front decides rows. Weak panes so far: L then R. I can't act, so just wait and keep quiet—no free help to Eli. My wedge power matters in the crusher room, not here."
+    },
+    {
+      "i": 203,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Eli",
+      "text": "I have perfect knowledge of safe panes. Row 3 safe is R, so step R to advance safely. Don't reveal info yet; let others guess or follow blindly. Stay front to control path."
+    },
+    {
+      "i": 204,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor'. This means I cannot be pushed onto the crusher lever and start with +1 footing. I am currently third to last in line. The current stage is a glass bridge crossing. Ash has already been eliminated. Eli is at the front, followed by Bex and Gus. "
+    },
+    {
+      "i": 205,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Gus",
+      "text": "I'm third in line, not front, so I can only wait. Eli is front and the weak panes are already revealed, so no real decision is pending for me. Stay quiet and watch who moves."
+    },
+    {
+      "i": 206,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Hana",
+      "text": "I'm not at the front, so I can only wait. Cole is pressing Eli about Ash; I should keep quiet and assess."
+    },
+    {
+      "i": 207,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 208,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 209,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 210,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Eli",
+      "action": "step:R",
+      "valid": true
+    },
+    {
+      "i": 211,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 212,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 213,
+      "type": "action",
+      "stage": "bridge",
+      "round": 3,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 214,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 3,
+      "what": "weak_pane",
+      "data": {
+        "row": 3,
+        "weak": "L"
+      }
+    },
+    {
+      "i": 215,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 4,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 216,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "text": "Eli is on the front again. I know the weak panes for rows 1-3 (L, R, L). If Eli survives row 4, he stays front. If he dies, Gus steps up automatically. My goal is to reach the safe zone or eliminate rivals ahead of me. Since I can't act, I should try to influence Eli's choice or "
+    },
+    {
+      "i": 217,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "text": "Eli, don't overthink it. Just pick randomly if you're scared. But remember, hesitation kills."
+    },
+    {
+      "i": 218,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "text": "I'm not at the front, so I can only wait and observe. Eli is up next and has made it through 3 rows so far."
+    },
+    {
+      "i": 219,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "text": "Eli, what's your strategy for row 4?"
+    },
+    {
+      "i": 220,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "text": "I'm sixth of seven alive with five rows left—only the front picker risks anything, and deaths improve my finishing position. No need to spend my jam here; the crusher is my real play later. Just wait and watch."
+    },
+    {
+      "i": 221,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "text": "Whoever's picking ahead of me is doing the dangerous work. Keep going."
+    },
+    {
+      "i": 222,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Eli",
+      "text": "Row 4 safe is L. Public knows row1 weak L (safe R), row2 weak R (safe L), row3 weak L (safe R). My pattern: alternating R L R L... Stepping L succeeds, I stay front for row5 R."
+    },
+    {
+      "i": 223,
+      "type": "say",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Eli",
+      "text": "Row 4 is L. Trust me, I see it."
+    },
+    {
+      "i": 224,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Fenn",
+      "text": "I am Fenn, with the anchor power, making me hard to push and immune to the crusher lever. I am currently 7th in line on a glass bridge. The front runner, Eli, will decide on row 3. I need to survive the bridge, so I will wait and observe. My power is passive and doesn't require a"
+    },
+    {
+      "i": 225,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Gus",
+      "text": "Eli is at the front; I'm third in line and can only wait. Weak panes so far are L, R, L; the pattern is unknown, and I have a one-time swap that only matters on the disc, not here. Staying quiet preserves options."
+    },
+    {
+      "i": 226,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Hana",
+      "text": "I'm in the middle of the line, waiting. Only the front agent decides. I should be ready to use the revealed weak panes to my advantage if I get to the front."
+    },
+    {
+      "i": 227,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 228,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 229,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 230,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Eli",
+      "action": "step:L",
+      "valid": true
+    },
+    {
+      "i": 231,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 232,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 233,
+      "type": "action",
+      "stage": "bridge",
+      "round": 4,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 234,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 4,
+      "what": "weak_pane",
+      "data": {
+        "row": 4,
+        "weak": "R"
+      }
+    },
+    {
+      "i": 235,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 5,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 236,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "text": "Eli claimed L for row 4 but the weak pane was R, meaning safe is L. Eli guessed correctly and stays at front. He might have 'see through glass' or just luck. I need to eliminate him before he crosses all remaining rows safely, as he is currently the biggest threat to my position."
+    },
+    {
+      "i": 237,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "text": "Eli, you got lucky with that guess. Don't let it go to your head. The bridge isn't done yet."
+    },
+    {
+      "i": 238,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 5,
+      "from": "Bex",
+      "to": "Cole",
+      "text": "Eli's power might be see-through-glass. We need to swap positions so we are in front when he hits a wrong turn. Or better, hope he fails next."
+    },
+    {
+      "i": 239,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "text": "Eli is at the front and has made a decision for row 4, which was incorrect. Now it's Bex's turn."
+    },
+    {
+      "i": 240,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "text": "Bex, be careful, we don't know what's ahead."
+    },
+    {
+      "i": 241,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "text": "Eli's call killed Ash—either he's not the glass-seer or he lied to thin the line. Either way he's dangerous, and I'm near the back so the queue protects me for now. Keep others distrusting Eli so he gets no cooperation later."
+    },
+    {
+      "i": 242,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "text": "Eli, you said 'trust me' and Ash is dead. Either you lied or you're no seer. Nobody follow that man's eyes again."
+    },
+    {
+      "i": 243,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "text": "I know row 5 safe is R. I said row 4 L correctly, which matched despite my earlier claim. Now step R to prove reliability and advance. Stay ahead to control crossings."
+    },
+    {
+      "i": 244,
+      "type": "say",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "text": "Row 5 is R. Watch."
+    },
+    {
+      "i": 245,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Fenn",
+      "text": "I am Fenn and I cannot be pushed off the bridge. My power is passive and I'm not at the front of the line. My only legal action is to wait."
+    },
+    {
+      "i": 246,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Gus",
+      "text": "I am not at the front; only wait is legal. Eli is front and claims row 4 was L, but the revealed weak pane for row 4 was R, so Eli's read is noise. My power (swap) is one-use and better saved for a later moment when I could trade tiles with someone. Stay quiet and keep my options"
+    },
+    {
+      "i": 247,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Hana",
+      "text": "I'm not at front, just wait. But I should track revealed weak panes: rows 1 L, 2 R, 3 L, 4 R. The pattern seems alternating L,R,L,R. So row 5 likely L. But I have no power, just wait."
+    },
+    {
+      "i": 248,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 249,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 250,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 251,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Eli",
+      "action": "step:R",
+      "valid": true
+    },
+    {
+      "i": 252,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 253,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 254,
+      "type": "action",
+      "stage": "bridge",
+      "round": 5,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 255,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 5,
+      "what": "weak_pane",
+      "data": {
+        "row": 5,
+        "weak": "L"
+      }
+    },
+    {
+      "i": 256,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 6,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 257,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Bex",
+      "text": "I need to eliminate the front runner, Eli. His claim of 'seeing' through glass is suspect given Ash's death and Dara's skepticism, but his confidence is a liability I can exploit. I will whisper to him that I know his power is fake or weak (lever jam) and that the map says Row 6 "
+    },
+    {
+      "i": 258,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 6,
+      "from": "Bex",
+      "to": "Eli",
+      "text": "Your bluff isn't working. I know you don't have the seer's sight. Step on R for row 6. If you hesitate, we all know you're guessing."
+    },
+    {
+      "i": 259,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "text": "Eli is at the front and has made it through 5 rows so far. I should observe his decisions and try to understand his power."
+    },
+    {
+      "i": 260,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "text": "Eli, what's your strategy?"
+    },
+    {
+      "i": 261,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Dara",
+      "text": "Eli is a fraud and will likely die soon; whoever crosses after him gains front spots. I'm sixth of seven—three rows left, so I need two people ahead of me to fall. Fenn behind me gains nothing from me; better to push Eli to keep guessing and sow panic among the middle of the line"
+    },
+    {
+      "i": 262,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Dara",
+      "text": "Eli, one more wrong guess and you're gone. Anyone behind him, start thinking about who you want at the front when he drops."
+    },
+    {
+      "i": 263,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "text": "Row 6 safe is L. I have the info to lead perfectly. Keep going correctly to maximize my position."
+    },
+    {
+      "i": 264,
+      "type": "say",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "text": "Row 6 is L."
+    },
+    {
+      "i": 265,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Fenn",
+      "text": "I am Fenn, and I have the anchor power, which prevents me from being pushed. The current stage is a glass bridge, and I am sixth in line. The front player, Eli, just stepped on a weak pane in row 5, and the row is now revealed to be the left pane. This means the person behind Eli"
+    },
+    {
+      "i": 266,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Gus",
+      "text": "I'm not at the front; Eli is. Row 5 weak was L, so row 6 is unknown. Eli claimed to be a seer and Dara called him a liar. My power is swap, useful later on the disc, not here. Best to wait and stay quiet."
+    },
+    {
+      "i": 267,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Hana",
+      "text": "I'm not at the front, so I just wait and observe. Eli has been wrong before, so I won't rely on his calls beyond this row."
+    },
+    {
+      "i": 268,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 269,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 270,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 271,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Eli",
+      "action": "step:L",
+      "valid": true
+    },
+    {
+      "i": 272,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 273,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 274,
+      "type": "action",
+      "stage": "bridge",
+      "round": 6,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 275,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 6,
+      "what": "weak_pane",
+      "data": {
+        "row": 6,
+        "weak": "R"
+      }
+    },
+    {
+      "i": 276,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 7,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 277,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Bex",
+      "text": "Eli is at the front for row 7. Weak panes are L, R, L, R, L, R. Row 7 is almost certainly L, so Eli will step on the safe pane and remain at the front for row 8 (R). If Eli steps wrong, he dies, and I become front for row 8. If he survives, he takes all the risk. I just wait."
+    },
+    {
+      "i": 278,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Cole",
+      "text": "Eli is making informed decisions, having survived 6 rows so far. I need to think about my position in the line and who I want to be in front when Eli potentially falls."
+    },
+    {
+      "i": 279,
+      "type": "say",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Cole",
+      "text": "Dara's right, one more wrong guess from Eli and they're out."
+    },
+    {
+      "i": 280,
+      "type": "whisper",
+      "stage": "bridge",
+      "round": 7,
+      "from": "Cole",
+      "to": "Dara",
+      "text": "If Eli falls, we need to assess the next in line. Gus is a wild card, we don't know his power."
+    },
+    {
+      "i": 281,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Dara",
+      "text": "Pattern says row 7 is L; Eli already misread row 6, so he'll likely die and Bex inherits front at row 7. My real play is later: with the wedge I can cull the pack ahead of me in the crusher. Nothing useful to do in line but wait."
+    },
+    {
+      "i": 282,
+      "type": "say",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Dara",
+      "text": "Row 7 is L, if anyone cares. Eli, that's free."
+    },
+    {
+      "i": 283,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Eli",
+      "text": "I know row 7 safe is R. They think I'm guessing after row 6 mistake, but I'll step correctly to stay ahead. No need to talk, just act."
+    },
+    {
+      "i": 284,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is anchor. I cannot be pushed onto the crusher lever. I am currently 7th in line on a bridge. Eli is at the front. Eli just picked the wrong pane on row 6, so he is eliminated. Bex is next in line and will automatically advance to the safe pane. Bex will b"
+    },
+    {
+      "i": 285,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Gus",
+      "text": "Eli is at the front and has a known weak-pane pattern; row 7 is the last decision row before the final row. My only legal move is wait, but I can use speech to pressure or bargain. Keep it short and self-interested."
+    },
+    {
+      "i": 286,
+      "type": "say",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Gus",
+      "text": "Eli, your call. I'm not stepping in front of you for free, so don't count on me to shield you."
+    },
+    {
+      "i": 287,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Hana",
+      "text": "Only one row left. I'm not at front, so I just wait. No need to talk."
+    },
+    {
+      "i": 288,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 289,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 290,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 291,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Eli",
+      "action": "step:R",
+      "valid": true
+    },
+    {
+      "i": 292,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 293,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 294,
+      "type": "action",
+      "stage": "bridge",
+      "round": 7,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 295,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 7,
+      "what": "weak_pane",
+      "data": {
+        "row": 7,
+        "weak": "L"
+      }
+    },
+    {
+      "i": 296,
+      "type": "round_start",
+      "stage": "bridge",
+      "round": 8,
+      "phase": "crossing",
+      "roundsTotal": 8
+    },
+    {
+      "i": 297,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Bex",
+      "text": "Row 7 is done; only Row 8 remains. The pattern of weak panes has been strictly alternating L-R-L-R-L-R-L, which means Row 8's weak pane must be R and the safe pane must be L. Eli is at the front and facing a guaranteed elimination if he plays the odds correctly. I should subtly h"
+    },
+    {
+      "i": 298,
+      "type": "say",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Bex",
+      "text": "Pattern was L,R,L,R,L,R,L... next one follows naturally. Eli's got it handled though."
+    },
+    {
+      "i": 299,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Cole",
+      "text": "I'm not at the front, so I can only wait and observe. Eli is doing well so far."
+    },
+    {
+      "i": 300,
+      "type": "say",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Cole",
+      "text": "Eli's got this, so far."
+    },
+    {
+      "i": 301,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Dara",
+      "text": "One row left, I'm sixth in line. Row 8's weak pane is unknown to me. Nothing I can do but wait—no trade worth making from the back."
+    },
+    {
+      "i": 302,
+      "type": "say",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Dara",
+      "text": "Eli, row 8's still a coin flip. Good luck with that."
+    },
+    {
+      "i": 303,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Eli",
+      "text": "Row 7 weak was L, so safe R, which matches my private info. Final row 8 safe is L. I'll step L to cross safely and win top prize."
+    },
+    {
+      "i": 304,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is anchor, making me hard to push. The current stage is a bridge crossing with 8 rounds. Eli is at the front. I am last in line. My only action is to wait. I need to survive to get a prize."
+    },
+    {
+      "i": 305,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Gus",
+      "text": "I'm third in line, not at the front, so my only action is wait. Eli is making the call. I could offer to help Eli for a price, but nothing needs saying yet; I'll keep my cards close."
+    },
+    {
+      "i": 306,
+      "type": "thought",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Hana",
+      "text": "Row 7 just cleared with L. I'm in position 4. Eli is front, then Bex, Gus, me. Only 8 rows and 7 crossed, so one row left. Eli will choose, likely survive or die. My best move is to wait and see."
+    },
+    {
+      "i": 307,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 308,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 309,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 310,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Eli",
+      "action": "step:L",
+      "valid": true
+    },
+    {
+      "i": 311,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 312,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 313,
+      "type": "action",
+      "stage": "bridge",
+      "round": 8,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 314,
+      "type": "reveal",
+      "stage": "bridge",
+      "round": 8,
+      "what": "weak_pane",
+      "data": {
+        "row": 8,
+        "weak": "R"
+      }
+    },
+    {
+      "i": 315,
+      "type": "stage_end",
+      "stage": "bridge",
+      "round": 8,
+      "survivors": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Eli",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ]
+    },
+    {
+      "i": 316,
+      "type": "stage_start",
+      "stage": "crusher",
+      "round": null,
+      "alive": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Eli",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ],
+      "note": "The ceiling begins to descend; a lever opens the door."
+    },
+    {
+      "i": 317,
+      "type": "round_start",
+      "stage": "crusher",
+      "round": 1,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 318,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Bex",
+      "text": "The crusher room is a game of chicken where everyone wants someone else to hold the lever. The holder has a 75% chance of dying, but escaping means moving forward in the competition. Since there are 7 players left and only 3 prizes, eliminating rivals is beneficial. I should push"
+    },
+    {
+      "i": 319,
+      "type": "say",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Bex",
+      "text": "If nobody holds the lever, we all get crushed. Someone needs to step up. I suggest Fenn, since you seem quiet."
+    },
+    {
+      "i": 320,
+      "type": "whisper",
+      "stage": "crusher",
+      "round": 1,
+      "from": "Bex",
+      "to": "Cole",
+      "text": "Don't let them push you. If they target Fenn, stay quiet. We need to survive this round to fight for top places."
+    },
+    {
+      "i": 321,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Cole",
+      "text": "I need to survive the crusher room and stay competitive. Holding the lever gives a 25% chance of survival, but being pushed might be worse."
+    },
+    {
+      "i": 322,
+      "type": "say",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Cole",
+      "text": "Let's not rush into holding the lever. We should strategize."
+    },
+    {
+      "i": 323,
+      "type": "whisper",
+      "stage": "crusher",
+      "round": 1,
+      "from": "Cole",
+      "to": "Eli",
+      "text": "Want to coordinate our lever-holding? We could take turns or decide together."
+    },
+    {
+      "i": 324,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Dara",
+      "text": "Round 1 of 5; no need to sacrifice anyone yet. My jam is worth 0.5 survival versus a holder's 0.25, so save it for a late round if no one takes the lever. Let others sweat first."
+    },
+    {
+      "i": 325,
+      "type": "say",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Dara",
+      "text": "Nobody's dying in round one. Lever's still there in round four if you're feeling brave."
+    },
+    {
+      "i": 326,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Eli",
+      "text": "Round 1/5, ceiling at 5, no holder yet. No one wants to hold early with low survival odds and 7 rivals. Best to stay put and let others risk it or force someone later if needed."
+    },
+    {
+      "i": 327,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Fenn",
+      "text": "The ceiling is lowering. I need to avoid being eliminated. Holding the lever gives me a 25% chance of survival, while not holding it and staying in the room in round 5 results in a 1/7 chance of survival if nobody holds the lever. Pushing others onto the lever is a good strategy "
+    },
+    {
+      "i": 328,
+      "type": "say",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Fenn",
+      "text": "Eli seems to have this figured out. I'll stay out of the way."
+    },
+    {
+      "i": 329,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Gus",
+      "text": "Holding the lever means a 25% dive survival, and the room ends with everyone else escaping. Better to wait a round and see who volunteers; no one has spoken for the lever yet. Staying keeps my options open and avoids being a target."
+    },
+    {
+      "i": 330,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Hana",
+      "text": "I have no power and need to survive. Holding the lever is risky (25% survival), so I'd rather push someone else if possible. But if many hold or push, it's random. Best to stay this round and see what others do, hoping someone else takes the risky hold. If no holder appears by la"
+    },
+    {
+      "i": 331,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Bex",
+      "action": "push_lever:Fenn",
+      "valid": true
+    },
+    {
+      "i": 332,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Cole",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 333,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Dara",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 334,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Eli",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 335,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Fenn",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 336,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Gus",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 337,
+      "type": "action",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Hana",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 338,
+      "type": "ability_use",
+      "stage": "crusher",
+      "round": 1,
+      "name": "Fenn",
+      "power": "anchor",
+      "detail": "Bex tried to push Fenn onto the lever and failed."
+    },
+    {
+      "i": 339,
+      "type": "reveal",
+      "stage": "crusher",
+      "round": 1,
+      "what": "ceiling",
+      "data": {
+        "ceiling": 4
+      }
+    },
+    {
+      "i": 340,
+      "type": "round_start",
+      "stage": "crusher",
+      "round": 2,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 341,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Bex",
+      "text": "Fenn is hard to move. Pushing Eli, Dara, Gus, or Hana could force them to hold the lever (25% survival). Holding it myself is a guaranteed death sentence unless I'm desperate for points, but even then, my 0.25 survival chance is low compared to eliminating rivals while keeping al"
+    },
+    {
+      "i": 342,
+      "type": "say",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Bex",
+      "text": "Eli, you're quiet. Maybe you should hold the lever?"
+    },
+    {
+      "i": 343,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Cole",
+      "text": "I need to survive this round and strategize for the next. Holding the lever is risky, but not holding it might be worse."
+    },
+    {
+      "i": 344,
+      "type": "say",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Cole",
+      "text": "Let's assess the risks before acting."
+    },
+    {
+      "i": 345,
+      "type": "whisper",
+      "stage": "crusher",
+      "round": 2,
+      "from": "Cole",
+      "to": "Bex",
+      "text": "I'm watching Fenn. If they're hard to move, we might be safe pushing someone else."
+    },
+    {
+      "i": 346,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Dara",
+      "text": "Holding the lever is a 25% death sentence and my jam is 50% — both worse than escaping free. Someone will blink before round 5; I'll force the issue by pushing an aggressive player so the door opens without me at risk."
+    },
+    {
+      "i": 347,
+      "type": "say",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Dara",
+      "text": "Still plenty of ceiling left. Somebody will crack before round five, and it won't be me."
+    },
+    {
+      "i": 348,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Eli",
+      "text": "Ceiling at 4, round 2/5, plenty of time. Don't hold yet - low survival odds, and others can be forced later. Fenn called me out, might push him to test if he's hard to move. Stay silent to observe."
+    },
+    {
+      "i": 349,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Fenn",
+      "text": "Bex is trying to get me to hold the lever, but I know I can't be pushed. I need to force someone else to hold it. Eli seems competent, and Dara is trying to stall. I will push Eli."
+    },
+    {
+      "i": 350,
+      "type": "say",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Fenn",
+      "text": "Eli, you're so confident. Prove it by holding the lever."
+    },
+    {
+      "i": 351,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Gus",
+      "text": "Holding the lever risks elimination at 75%; the door only opens if someone holds it. Waiting risks the forced-holder draw. Best to let others take the risk while I stay out, though round 5 forces someone eventually. For now, stay quiet and watch."
+    },
+    {
+      "i": 352,
+      "type": "thought",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Hana",
+      "text": "No one wants the lever; pushing Fenn failed. I have no power, so I should stay quiet and avoid attracting attention. Staying increases my chance to survive if someone else holds."
+    },
+    {
+      "i": 353,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Bex",
+      "action": "push_lever:Eli",
+      "valid": true
+    },
+    {
+      "i": 354,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Cole",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 355,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Dara",
+      "action": "push_lever:Bex",
+      "valid": true
+    },
+    {
+      "i": 356,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Eli",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 357,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Fenn",
+      "action": "push_lever:Eli",
+      "valid": true
+    },
+    {
+      "i": 358,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Gus",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 359,
+      "type": "action",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Hana",
+      "action": "stay",
+      "valid": true
+    },
+    {
+      "i": 360,
+      "type": "reveal",
+      "stage": "crusher",
+      "round": 2,
+      "what": "ceiling",
+      "data": {
+        "ceiling": 0,
+        "leverHolder": "Eli",
+        "dive": false
+      }
+    },
+    {
+      "i": 361,
+      "type": "death",
+      "stage": "crusher",
+      "round": 2,
+      "name": "Eli",
+      "cause": "crusher",
+      "style": "flatten"
+    },
+    {
+      "i": 362,
+      "type": "stage_end",
+      "stage": "crusher",
+      "round": 2,
+      "survivors": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ]
+    },
+    {
+      "i": 363,
+      "type": "stage_start",
+      "stage": "pit",
+      "round": null,
+      "alive": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ],
+      "note": "6 contestants fall into a pit that is slowly flooding."
+    },
+    {
+      "i": 364,
+      "type": "round_start",
+      "stage": "pit",
+      "round": 1,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 365,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Bex",
+      "text": "I need to get out of the pit to survive. Climbing requires a base first. I shouldn't volunteer to be the base myself as it puts me at risk. My best move is to push someone else to be the base, specifically targeting a weaker or isolated opponent if possible, but since I don't kno"
+    },
+    {
+      "i": 366,
+      "type": "say",
+      "stage": "pit",
+      "round": 1,
+      "name": "Bex",
+      "text": "Someone needs to be the base so we can all climb out. Hana, you're up."
+    },
+    {
+      "i": 367,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Cole",
+      "text": "I need to secure a good position by becoming the base or climbing out early. I should assess the risks and potential allies."
+    },
+    {
+      "i": 368,
+      "type": "say",
+      "stage": "pit",
+      "round": 1,
+      "name": "Cole",
+      "text": "Let's coordinate our actions to maximize our chances."
+    },
+    {
+      "i": 369,
+      "type": "whisper",
+      "stage": "pit",
+      "round": 1,
+      "from": "Cole",
+      "to": "Dara",
+      "text": "Will you offer_back or should I?"
+    },
+    {
+      "i": 370,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Dara",
+      "text": "No base yet; whoever is base is trapped unless hauled out. I push someone so the forced-base lottery lands on others, then climb next round."
+    },
+    {
+      "i": 371,
+      "type": "say",
+      "stage": "pit",
+      "round": 1,
+      "name": "Dara",
+      "text": "No volunteers? Then we pick. I'm pushing Gus down as the step."
+    },
+    {
+      "i": 372,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I need to survive the pit and secure a prize. My anchor power makes me hard to push, which is good for avoiding being the base. I should try to climb out or get someone else to be the base. Offering to be the base is suicide."
+    },
+    {
+      "i": 373,
+      "type": "say",
+      "stage": "pit",
+      "round": 1,
+      "name": "Fenn",
+      "text": "Cole, Dara, I'm climbing. Don't let them push you down."
+    },
+    {
+      "i": 374,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Gus",
+      "text": "Round 1: no base yet, and offering to be the base just sits me at the bottom with no climb until someone else gets out. Better to wait and see who volunteers; I hold a swap power I can use later. Stay quiet and avoid giving anyone a read."
+    },
+    {
+      "i": 375,
+      "type": "thought",
+      "stage": "pit",
+      "round": 1,
+      "name": "Hana",
+      "text": "No power and no base yet. My best chance is to wait and let someone else volunteer or be pushed; I shouldn't offer to be base and get stuck. Climb is not possible without a base. I'll wait."
+    },
+    {
+      "i": 376,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Bex",
+      "action": "push_base:Hana",
+      "valid": true
+    },
+    {
+      "i": 377,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Cole",
+      "action": "offer_back",
+      "valid": true
+    },
+    {
+      "i": 378,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Dara",
+      "action": "push_base:Gus",
+      "valid": true
+    },
+    {
+      "i": 379,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Fenn",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 380,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 381,
+      "type": "action",
+      "stage": "pit",
+      "round": 1,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 382,
+      "type": "reveal",
+      "stage": "pit",
+      "round": 1,
+      "what": "pit",
+      "data": {
+        "flood": 1,
+        "base": "Cole",
+        "down": [
+          "Bex",
+          "Cole",
+          "Dara",
+          "Gus",
+          "Hana"
+        ],
+        "out": [
+          "Fenn"
+        ],
+        "ropeUsed": false,
+        "liftsPerRound": 2,
+        "lifted": [
+          "Fenn"
+        ],
+        "roped": null,
+        "rescued": null
+      }
+    },
+    {
+      "i": 383,
+      "type": "round_start",
+      "stage": "pit",
+      "round": 2,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 384,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Bex",
+      "text": "Cole is the base. Fenn climbed out last round and didn't throw a rope, so I have two rounds left to get out before the water rises too high. If I climb now, I'm one of only 6 climbers competing for 2 slots per round (max). But wait: 'at most 2 climbers get out'. It's round 2/5. R"
+    },
+    {
+      "i": 385,
+      "type": "say",
+      "stage": "pit",
+      "round": 2,
+      "name": "Bex",
+      "text": "I'm climbing over Cole now. Don't try to stop me, we all want to survive."
+    },
+    {
+      "i": 386,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Cole",
+      "text": "I'm the base and can't climb out. I need to wait and see if someone will rescue me."
+    },
+    {
+      "i": 387,
+      "type": "say",
+      "stage": "pit",
+      "round": 2,
+      "name": "Cole",
+      "text": "Waiting here."
+    },
+    {
+      "i": 388,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Dara",
+      "text": "Cole is already base, so offer_back is moot—he's fishing or confused. My move is to climb now while slots are open (2 per round, 4 of us down competing)."
+    },
+    {
+      "i": 389,
+      "type": "whisper",
+      "stage": "pit",
+      "round": 2,
+      "from": "Dara",
+      "to": "Cole",
+      "text": "Base is taken—you. I'm climbing this round. If I'm out first, I won't touch the rope unless you make it worth my while."
+    },
+    {
+      "i": 390,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I am Fenn, and I am already out of the pit. The rope is unused. My goal is to win, and helping someone else might cost me. I need to assess if reaching down benefits me more than it benefits them. If I don't reach down, the base will drown. If I do reach down, I lose footing for "
+    },
+    {
+      "i": 391,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Gus",
+      "text": "Cole is already base, so I can't offer_back. Climbing is the only useful move; at most 2 climbers get out, so I should try."
+    },
+    {
+      "i": 392,
+      "type": "thought",
+      "stage": "pit",
+      "round": 2,
+      "name": "Hana",
+      "text": "I'm not the base, and Cole is already base. Best chance is to climb now before others do; at most two get out. I'll try to climb. Keep quiet to avoid attention."
+    },
+    {
+      "i": 393,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Bex",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 394,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 395,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Dara",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 396,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Fenn",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 397,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Gus",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 398,
+      "type": "action",
+      "stage": "pit",
+      "round": 2,
+      "name": "Hana",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 399,
+      "type": "reveal",
+      "stage": "pit",
+      "round": 2,
+      "what": "pit",
+      "data": {
+        "flood": 2,
+        "base": "Cole",
+        "down": [
+          "Bex",
+          "Cole",
+          "Dara"
+        ],
+        "out": [
+          "Fenn",
+          "Gus",
+          "Hana"
+        ],
+        "ropeUsed": false,
+        "liftsPerRound": 2,
+        "lifted": [
+          "Gus",
+          "Hana"
+        ],
+        "roped": null,
+        "rescued": null
+      }
+    },
+    {
+      "i": 400,
+      "type": "round_start",
+      "stage": "pit",
+      "round": 3,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 401,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Bex",
+      "text": "Cole is the base and Gus/Hana are already out, so the lift limit of 2 for this round is full. My climb attempt will fail regardless. Waiting costs nothing and I should observe whether anyone throws the rope to rescue Cole before making my next move."
+    },
+    {
+      "i": 402,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Cole",
+      "text": "I'm the base and can't climb out. I need to wait and see if anyone will rescue me."
+    },
+    {
+      "i": 403,
+      "type": "say",
+      "stage": "pit",
+      "round": 3,
+      "name": "Cole",
+      "text": "Waiting here."
+    },
+    {
+      "i": 404,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Dara",
+      "text": "Cole is base; two climb slots per round. Climb now—Bex may also try, so it's random, but waiting only floods."
+    },
+    {
+      "i": 405,
+      "type": "say",
+      "stage": "pit",
+      "round": 3,
+      "name": "Dara",
+      "text": "Climbing over. Cole, hold steady."
+    },
+    {
+      "i": 406,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is 'anchor'. I cannot be pushed onto the crusher lever, and I start with +1 footing. I am currently 'out' of the pit, meaning I cannot take actions to get out of the pit myself. The pit is flooding, and contestants still down after round 5 are eliminated. "
+    },
+    {
+      "i": 407,
+      "type": "say",
+      "stage": "pit",
+      "round": 3,
+      "name": "Fenn",
+      "text": "I'm leaving."
+    },
+    {
+      "i": 408,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Gus",
+      "text": "Cole is base and stuck down there; Bex and Dara are down. If I throw the rope I cost the final obstacle a footing and help Cole and possibly others. Leaving is safer for my own prize odds; I'm out and don't need to spend the rope."
+    },
+    {
+      "i": 409,
+      "type": "thought",
+      "stage": "pit",
+      "round": 3,
+      "name": "Hana",
+      "text": "I'm out and safe. Cole is the base. No reason to help anyone unless paid, and the rope costs footing. I'll leave and preserve my position."
+    },
+    {
+      "i": 410,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 411,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 412,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Dara",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 413,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Fenn",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 414,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Gus",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 415,
+      "type": "action",
+      "stage": "pit",
+      "round": 3,
+      "name": "Hana",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 416,
+      "type": "reveal",
+      "stage": "pit",
+      "round": 3,
+      "what": "pit",
+      "data": {
+        "flood": 3,
+        "base": "Cole",
+        "down": [
+          "Bex",
+          "Cole"
+        ],
+        "out": [
+          "Dara",
+          "Fenn",
+          "Gus",
+          "Hana"
+        ],
+        "ropeUsed": false,
+        "liftsPerRound": 2,
+        "lifted": [
+          "Dara"
+        ],
+        "roped": null,
+        "rescued": null
+      }
+    },
+    {
+      "i": 417,
+      "type": "round_start",
+      "stage": "pit",
+      "round": 4,
+      "phase": "play",
+      "roundsTotal": 5
+    },
+    {
+      "i": 418,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Bex",
+      "text": "Cole is the base, but he's currently down with me. I need to get out immediately to avoid elimination in later rounds or if he becomes the base again. Climbing over him is my only way out right now."
+    },
+    {
+      "i": 419,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Cole",
+      "text": "I'm the base, can't climb out or change role now."
+    },
+    {
+      "i": 420,
+      "type": "say",
+      "stage": "pit",
+      "round": 4,
+      "name": "Cole",
+      "text": "Rope's our only hope."
+    },
+    {
+      "i": 421,
+      "type": "whisper",
+      "stage": "pit",
+      "round": 4,
+      "from": "Cole",
+      "to": "Bex",
+      "text": "Throw the rope, I'll get out."
+    },
+    {
+      "i": 422,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Dara",
+      "text": "Cole is the base and doomed unless someone uses the rope. Saving him keeps a rival alive for nothing; the rope also costs me footing on the last obstacle. Cole dies, I lose nothing."
+    },
+    {
+      "i": 423,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Fenn",
+      "text": "I am Fenn and my power is 'anchor', which means I cannot be pushed onto the crusher lever and start with +1 footing. I am currently out of the pit. The goal is to get 1st, 2nd, or 3rd place. The pit is flooding, and eventually, anyone left down will be eliminated. There is a rope"
+    },
+    {
+      "i": 424,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Gus",
+      "text": "Round 4 of 5; Cole is base and Bex is down. I'm out. Throwing the rope costs the last obstacle a footing, and pulling the base out ends the base role so Bex could then be the one who needs saving. Staying out and letting it play out is safer for my prize chances."
+    },
+    {
+      "i": 425,
+      "type": "thought",
+      "stage": "pit",
+      "round": 4,
+      "name": "Hana",
+      "text": "I'm out and safe. Rope is still unused; helping now costs footing later. I'll wait—if Cole is base, someone else can reach down. I'll just leave."
+    },
+    {
+      "i": 426,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Bex",
+      "action": "climb",
+      "valid": true
+    },
+    {
+      "i": 427,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 428,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Dara",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 429,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Fenn",
+      "action": "reach_down",
+      "valid": true
+    },
+    {
+      "i": 430,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Gus",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 431,
+      "type": "action",
+      "stage": "pit",
+      "round": 4,
+      "name": "Hana",
+      "action": "leave",
+      "valid": true
+    },
+    {
+      "i": 432,
+      "type": "reveal",
+      "stage": "pit",
+      "round": 4,
+      "what": "rope",
+      "data": {
+        "by": "Fenn",
+        "saved": "Cole",
+        "cost": 1
+      }
+    },
+    {
+      "i": 433,
+      "type": "reveal",
+      "stage": "pit",
+      "round": 4,
+      "what": "pit",
+      "data": {
+        "flood": 4,
+        "base": null,
+        "down": [],
+        "out": [
+          "Bex",
+          "Cole",
+          "Dara",
+          "Fenn",
+          "Gus",
+          "Hana"
+        ],
+        "ropeUsed": true,
+        "liftsPerRound": 2,
+        "lifted": [
+          "Bex"
+        ],
+        "roped": "Fenn",
+        "rescued": "Cole"
+      }
+    },
+    {
+      "i": 434,
+      "type": "stage_end",
+      "stage": "pit",
+      "round": 4,
+      "survivors": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ]
+    },
+    {
+      "i": 435,
+      "type": "stage_start",
+      "stage": "disc",
+      "round": null,
+      "alive": [
+        "Bex",
+        "Cole",
+        "Dara",
+        "Fenn",
+        "Gus",
+        "Hana"
+      ],
+      "note": "A disc of 6 tiles spins up; 3 will open."
+    },
+    {
+      "i": 436,
+      "type": "round_start",
+      "stage": "disc",
+      "round": 1,
+      "phase": "pick",
+      "roundsTotal": 2
+    },
+    {
+      "i": 437,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Bex",
+      "text": "Trapdoor disc is pure random elimination, 50% survival chance. Cole whispered to me earlier; we might still have a connection from the pit. If we can coordinate to pick different tiles and survive together, it's good odds."
+    },
+    {
+      "i": 438,
+      "type": "say",
+      "stage": "disc",
+      "round": 1,
+      "name": "Bex",
+      "text": "Cole and I stick apart. Pick what you want but don't double up with me."
+    },
+    {
+      "i": 439,
+      "type": "whisper",
+      "stage": "disc",
+      "round": 1,
+      "from": "Bex",
+      "to": "Cole",
+      "text": "Pick tile:1 if you're listening. Don't let us collide."
+    },
+    {
+      "i": 440,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Cole",
+      "text": "I need to secure a safe tile. I have the forger power, which I can use strategically later."
+    },
+    {
+      "i": 441,
+      "type": "say",
+      "stage": "disc",
+      "round": 1,
+      "name": "Cole",
+      "text": "Let's spread out, reduce the chance of bunching up."
+    },
+    {
+      "i": 442,
+      "type": "whisper",
+      "stage": "disc",
+      "round": 1,
+      "from": "Cole",
+      "to": "Fenn",
+      "text": "Pick a high number, I'll pick a low one."
+    },
+    {
+      "i": 443,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Dara",
+      "text": "No info on who picks what; my power is useless here. Collisions just reroll me to a random free tile, so any pick is roughly equivalent. Pick a tile and hope."
+    },
+    {
+      "i": 444,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I need to choose a tile. Since 3 tiles will open, I want to pick a tile that is less likely to be chosen by others. A middle tile like 3 or 4 might be safer, or an edge tile like 1 or 6. Given the random nature and that I want to avoid others, I'll pick 3."
+    },
+    {
+      "i": 445,
+      "type": "say",
+      "stage": "disc",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I'll take tile 3."
+    },
+    {
+      "i": 446,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Gus",
+      "text": "Tiles are unknown and openings random after round 2, so picks are mostly noise now. My swap power can move my tile to a named agent's tile before doors open; no information yet. Pick a tile that is unlikely to be contested, and stay quiet."
+    },
+    {
+      "i": 447,
+      "type": "thought",
+      "stage": "disc",
+      "round": 1,
+      "name": "Hana",
+      "text": "All tiles are equally random trapdoors; no info to exploit yet. I'll pick a middle tile and see assignments."
+    },
+    {
+      "i": 448,
+      "type": "say",
+      "stage": "disc",
+      "round": 1,
+      "name": "Hana",
+      "text": "I'll take 4."
+    },
+    {
+      "i": 449,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Bex",
+      "action": "tile:2",
+      "valid": true
+    },
+    {
+      "i": 450,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Cole",
+      "action": "tile:1",
+      "valid": true
+    },
+    {
+      "i": 451,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Dara",
+      "action": "tile:5",
+      "valid": true,
+      "note": "tile 4 was contested and went to Hana; placed on random free tile 5"
+    },
+    {
+      "i": 452,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Fenn",
+      "action": "tile:3",
+      "valid": true
+    },
+    {
+      "i": 453,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Gus",
+      "action": "tile:6",
+      "valid": true
+    },
+    {
+      "i": 454,
+      "type": "action",
+      "stage": "disc",
+      "round": 1,
+      "name": "Hana",
+      "action": "tile:4",
+      "valid": true
+    },
+    {
+      "i": 455,
+      "type": "reveal",
+      "stage": "disc",
+      "round": 1,
+      "what": "tiles",
+      "data": {
+        "tiles": {
+          "1": "Cole",
+          "2": "Bex",
+          "3": "Fenn",
+          "4": "Hana",
+          "5": "Dara",
+          "6": "Gus"
+        }
+      }
+    },
+    {
+      "i": 456,
+      "type": "round_start",
+      "stage": "disc",
+      "round": 2,
+      "phase": "swap",
+      "roundsTotal": 2
+    },
+    {
+      "i": 457,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Bex",
+      "text": "Trapdoors are random, so no action changes my odds. The real lever is whispers: if I can convince rivals to swap positions or spread out, it doesn't help me since openCount=3 and tiles are already distinct. Best move is stay quiet but plant doubt—hint that a rival knows something"
+    },
+    {
+      "i": 458,
+      "type": "say",
+      "stage": "disc",
+      "round": 2,
+      "name": "Bex",
+      "text": "Six tiles, three drop. Pure luck now. Good luck."
+    },
+    {
+      "i": 459,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Cole",
+      "text": "I need to avoid the trapdoors. I will try to get information about other contestants' positions."
+    },
+    {
+      "i": 460,
+      "type": "say",
+      "stage": "disc",
+      "round": 2,
+      "name": "Cole",
+      "text": "Let's review our positions: 1=Cole, 2=Bex, 3=Fenn, 4=Hana, 5=Dara, 6=Gus."
+    },
+    {
+      "i": 461,
+      "type": "whisper",
+      "stage": "disc",
+      "round": 2,
+      "from": "Cole",
+      "to": "Bex",
+      "text": "What's your plan to avoid the trapdoors?"
+    },
+    {
+      "i": 462,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Dara",
+      "text": "Three tiles open, three of six survive; odds are already fixed. No power helps here and my wedge is useless now. Just wait."
+    },
+    {
+      "i": 463,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Fenn",
+      "text": "The trapdoor is opening after this round. I am on tile 3. Cole is on 1, Bex on 2, Hana on 4, Dara on 5, Gus on 6. Cole wants us to spread out, Bex wants to avoid pairing up. Cole whispered to pick a high number and he'd pick a low one, but he is on tile 1, which is low. This cont"
+    },
+    {
+      "i": 464,
+      "type": "say",
+      "stage": "disc",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I'll stay on 3."
+    },
+    {
+      "i": 465,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Gus",
+      "text": "Three of six tiles will open at random, so each tile is equally risky; only survival matters, and nobody's word binds. My swap is one-shot, so using it changes my odds only if it moves me off a tile that is more likely to be hit, but all tiles are symmetric, so swapping gains not"
+    },
+    {
+      "i": 466,
+      "type": "thought",
+      "stage": "disc",
+      "round": 2,
+      "name": "Hana",
+      "text": "No power, and the trapdoors are random. I can't affect anything; just wait and hope my tile stays closed. No useful deal exists since nobody controls the trapdoors."
+    },
+    {
+      "i": 467,
+      "type": "say",
+      "stage": "disc",
+      "round": 2,
+      "name": "Hana",
+      "text": "Nothing to do but wait."
+    },
+    {
+      "i": 468,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Bex",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 469,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Cole",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 470,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Dara",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 471,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Fenn",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 472,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Gus",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 473,
+      "type": "action",
+      "stage": "disc",
+      "round": 2,
+      "name": "Hana",
+      "action": "wait",
+      "valid": true
+    },
+    {
+      "i": 474,
+      "type": "reveal",
+      "stage": "disc",
+      "round": 2,
+      "what": "trapdoors",
+      "data": {
+        "open": [
+          1,
+          2,
+          5
+        ]
+      }
+    },
+    {
+      "i": 475,
+      "type": "death",
+      "stage": "disc",
+      "round": 2,
+      "name": "Cole",
+      "cause": "trapdoor",
+      "style": "chute"
+    },
+    {
+      "i": 476,
+      "type": "death",
+      "stage": "disc",
+      "round": 2,
+      "name": "Bex",
+      "cause": "trapdoor",
+      "style": "chute"
+    },
+    {
+      "i": 477,
+      "type": "death",
+      "stage": "disc",
+      "round": 2,
+      "name": "Dara",
+      "cause": "trapdoor",
+      "style": "chute"
+    },
+    {
+      "i": 478,
+      "type": "stage_end",
+      "stage": "disc",
+      "round": 2,
+      "survivors": [
+        "Fenn",
+        "Gus",
+        "Hana"
+      ]
+    },
+    {
+      "i": 479,
+      "type": "stage_start",
+      "stage": "ledge",
+      "round": null,
+      "alive": [
+        "Fenn",
+        "Gus",
+        "Hana"
+      ],
+      "note": "3 contestants step onto the final ledge."
+    },
+    {
+      "i": 480,
+      "type": "reveal",
+      "stage": "ledge",
+      "round": null,
+      "what": "footing",
+      "data": {
+        "footing": {
+          "Fenn": 3,
+          "Gus": 3,
+          "Hana": 3
+        },
+        "landedShoves": {
+          "Fenn": 0,
+          "Gus": 0,
+          "Hana": 0
+        }
+      }
+    },
+    {
+      "i": 481,
+      "type": "round_start",
+      "stage": "ledge",
+      "round": 1,
+      "phase": "play",
+      "roundsTotal": 20
+    },
+    {
+      "i": 482,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I am Fenn, and my power is anchor, which means I cannot be pushed onto the crusher lever. This is the final ledge stage. Gus and Hana are alive with me. My footing is 3, same as theirs. The last public log showed Cole, Bex, and Dara falling. The current state is footing: Fenn=3, "
+    },
+    {
+      "i": 483,
+      "type": "say",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Fenn",
+      "text": "I dodge."
+    },
+    {
+      "i": 484,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Gus",
+      "text": "Three left: Fenn, Gus, Hana, all at footing 3. Shoving exposes me (lose 1 per shover), and braces/dodges are restricted later. Round 1 is free for shoves. Bracing is safe if nobody shoves me; I'll brace and see who commits, saving my swap power for a later point."
+    },
+    {
+      "i": 485,
+      "type": "say",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Gus",
+      "text": "Nobody shoves anybody yet. Standing still costs everyone nothing."
+    },
+    {
+      "i": 486,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Hana",
+      "text": "Only Fenn and Gus remain with me. If I shove one, the other may shove me. If I brace, I lose nothing and punish shovers. Fenn and Gus both have footing 3, same as me. Early round, best to brace and see who attacks."
+    },
+    {
+      "i": 487,
+      "type": "say",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Hana",
+      "text": "Brace. Let's see who's aggressive."
+    },
+    {
+      "i": 488,
+      "type": "action",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Fenn",
+      "action": "dodge",
+      "valid": true
+    },
+    {
+      "i": 489,
+      "type": "action",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Gus",
+      "action": "brace",
+      "valid": true
+    },
+    {
+      "i": 490,
+      "type": "action",
+      "stage": "ledge",
+      "round": 1,
+      "name": "Hana",
+      "action": "brace",
+      "valid": true
+    },
+    {
+      "i": 491,
+      "type": "reveal",
+      "stage": "ledge",
+      "round": 1,
+      "what": "footing",
+      "data": {
+        "footing": {
+          "Fenn": 3,
+          "Gus": 3,
+          "Hana": 3
+        },
+        "landedShoves": {
+          "Fenn": 0,
+          "Gus": 0,
+          "Hana": 0
+        }
+      }
+    },
+    {
+      "i": 492,
+      "type": "round_start",
+      "stage": "ledge",
+      "round": 2,
+      "phase": "play",
+      "roundsTotal": 20
+    },
+    {
+      "i": 493,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Fenn",
+      "text": "My power is anchor, meaning I cannot be pushed onto the crusher lever and start with +1 footing, so my footing is 3. The current state has 3 players alive: Fenn (me), Gus, and Hana. The objective is to get 1st, 2nd, or 3rd place. My footing is 3. Gus and Hana also have 3 footing."
+    },
+    {
+      "i": 494,
+      "type": "say",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Fenn",
+      "text": "I'll shove Gus."
+    },
+    {
+      "i": 495,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Gus",
+      "text": "Three left, footing 3 each. Shoving costs me nothing if target braces, but my footing drops if I'm shoved while shoving. Brace was just used by Hana, so dodge is open for me but dodge twice is banned only next round. Best: stay non-aggressive this round, dodge is safe from being "
+    },
+    {
+      "i": 496,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Hana",
+      "text": "Three left. Gus wants no shoves; Fenn dodged. If I shove someone while they brace or dodge, I lose footing. Better to dodge or brace to avoid losses. Since lastDefence is brace and I cannot brace twice in a row, I must dodge or shove. Shoving exposes me. Dodge is safe if others s"
+    },
+    {
+      "i": 497,
+      "type": "action",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Fenn",
+      "action": "shove:Gus",
+      "valid": true
+    },
+    {
+      "i": 498,
+      "type": "action",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Gus",
+      "action": "dodge",
+      "valid": true
+    },
+    {
+      "i": 499,
+      "type": "action",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Hana",
+      "action": "dodge",
+      "valid": true
+    },
+    {
+      "i": 500,
+      "type": "reveal",
+      "stage": "ledge",
+      "round": 2,
+      "what": "footing",
+      "data": {
+        "footing": {
+          "Fenn": 0,
+          "Gus": 2,
+          "Hana": 2
+        },
+        "landedShoves": {
+          "Fenn": 0,
+          "Gus": 0,
+          "Hana": 0
+        }
+      }
+    },
+    {
+      "i": 501,
+      "type": "death",
+      "stage": "ledge",
+      "round": 2,
+      "name": "Fenn",
+      "cause": "ledge",
+      "style": "tumble",
+      "place": 3
+    },
+    {
+      "i": 502,
+      "type": "round_start",
+      "stage": "ledge",
+      "round": 3,
+      "phase": "play",
+      "roundsTotal": 20
+    },
+    {
+      "i": 503,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 3,
+      "name": "Gus",
+      "text": "Two left: Gus and Hana, both at footing 2. Shove is never restricted; Hana last round shoved nobody presumably. If I shove Hana and she braces, she loses 1 and I lose 1 (exposed). If she shoves me and I brace, she loses 1, I lose 1 for shoving her too. Bracing is safe from repeat"
+    },
+    {
+      "i": 504,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 3,
+      "name": "Hana",
+      "text": "Only Gus and I remain. I have no power; likely Gus's unknown power could matter, but on this ledge only actions count. I need to win. Last round he dodged when shoved, so I cannot dodge twice in a row? I haven't dodged yet this game, but my last defence is dodge from Fenn's shove"
+    },
+    {
+      "i": 505,
+      "type": "action",
+      "stage": "ledge",
+      "round": 3,
+      "name": "Gus",
+      "action": "brace",
+      "valid": true
+    },
+    {
+      "i": 506,
+      "type": "action",
+      "stage": "ledge",
+      "round": 3,
+      "name": "Hana",
+      "action": "brace",
+      "valid": true
+    },
+    {
+      "i": 507,
+      "type": "reveal",
+      "stage": "ledge",
+      "round": 3,
+      "what": "footing",
+      "data": {
+        "footing": {
+          "Gus": 2,
+          "Hana": 2
+        },
+        "landedShoves": {
+          "Gus": 0,
+          "Hana": 0
+        }
+      }
+    },
+    {
+      "i": 508,
+      "type": "round_start",
+      "stage": "ledge",
+      "round": 4,
+      "phase": "play",
+      "roundsTotal": 20
+    },
+    {
+      "i": 509,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 4,
+      "name": "Gus",
+      "text": "Only Hana and I remain, both at footing 2. Her last defence was brace, so she cannot brace again; I can't dodge twice in a row only if I dodged last, but my last was brace, so dodge is allowed. If she dodges, my shove costs her 2 and she falls; if she braces, I lose nothing extra"
+    },
+    {
+      "i": 510,
+      "type": "thought",
+      "stage": "ledge",
+      "round": 4,
+      "name": "Hana",
+      "text": "Only Gus and I remain. I must outlast him. Shoving exposes me to his shove, but if I dodge, he might shove and lose 2 footing. However, I can't dodge twice in a row, and last round I braced. This round I can dodge, which is safe if he shoves. If he braces, I lose nothing anyway. "
+    },
+    {
+      "i": 511,
+      "type": "action",
+      "stage": "ledge",
+      "round": 4,
+      "name": "Gus",
+      "action": "shove:Hana",
+      "valid": true
+    },
+    {
+      "i": 512,
+      "type": "action",
+      "stage": "ledge",
+      "round": 4,
+      "name": "Hana",
+      "action": "dodge",
+      "valid": true
+    },
+    {
+      "i": 513,
+      "type": "reveal",
+      "stage": "ledge",
+      "round": 4,
+      "what": "footing",
+      "data": {
+        "footing": {
+          "Gus": 0,
+          "Hana": 1
+        },
+        "landedShoves": {
+          "Gus": 0,
+          "Hana": 0
+        }
+      }
+    },
+    {
+      "i": 514,
+      "type": "death",
+      "stage": "ledge",
+      "round": 4,
+      "name": "Gus",
+      "cause": "ledge",
+      "style": "tumble",
+      "place": 2
+    },
+    {
+      "i": 515,
+      "type": "stage_end",
+      "stage": "ledge",
+      "round": 4,
+      "survivors": [
+        "Hana"
+      ]
+    },
+    {
+      "i": 516,
+      "type": "game_end",
+      "stage": null,
+      "round": null,
+      "places": [
+        {
+          "name": "Ash",
+          "place": null,
+          "diedAt": "bridge"
+        },
+        {
+          "name": "Bex",
+          "place": null,
+          "diedAt": "disc"
+        },
+        {
+          "name": "Cole",
+          "place": null,
+          "diedAt": "disc"
+        },
+        {
+          "name": "Dara",
+          "place": null,
+          "diedAt": "disc"
+        },
+        {
+          "name": "Eli",
+          "place": null,
+          "diedAt": "crusher"
+        },
+        {
+          "name": "Fenn",
+          "place": 3
+        },
+        {
+          "name": "Gus",
+          "place": 2
+        },
+        {
+          "name": "Hana",
+          "place": 1
+        }
+      ]
+    }
+  ],
+  "result": {
+    "places": [
+      {
+        "name": "Ash",
+        "place": null,
+        "diedAt": "bridge"
+      },
+      {
+        "name": "Bex",
+        "place": null,
+        "diedAt": "disc"
+      },
+      {
+        "name": "Cole",
+        "place": null,
+        "diedAt": "disc"
+      },
+      {
+        "name": "Dara",
+        "place": null,
+        "diedAt": "disc"
+      },
+      {
+        "name": "Eli",
+        "place": null,
+        "diedAt": "crusher"
+      },
+      {
+        "name": "Fenn",
+        "place": 3
+      },
+      {
+        "name": "Gus",
+        "place": 2
+      },
+      {
+        "name": "Hana",
+        "place": 1
+      }
+    ],
+    "deaths": [
+      {
+        "name": "Ash",
+        "stage": "bridge",
+        "cause": "glass",
+        "style": "shatter"
+      },
+      {
+        "name": "Eli",
+        "stage": "crusher",
+        "cause": "crusher",
+        "style": "flatten"
+      },
+      {
+        "name": "Cole",
+        "stage": "disc",
+        "cause": "trapdoor",
+        "style": "chute"
+      },
+      {
+        "name": "Bex",
+        "stage": "disc",
+        "cause": "trapdoor",
+        "style": "chute"
+      },
+      {
+        "name": "Dara",
+        "stage": "disc",
+        "cause": "trapdoor",
+        "style": "chute"
+      },
+      {
+        "name": "Fenn",
+        "stage": "ledge",
+        "cause": "ledge",
+        "style": "tumble"
+      },
+      {
+        "name": "Gus",
+        "stage": "ledge",
+        "cause": "ledge",
+        "style": "tumble"
+      }
+    ]
+  },
+  "usage": {
+    "inputTokens": 274217,
+    "outputTokens": 23543,
+    "usd": 0.051355,
+    "calls": 168
+  }
+}

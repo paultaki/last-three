@@ -32,7 +32,7 @@ export function place(node, x, y, w, hgt) {
 }
 
 // Short chip under a figure's name tag while an action is "current" this round.
-export function actLabel(act, cut) {
+export function actLabel(act, cut, stage) {
   if (!act) return '';
   if (act.valid === false) return cut ? 'oops?' : '';
   const { verb, arg } = act;
@@ -59,6 +59,16 @@ export function actLabel(act, cut) {
       return 'braces';
     case 'dodge':
       return 'dodges';
+    case 'offer_back':
+      return 'offers back';
+    case 'climb':
+      return 'climbs';
+    case 'push_base':
+      return `pushes ${arg}`;
+    case 'reach_down':
+      return 'throws rope';
+    case 'wait':
+      return stage === 'pit' ? 'waits' : '';
     default:
       return '';
   }

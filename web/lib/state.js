@@ -3,7 +3,8 @@
 // unknown events are ignored and missing optional fields never throw.
 import { describeEvent } from './text.js';
 
-export const STAGES = ['bridge', 'crusher', 'disc', 'ledge'];
+export const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+const PIT_ROUNDS_DEFAULT = 5;
 const MAX_SPEECH = 8;
 
 export function parseAction(raw) {
@@ -90,6 +91,7 @@ function initial(tape) {
     ev: null,
     started: false,
     ended: false,
+    rules: Number.isInteger(tape && tape.rulesVersion) && tape.rulesVersion > 0 ? tape.rulesVersion : 1,
     stage: 'lobby',
     phase: null,
     round: null,
@@ -110,6 +112,8 @@ function initial(tape) {
     stageSurvivors: null,
     bridge: null,
     crusher: null,
+    pit: null,
+    ropeCost: {},
     disc: null,
     ledge: null,
   };
@@ -149,11 +153,45 @@ const newDisc = (aliveList) => ({
   open: [],
   swapped: false,
 });
-function newLedge(aliveList, players) {
+// Start footing: 3 (anchor 4, spent feather 1), minus the pit rope's price, never below 1.
+function newLedge(aliveList, players, ropeCost = {}, spent = {}) {
   const footing = {};
-  for (const n of aliveList) footing[n] = players[n] && players[n].power === 'anchor' ? 4 : 3;
+  for (const n of aliveList) {
+    const power = players[n] && players[n].power;
+    let start = power === 'anchor' ? 4 : power === 'feather' && spent[n] === 'feather' ? 1 : 3;
+    if (ropeCost[n]) start = Math.max(1, start - ropeCost[n]);
+    footing[n] = start;
+  }
   return { footing, shrinkIn: null, shrunk: 0 };
 }
+
+const newPit = (aliveList) => ({
+  total: PIT_ROUNDS_DEFAULT,
+  flood: 0,
+  base: null,
+  baseHow: null, // 'volunteer' | 'pushed'
+  baseNew: false, // the latest reveal chose a new base
+  order: aliveList.slice(), // stable basis for slots
+  down: aliveList.slice(),
+  sunk: [], // went under in the flood (their slots stay reserved)
+  out: [], // in the order they got out
+  ropeUsed: false,
+  lifted: [],
+  roped: null,
+  rescued: null,
+  rope: null, // { by, saved, cost } once thrown
+  pushFail: null, // { by, target }
+  floated: [], // saved from the flood by luck or the feather
+});
+
+const arrNames = (v, players) => (Array.isArray(v) ? v.filter((n) => typeof n === 'string' && players[n]) : []);
+const oneName = (v, players) => (typeof v === 'string' && players[v] ? v : null);
+// Move names from down to out, keeping the exit order.
+const moveOut = (pit, names) => {
+  const out = [...pit.out];
+  for (const n of names) if (!out.includes(n)) out.push(n);
+  return { ...pit, out, down: pit.down.filter((n) => !out.includes(n)), base: pit.base && out.includes(pit.base) ? null : pit.base };
+};
 
 // ---------------------------------------------------------------- reducer
 export function reduce(s, ev, idx, derivedInfo) {
@@ -191,8 +229,9 @@ export function reduce(s, ev, idx, derivedInfo) {
       next.stageSurvivors = null;
       if (stage === 'bridge') next.bridge = newBridge(alive);
       else if (stage === 'crusher') next.crusher = newCrusher();
+      else if (stage === 'pit') next.pit = newPit(alive);
       else if (stage === 'disc') next.disc = newDisc(alive);
-      else if (stage === 'ledge') next.ledge = newLedge(alive, s.players);
+      else if (stage === 'ledge') next.ledge = newLedge(alive, s.players, s.ropeCost, s.spent);
       break;
     }
 
@@ -224,6 +263,9 @@ export function reduce(s, ev, idx, derivedInfo) {
         next.bridge = b;
       } else if (next.stage === 'crusher' && s.crusher) {
         next.crusher = { ...s.crusher, holder: null, holdChosen: false, jam: false, door: false, deathsThisRound: 0 };
+      } else if (next.stage === 'pit' && s.pit) {
+        const total = toNum(ev.roundsTotal);
+        next.pit = { ...s.pit, total: total || s.pit.total, baseNew: false, lifted: [], roped: null, rescued: null, pushFail: null, floated: [] };
       }
       break;
     }
@@ -290,12 +332,20 @@ export function reduce(s, ev, idx, derivedInfo) {
         }
       } else if (ev.power === 'feather' && s.stage === 'ledge' && s.ledge) {
         next.ledge = { ...s.ledge, footing: { ...s.ledge.footing, [name]: 1 } };
+      } else if (ev.power === 'feather' && s.stage === 'pit' && s.pit) {
+        next.pit = { ...moveOut(s.pit, [name]), floated: [...s.pit.floated, name] };
+        next.flash = { kind: 'pit', name, text: 'FLOATS OUT!', i: idx };
+      } else if (ev.power === 'anchor' && s.stage === 'pit' && s.pit) {
+        const by = /^(\S+) tried to push/.exec(String(ev.detail || ''));
+        next.pit = { ...s.pit, pushFail: { by: by && by[1] !== name && s.players[by[1]] ? by[1] : null, target: name } };
+        next.flash = { kind: 'pit', name, text: 'BOUNCES OFF!', i: idx };
       }
       break;
     }
 
     case 'lucky_save':
       next.flash = { kind: 'lucky', name: ev.name, why: ev.why || '', i: idx };
+      if (s.stage === 'pit' && s.pit) next.pit = { ...moveOut(s.pit, [ev.name]), floated: [...s.pit.floated, ev.name] };
       break;
 
     case 'death':
@@ -312,6 +362,9 @@ export function reduce(s, ev, idx, derivedInfo) {
         next.bridge = { ...s.bridge, finished: true, line: survivors.slice(), stepping: {} };
       } else if ((ev.stage || s.stage) === 'crusher' && s.crusher) {
         next.crusher = { ...s.crusher, escaped: true, door: true };
+      } else if ((ev.stage || s.stage) === 'pit' && s.pit) {
+        // whoever is alive got out one way or another
+        next.pit = { ...moveOut(s.pit, s.pit.down.filter((n) => s.players[n] && s.players[n].alive)), base: null };
       }
       break;
     }
@@ -457,6 +510,17 @@ function applyReveal(next, s, ev, idx) {
         door: s.crusher.door || !!holder || jam,
       };
     }
+  } else if (what === 'rope' && s.pit) {
+    const by = oneName(data && data.by, s.players);
+    if (by) {
+      const cost = toNum(data.cost) || 1;
+      next.pit = { ...s.pit, rope: { by, saved: oneName(data.saved, s.players), cost } };
+      next.ropeCost = { ...s.ropeCost, [by]: (s.ropeCost[by] || 0) + cost };
+      next.flash = { kind: 'pit', name: by, text: 'ROPE!', i: idx };
+    }
+  } else if (what === 'pit' && s.pit) {
+    next.pit = foldPit(s, data);
+    if (next.pit.baseNew) next.flash = { kind: 'pit', name: next.pit.base, text: next.pit.baseHow === 'pushed' ? 'SHOVED!' : 'STEP UP!', i: idx };
   } else if (what === 'footing' && s.ledge) {
     const src = data && typeof data === 'object' ? (data.footing && typeof data.footing === 'object' ? data.footing : data) : {};
     const footing = { ...s.ledge.footing };
@@ -470,6 +534,36 @@ function applyReveal(next, s, ev, idx) {
     next.ledge = { ...s.ledge, footing, shrinkIn: shrinkIn != null ? shrinkIn : s.ledge.shrinkIn, shrunk: s.ledge.shrunk + (shrank ? 1 : 0) };
   }
   void idx;
+}
+
+// The pit reveal is the public view after a round; how the base was picked comes from the round's actions.
+function foldPit(s, data) {
+  const d = data && typeof data === 'object' ? data : {};
+  const pit = s.pit;
+  const pl = s.players;
+  const base = oneName(d.base, pl);
+  const lifted = arrNames(d.lifted, pl);
+  const rescued = oneName(d.rescued, pl);
+  const baseNew = !!base && base !== pit.base;
+  const acts = Object.values(s.acts || {}).filter((a) => a && a.valid);
+  const baseHow = !baseNew ? pit.baseHow : acts.some((a) => a.verb === 'push_base' && a.arg === base) && !acts.some((a) => a.verb === 'offer_back') ? 'pushed' : 'volunteer';
+  // exit order: climbers, then the hauled-out base, then anyone else listed
+  const out = [...pit.out];
+  for (const n of [...lifted, ...(rescued ? [rescued] : []), ...arrNames(d.out, pl)]) if (!out.includes(n)) out.push(n);
+  return {
+    ...pit,
+    total: toNum(s.roundsTotal) || pit.total,
+    flood: toNum(d.flood) != null ? toNum(d.flood) : toNum(s.round) || pit.flood,
+    base: base && !out.includes(base) ? base : null,
+    baseHow: base ? baseHow : null,
+    baseNew,
+    down: arrNames(d.down, pl).filter((n) => !out.includes(n)),
+    out,
+    ropeUsed: d.ropeUsed === true || pit.ropeUsed,
+    lifted,
+    roped: oneName(d.roped, pl),
+    rescued,
+  };
 }
 
 function applyDeath(next, s, ev, idx) {
@@ -488,6 +582,9 @@ function applyDeath(next, s, ev, idx) {
   if (s.crusher && fate.stage === 'crusher') {
     next.crusher = { ...s.crusher, crushed: true, deathsThisRound: s.crusher.deathsThisRound + 1 };
   }
+  if (s.pit && fate.stage === 'pit') {
+    next.pit = { ...s.pit, down: s.pit.down.filter((n) => n !== name), sunk: [...s.pit.sunk, name], base: s.pit.base === name ? null : s.pit.base };
+  }
   if (s.disc && fate.style === 'chute') {
     const tile = s.disc.tiles[name];
     next.disc = { ...s.disc, open: tile != null ? uniq([...s.disc.open, tile]) : s.disc.open };
@@ -495,7 +592,7 @@ function applyDeath(next, s, ev, idx) {
 }
 
 function styleFor(cause) {
-  return { glass: 'shatter', crusher: 'flatten', trapdoor: 'chute', ledge: 'tumble' }[cause] || 'shatter';
+  return { glass: 'shatter', crusher: 'flatten', pit: 'sink', trapdoor: 'chute', ledge: 'tumble' }[cause] || 'shatter';
 }
 
 // ---------------------------------------------------------------- public API
@@ -536,7 +633,7 @@ export function isStepWorthy(ev, cut) {
     case 'action': {
       const { verb } = parseAction(ev.action);
       if (ev.valid === false) return !!cut;
-      return !['hold', 'wait', 'stay'].includes(verb) || ev.primary === true;
+      return !['hold', 'wait', 'stay', 'leave'].includes(verb) || ev.primary === true;
     }
     default:
       return true;

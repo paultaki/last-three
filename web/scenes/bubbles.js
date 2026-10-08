@@ -40,7 +40,7 @@ export class Bubbles {
 
   // items oldest -> newest: [{key, kind, seat, as, name, to, text, forgedAs}]
   // anchors: name -> {x, top, feet} in px. u: figure unit in px.
-  render(items, anchors, env, { animate, cut, u, fade, speed = 1, keep = [] }) {
+  render(items, anchors, env, { animate, cut, u, fade, speed = 1, keep = [], figWeight = 14, lift = 0, wide = false }) {
     const live = new Set(items.map((it) => it.key));
     for (const [key, rec] of this.nodes) {
       if (!live.has(key)) {
@@ -50,13 +50,13 @@ export class Bubbles {
       }
     }
     if (!fade) this.pin();
-    const maxW = env.portrait ? Math.min(310, env.W - 2 * MARGIN - 6) : Math.min(290, Math.max(200, env.W * 0.34));
+    const maxW = env.portrait ? Math.min(wide ? 380 : 310, env.W - 2 * MARGIN - 6) : Math.min(290, Math.max(200, env.W * 0.34));
     const placed = [];
     const lines = [];
     // Faces, bodies and name tags the bubbles must not cover.
     const hw = Math.max(u * 0.62, 38);
     const obstacles = Object.entries(anchors)
-      .map(([name, a]) => ({ name, tagTop: a.feet - u * 0.1, wt: 14, l: a.x - hw, r: a.x + hw, t: a.top - u * 0.35, b: a.feet + u * 1.25 }))
+      .map(([name, a]) => ({ name, tagTop: a.feet - u * 0.1, wt: figWeight, l: a.x - hw, r: a.x + hw, t: a.top - u * 0.35, b: a.feet + u * 1.25 }))
       .concat(keep);
 
     // newest first so the line being read gets the best spot
@@ -93,7 +93,7 @@ export class Bubbles {
       const w = Math.ceil(node.getBoundingClientRect().width);
       node.style.width = `${w}px`;
       const hgt = node.offsetHeight;
-      const best = this.pick(rec, w, hgt, speaker, it, obstacles, placed, env);
+      const best = this.pick(rec, w, hgt, speaker, it, obstacles, placed, env, lift);
       const top = best.t;
       const left = best.l;
       node.style.left = `${left}px`;
@@ -122,7 +122,7 @@ export class Bubbles {
 
   // Lowest-cost spot on a grid: no overlap with figures (least of all the speaker's own tag),
   // no overlap with other bubbles, and as close to the speaker's head as that allows.
-  pick(rec, w, hgt, speaker, it, obstacles, placed, env) {
+  pick(rec, w, hgt, speaker, it, obstacles, placed, env, lift = 0) {
     const own = it.as;
     const hx = speaker.x;
     const hy = speaker.top + 4;
@@ -139,7 +139,7 @@ export class Bubbles {
           hard += tag;
           c += tag * 3000;
         }
-        c += overlapArea(r, ob) * (ob.name === own ? 20 : ob.wt);
+        c += overlapArea(r, ob) * (ob.name === own ? Math.max(20, ob.wt * 0.7) : ob.wt);
       }
       for (const p of placed) {
         const o = overlapArea(r, p);
@@ -148,7 +148,7 @@ export class Bubbles {
       }
       const dx = hx < r.l ? r.l - hx : hx > r.r ? hx - r.r : 0;
       const dy = hy < r.t ? r.t - hy : hy > r.b ? hy - r.b : 0;
-      c += Math.hypot(dx, dy) * 40;
+      c += Math.hypot(dx, dy) * 40 + t * lift; // lift: a scene with a clear band at the top pulls bubbles up into it
       return { c, hard };
     };
     let best = null;

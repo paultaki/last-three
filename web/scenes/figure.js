@@ -30,7 +30,9 @@ export class Figure {
     this.num = h('span', 'num');
     tag.append(this.num, document.createTextNode(player.name));
     this.act = h('span', 'act');
-    el.append(inner, pips, tag, this.act);
+    this.note = h('span', 'note');
+    this.note.hidden = true;
+    el.append(inner, pips, tag, this.act, this.note);
     this.el = el;
     this.inner = inner;
     this.pips = pips;
@@ -61,6 +63,13 @@ export class Figure {
   setAct(text) {
     this.act.textContent = text || '';
     this.act.hidden = !text;
+  }
+
+  // A longer-lived caption under the action chip (for example "the step").
+  setNote(text) {
+    this.note.textContent = text || '';
+    this.note.hidden = !text;
+    this.note.style.top = this.act.hidden ? 'calc(100% + 31px)' : 'calc(100% + 60px)';
   }
 
   cancelAnimations() {

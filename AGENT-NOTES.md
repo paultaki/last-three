@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · claude-code (rules v3)
+- **Did:** Paul asked for a new obstacle where everyone drops in a pit and one player must be left behind as the step, with a rope that costs the rescuer, and wanted the agents to be rivals, never friends. Built it as rules v3: new stage `pit` (src/stages/pit.js, between crusher and disc), `ROPE_COST_FOOTING`, new `pit`/`sink` death, `pit`/`rope` reveals, ledge tie-break by footing then landed shoves, rivals wording in the engine intro and a rewritten system prompt (src/llm/prompts.js). Viewer got a Pit scene. 24 budget + 5 heavyweight real v3 tapes; 290 tests; Playwright check 1,841 passing.
+- **Why:** Cooperation was too cheap: friendly lines were 2.6% of public speech and the Wedge/rope-style rescues were free. Now friendly lines are 0.7% (0 in heavyweight games).
+- **Next:** Tune `ROPE_COST_FOOTING` (rescues are still cheap); shrink the ledge faster for stallers to cut luck finishes (5 of 24); stats panel could offer a rules-version picker; phase 2 is the 3D show.
+- **Watch out:** Every rules change bumps `RULES_VERSION` and stats only compare the same version, so old tapes drop out of the table but stay playable. Spend is now $11.53 (cap in code 14 on the last runs, hard ceiling 18); ask before more heavyweight runs. Viewer JS+CSS is about 183 KiB.
+
 ## 2026-10-08 · claude-code (later)
 - **Did:** Paul said "put it out there" and pointed at his unused Cloudflare domain thecriticalfew.com. Made the repo public (history scanned first: no tokens, keys or personal paths). Published the site at https://www.thecriticalfew.com/last-three/ (apex redirects to www). Done with two Vercel project routes on the existing `the-critical-few` project (a 308 from `/last-three` to `/last-three/` and a regex rewrite `^/last-three/(.*)$` to `https://last-three-woad.vercel.app/$1`), so pushes to this repo still update the page with no extra step. The old homepage of that site is untouched.
 - **Why:** The wrangler login has no DNS edit permission and the domain's DNS is DNS-only pointing at Vercel, so a path rewrite on the Vercel project was the safe, reversible route; no DNS records were created or changed.

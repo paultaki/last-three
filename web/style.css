@@ -306,6 +306,7 @@ main {
 }
 .arena[data-scene="bridge"] { --stage: #0e1a42; }
 .arena[data-scene="crusher"] { --stage: #1a2147; }
+.arena[data-scene="pit"] { --stage: #6db8f5; }
 .arena[data-scene="disc"] { --stage: #14204a; }
 .arena[data-scene="ledge"] { --stage: #0c1330; }
 .arena[data-scene="podium"] {
@@ -559,6 +560,24 @@ main {
   text-overflow: ellipsis;
 }
 
+.fig .note {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 31px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 7em;
+  padding: 2px 8px;
+  border: 2px solid #1c2340;
+  border-radius: 8px;
+  background: #ffe9a0;
+  color: #1c2340;
+  font: 800 14px/1.2 var(--font-display);
+  text-align: center;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.fig .note[hidden] { display: none; }
+
 /* poses */
 .fig.cheer .fig-in { animation: bounce 0.95s ease-in-out infinite; }
 .fig.cheer .arm.l { transform: rotate(150deg); }
@@ -588,6 +607,41 @@ main {
 .fig.run .fig-in { animation: run 0.26s linear infinite alternate; }
 @keyframes run { to { transform: translateY(-0.12em) rotate(6deg); } }
 .fig.front .shadow { background: rgba(0, 0, 0, 0.18); }
+/* the pit */
+.fig.base .fig-in { transform: scale(1.16, 0.6); }
+.fig.base .arm.l { transform: rotate(62deg); }
+.fig.base .arm.r { transform: rotate(-62deg); }
+.fig.base .eye { height: 0.28em; top: 0.2em; }
+.fig.base::after {
+  content: "";
+  position: absolute;
+  left: -0.3em;
+  right: -0.3em;
+  top: 0.6em;
+  height: 0.2em;
+  border: 3px solid #1c2340;
+  border-radius: 0.07em;
+  background: linear-gradient(180deg, #f6d595 55%, #d9a860 55%);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+.fig.shoved .fig-in { animation: shoved 0.7s ease-out; }
+@keyframes shoved {
+  from { transform: translateX(-0.9em) rotate(-26deg); }
+  45% { transform: translateX(0.12em) rotate(8deg) scale(1.1, 0.8); }
+  to { transform: scale(1.16, 0.6); }
+}
+.arena.instant .fig.shoved .fig-in { animation: none; }
+.fig.reach .arm.l { transform: rotate(158deg); }
+.fig.reach .arm.r { transform: rotate(-158deg); }
+.fig.reach .fig-in { animation: reachy 0.6s ease-in-out infinite alternate; }
+.fig.bounce .fig-in { animation: reachy 0.2s ease-out 4 alternate; }
+@keyframes reachy { to { transform: translateY(-0.08em); } }
+.fig.lean .fig-in { transform: rotate(17deg); }
+.fig.lean.face-l .fig-in { transform: rotate(-17deg); }
+.fig.lean .arm.l { transform: rotate(-55deg); }
+.fig.lean .arm.r { transform: rotate(-75deg); }
+.fig.lean.face-l .arm.l { transform: rotate(75deg); }
+.fig.lean.face-l .arm.r { transform: rotate(55deg); }
 
 /* ---------------------------------------------------------------- bubbles + fx */
 .bubble {
@@ -673,7 +727,20 @@ main {
 .fx-chip.fx-flatten { background: #ffc233; }
 .fx-chip.fx-chute { background: #ff9ec7; }
 .fx-chip.fx-tumble { background: #a9c7ff; }
+.fx-chip.fx-sink { background: #9fe3ff; }
 .fx-chip.fx-ability { background: #fff; }
+.fx-bubble { position: absolute; border: 2px solid #fff; border-radius: 50%; background: rgba(255, 255, 255, 0.35); }
+.fx-hand { position: absolute; transform-origin: 50% 100%; }
+.fx-hand .arm, .fx-hand .palm { position: absolute; border: 3px solid #1c2340; }
+.fx-hand .arm { left: 18%; right: 18%; bottom: 0; top: 38%; border-radius: 0.12em; background: var(--c); }
+.fx-hand .palm {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 46%;
+  border-radius: 0.2em 0.2em 0.12em 0.12em;
+  background: linear-gradient(90deg, transparent 31%, #1c2340 31% 36%, transparent 36% 64%, #1c2340 64% 69%, transparent 69%) 0 0 / 100% 55% no-repeat, #ffd9b0;
+}
 .fx-cube {
   position: absolute;
   border: 2px solid #1c2340;
@@ -1041,6 +1108,89 @@ main {
   border-radius: 0 0 14px 14px;
 }
 
+
+/* ---------------------------------------------------------------- pit */
+.pit-sky { position: absolute; background: linear-gradient(180deg, #4d9be8, #bfe6ff); }
+.pit-sun {
+  position: absolute;
+  right: 6%;
+  top: 7%;
+  width: 6%;
+  aspect-ratio: 1;
+  border: 3px solid #1c2340;
+  border-radius: 22%;
+  background: #ffd23f;
+}
+.pit-cloud { position: absolute; border-radius: 999px; background: #fff; box-shadow: 0 5px 0 rgba(77, 155, 232, 0.55); }
+.pit-cloud::before, .pit-cloud::after { content: ""; position: absolute; border-radius: 50%; background: #fff; }
+.pit-cloud::before { left: 18%; top: -60%; width: 40%; height: 110%; }
+.pit-cloud::after { left: 48%; top: -35%; width: 34%; height: 85%; }
+.pit-cloud.c1 { left: 5%; top: 14%; width: 15%; height: 8%; }
+.pit-cloud.c2 { left: 38%; top: 6%; width: 11%; height: 6%; }
+.scene-pit.portrait .pit-sun { right: 5%; top: 5%; width: 10%; }
+.scene-pit.portrait .pit-cloud.c1 { left: 3%; top: 9%; width: 22%; height: 5%; }
+.scene-pit.portrait .pit-cloud.c2 { left: 40%; top: 14%; width: 17%; height: 4%; }
+.pit-far { position: absolute; background: #46c768; border-top: 4px solid #1c2340; }
+.pit-earth {
+  position: absolute;
+  border-top: 4px solid #1c2340;
+  background: repeating-linear-gradient(180deg, #b87740 0 46px, #a56a37 46px 50px);
+}
+.pit-lawn { position: absolute; z-index: 1; background: #46c768; border: 4px solid #1c2340; border-radius: 0 0 10px 10px; }
+.pit-shaft {
+  position: absolute;
+  z-index: 1;
+  border: 4px solid #1c2340;
+  border-top: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(0, 0, 0, 0.3) 30px 32px),
+    linear-gradient(180deg, #54467a, #2c2450);
+  box-shadow: inset 14px 0 0 rgba(0, 0, 0, 0.2), inset -14px 0 0 rgba(0, 0, 0, 0.2);
+}
+.pit-floor { position: absolute; z-index: 1; border: 4px solid #1c2340; background: repeating-linear-gradient(90deg, #d9a860 0 54px, #c4934c 54px 58px); }
+.pit-gauge { position: absolute; z-index: 2; }
+.pit-gauge .plate {
+  position: absolute;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  transform: translateY(-50%);
+  border: 2px solid #1c2340;
+  border-radius: 6px;
+  background: #cfc6e8;
+  color: #1c2340;
+  font: 900 14px/1 var(--font-display);
+}
+.pit-gauge .plate.on { background: #ffd23f; }
+.pit-gauge .plate.now { background: #ff6b4a; color: #fff; outline: 3px solid #fff; }
+.arena.portrait[data-scene="pit"] .fig .act { max-width: 5.8em; text-align: center; white-space: normal; } /* two short lines when four figures share a row */
+.arena[data-scene="pit"] .layer-figs { z-index: 2; } /* the water covers the figures standing in it */
+.pit-water {
+  position: absolute;
+  background: linear-gradient(180deg, rgba(96, 200, 255, 0.34), rgba(28, 110, 200, 0.5));
+  transition: top 1s ease-in-out, height 1s ease-in-out;
+}
+.pit-water.high { background: linear-gradient(180deg, rgba(96, 200, 255, 0.4), rgba(28, 110, 200, 0.58)); }
+.pit-water.dry { display: none; }
+.pit-water .wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -9px;
+  height: 14px;
+  background: radial-gradient(circle at 12px 14px, rgba(150, 224, 255, 0.95) 0 9px, transparent 10px) 0 0 / 24px 14px repeat-x;
+  animation: slosh 2.6s linear infinite;
+}
+@keyframes slosh { to { background-position-x: 24px; } }
+.arena.instant .pit-water { transition: none !important; }
+.pit-rope { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.pit-rope .rope-line { fill: none; stroke-linecap: round; }
+.pit-rope .rope-out { stroke: #1c2340; stroke-width: 9; }
+.pit-rope .rope-in { stroke: #f1d089; stroke-width: 4.5; stroke-dasharray: 7 3; }
+.pit-rope .rope-knot { fill: #f1d089; stroke: #1c2340; stroke-width: 3; }
+
 /* ---------------------------------------------------------------- controls */
 .now {
   margin: 14px 2px 10px;
@@ -1375,6 +1525,17 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .stats-table thead th:first-child { background: var(--navy); }
 .stats-scroll { display: none; margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); }
 .stats-meta, .stats-note, .empty { margin: 10px 0 0; font-size: 14px; color: var(--ink-soft); max-width: 75ch; }
+.stats-rules { margin: 0 0 8px; padding: 6px 10px; border-left: 4px solid var(--sun); background: var(--card); font: 700 14px/1.35 var(--font-body); color: var(--ink); max-width: 75ch; }
+.rules-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #9fe3ff;
+  color: #1c2340;
+  font: 800 14px/1.3 var(--font-display);
+}
 .empty { padding: 18px; border: 3px dashed var(--line); border-radius: 14px; text-align: center; }
 .footer { max-width: 1320px; margin: 0 auto; padding: 0 16px 28px; font-size: 14px; color: var(--ink-soft); }
 

@@ -7,11 +7,12 @@ import { powerName, capText } from '../lib/text.js';
 import lobby from './lobby.js';
 import bridge from './bridge.js';
 import crusher from './crusher.js';
+import pit from './pit.js';
 import disc from './disc.js';
 import ledge from './ledge.js';
 import podium from './podium.js';
 
-const SCENES = { lobby, bridge, crusher, disc, ledge, podium };
+const SCENES = { lobby, bridge, crusher, pit, disc, ledge, podium };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAX_BUBBLES = 3;
 const MAX_BUBBLES_NARROW = 2; // a phone screen has no room for a third without covering faces
@@ -93,19 +94,34 @@ export class Arena {
     this.root.classList.toggle('instant', !animate);
     this.root.style.setProperty('--move', animate ? `${Math.max(140, 560 / speed)}ms` : '0ms');
     this.root.classList.toggle('cut', this.cut);
+    this.root.classList.toggle('portrait', env.portrait);
 
     const sceneId = this.sceneFor(state);
-    if (sceneId !== this.sceneId || key !== this.envKey || opts.force) {
-      const changed = sceneId !== this.sceneId;
+    const changed = sceneId !== this.sceneId;
+    if (changed || key !== this.envKey || opts.force) {
       this.mountScene(sceneId, env, animate && changed);
       this.envKey = key;
     }
     this.root.dataset.scene = sceneId;
     const layout = SCENES[sceneId].update(this.handle, state, env, { cut: this.cut });
     const pos = layout.pos || {};
+    if (layout.dropIn && animate && changed) {
+      // new arrivals fall in from above the arena
+      for (const [name, L] of Object.entries(pos)) {
+        const fig = this.figures.get(name);
+        if (!fig) continue;
+        Object.assign(fig.el.style, { transition: 'none', left: `${L.x}%`, top: '-14%' });
+        void fig.el.offsetWidth;
+        fig.el.style.transition = '';
+        fig.last = { x: L.x, y: -14 };
+      }
+    }
     const uf = env.u * (layout.scale || 1);
     this.root.style.setProperty('--u', `${uf}px`);
     this.uf = uf;
+    this.waterY = layout.waterY != null ? layout.waterY : null;
+    this.bub = layout.bubbles || {}; // per-scene bubble tuning: figWeight, lift, wide, budget, cap
+    this.speed = speed;
     const prev = this.prev;
     const anchors = {};
 
@@ -145,6 +161,7 @@ export class Arena {
       fig.setPips(L.pips != null && player.alive ? L.pips : null, 4);
       fig.setNum(L.num != null && player.alive ? L.num : null);
       fig.setAct(player.alive || sceneId === 'podium' ? L.act : '');
+      fig.setNote(player.alive ? L.note : '');
     }
 
     this.keep = (layout.keep || []).map((k) => ({ name: null, wt: k.wt || 9, l: (k.x / 100) * env.W, r: ((k.x + k.w) / 100) * env.W, t: (k.y / 100) * env.H, b: ((k.y + k.h) / 100) * env.H }));
@@ -178,6 +195,12 @@ export class Arena {
         { duration: 420, easing: 'ease-out' }
       );
     }
+    if (animate && moved && L.via && L.via.length && !this.root.classList.contains('reduced')) {
+      // A climb or a haul: follow the waypoints (the final position is already in the style).
+      const pt = (v) => ({ left: `${v.x}%`, top: `${v.y}%` });
+      const dur = Math.max(500, 1500 / (this.speed || 1));
+      fig.el.animate([pt(fig.last), ...L.via.map(pt), pt(L)], { duration: dur, easing: 'ease-in-out' });
+    }
     fig.last = { x: L.x, y: L.y };
   }
 
@@ -199,7 +222,7 @@ export class Arena {
     if (animate && wasAlive && !fig.el.classList.contains('off')) {
       fig.mode = 'dying';
       anchors[name] = { x: (fig.last.x / 100) * env.W, top: (fig.last.y / 100) * env.H - (this.uf || env.u) * 1.95, feet: (fig.last.y / 100) * env.H };
-      const done = playDeath(style, fig, this.fxLayer, { ...env, u: this.uf || env.u }, speed);
+      const done = playDeath(style, fig, this.fxLayer, { ...env, u: this.uf || env.u, waterY: this.waterY }, speed);
       Promise.resolve(done).then(
         () => {
           if (fig.mode === 'dying') fig.mode = 'gone';
@@ -217,11 +240,16 @@ export class Arena {
 
   renderBubbles(state, anchors, env, animate, fade, speed) {
     // Newest speakers first: only lines whose speaker is on screen count towards the cap.
-    const items = state.speech
+    let items = state.speech
       .filter((s) => (s.kind === 'say' || this.cut) && (anchors[s.as] || anchors[s.name]))
       .slice(env.portrait ? -MAX_BUBBLES_NARROW : -MAX_BUBBLES)
-      .map((s) => ({ key: `${s.i}${this.cut ? 'c' : ''}`, kind: s.kind, seat: this.seats.get(s.as) ?? this.seats.get(s.name) ?? 0, name: s.name, as: s.as, to: s.to, text: capText(s.text), forgedAs: s.forgedAs }));
-    this.bubbles.render(items, anchors, env, { animate, cut: this.cut, u: this.uf || env.u, fade, speed, keep: this.keep || [] });
+      .map((s) => ({ key: `${s.i}${this.cut ? 'c' : ''}`, kind: s.kind, seat: this.seats.get(s.as) ?? this.seats.get(s.name) ?? 0, name: s.name, as: s.as, to: s.to, text: capText(s.text, this.bub.cap), forgedAs: s.forgedAs }));
+    if (this.bub.budget) {
+      // little free room: older lines go once the text outgrows the budget
+      let used = 0;
+      items = items.reduceRight((keep, it) => ((used += it.text.length) <= this.bub.budget || !keep.length ? [it, ...keep] : keep), []);
+    }
+    this.bubbles.render(items, anchors, env, { animate, cut: this.cut, u: this.uf || env.u, fade, speed, keep: this.keep || [], ...this.bub });
   }
 
   // Paused or scrubbed: bring faded bubbles back so nothing is lost while reading.
@@ -240,7 +268,7 @@ export class Arena {
     if (!animate) return;
     const fig = this.figures.get(f.name);
     if (!fig) return;
-    const text = f.kind === 'lucky' ? 'LUCKY!' : f.power === 'feather' ? 'BOING!' : f.power === 'wedge' ? 'JAMMED!' : f.power === 'swap' ? 'SWAP!' : this.cut ? powerName(f.power).toUpperCase() : null;
+    const text = f.kind === 'pit' ? f.text : f.kind === 'lucky' ? 'LUCKY!' : f.power === 'feather' ? 'BOING!' : f.power === 'wedge' ? 'JAMMED!' : f.power === 'swap' ? 'SWAP!' : this.cut ? powerName(f.power).toUpperCase() : null;
     if (text) popChip(this.fxLayer, text, fig.last.x, fig.last.y - 14, 'fx-ability');
   }
 

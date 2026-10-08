@@ -103,8 +103,10 @@ let statsMode = 'empty'; // 'missing' | 'empty' | 'full'
 const statsFixture = {
   generatedAt: '2026-10-08T00:00:00Z',
   games: 12,
+  rulesVersion: 3,
+  tapesByRules: { 1: 24, 2: 8, 3: 12 },
   models: [
-    { model: 'anthropic/claude-haiku-5.5', games: 12, meanPlace: 2.4, wins: 3, top3: 8, deathsByStage: { bridge: 3, crusher: 1, disc: 0, ledge: 2 }, volunteers: 5, frontOfBridge: 4, holdLever: 2, pushLever: 1, shoves: 9, lies: { power: 4, side: 1 } },
+    { model: 'anthropic/claude-haiku-5.5', games: 12, meanPlace: 2.4, wins: 3, top3: 8, deathsByStage: { bridge: 3, crusher: 1, pit: 4, disc: 0, ledge: 2 }, volunteers: 5, frontOfBridge: 4, holdLever: 2, pushLever: 1, shoves: 9, lies: { power: 4, side: 1 } },
     { model: 'openai/gpt-oss-120b', games: 12, meanPlace: 3.1, wins: 1, top3: 5, deathsByStage: { bridge: 4, crusher: 2, disc: 1, ledge: 1 }, volunteers: 1, frontOfBridge: 6, holdLever: 0, pushLever: 3, shoves: 4, lies: { power: 0, side: 3 } },
     { model: 'deepseek/deepseek-v4-flash', games: 12, meanPlace: 1.9, wins: 5, top3: 10, deathsByStage: { bridge: 1, crusher: 0, disc: 1, ledge: 3 }, volunteers: 7, frontOfBridge: 5, holdLever: 4, pushLever: 0, shoves: 12, lies: { power: 2, side: 0 } },
   ],
@@ -123,6 +125,22 @@ try {
 } catch (err) {
   console.log(`note: engine tapes unavailable (${String(err.message).split('\n')[0]})`);
 }
+
+// Rules v3 tapes from the real engine, one per scenario (volunteer base, pushed base, rope, sink, ...).
+const { buildPitTapes } = await import(pathToFileURL(path.join(here, 'pit-fixtures.mjs')).href);
+const pitTapes = await buildPitTapes();
+const pitNames = Object.keys(pitTapes).filter((n) => n !== 'noPit');
+// A copy of a pit tape with an unknown future stage spliced in: the viewer must shrug.
+function volcano() {
+  const copy = JSON.parse(JSON.stringify(pitTapes.volunteer));
+  const k = copy.events.findIndex((e) => e.type === 'stage_start' && e.stage === 'pit');
+  const alive = copy.events[k].alive;
+  copy.events.splice(k + 1, 0, { type: 'stage_start', stage: 'volcano', alive, note: 'lava', round: null }, { type: 'round_start', stage: 'volcano', round: 1, phase: 'x', roundsTotal: 2 }, { type: 'reveal', what: 'lava', stage: 'volcano', data: { depth: 3 } }, { type: 'action', stage: 'volcano', name: alive[0], action: 'sizzle', valid: true }, { type: 'stage_end', stage: 'volcano', survivors: alive });
+  copy.events = copy.events.map((e, i) => ({ ...e, i }));
+  copy.id = 'pit-volcano';
+  return copy;
+}
+const volcanoTape = volcano();
 
 // A mangled copy: unknown event types, missing optional fields, odd reveal shapes.
 function mutant() {
@@ -157,10 +175,15 @@ function serve() {
       if (statsMode === 'missing') return send(404, 'text/plain', 'not found');
       return send(200, 'application/json', JSON.stringify(statsMode === 'full' ? statsFixture : {}));
     }
-    if (realIndex.length && url.pathname === '/tapes/index.json') {
-      const all = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', 'index.json'), 'utf8'));
-      return send(200, 'application/json', JSON.stringify([...all, { ...realIndex[0], id: HEAVY_ID, tier: 'heavy' }]));
+    if (url.pathname === '/tapes/index.json') {
+      const all = fs.existsSync(path.join(webDir, 'tapes', 'index.json')) ? JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', 'index.json'), 'utf8')) : [];
+      const heavy = realIndex.length ? [{ ...realIndex[0], id: HEAVY_ID, tier: 'heavy' }] : [];
+      const pits = Object.entries(pitTapes).map(([name, t]) => ({ id: `pit-${name}`, seed: t.seed, rules: t.rulesVersion }));
+      return send(200, 'application/json', JSON.stringify([...all, ...heavy, ...pits]));
     }
+    const pit = /^\/tapes\/pit-([A-Za-z0-9]+)\.json$/.exec(url.pathname);
+    if (pit && pit[1] === 'volcano') return send(200, 'application/json', JSON.stringify(volcanoTape));
+    if (pit && pitTapes[pit[1]]) return send(200, 'application/json', JSON.stringify(pitTapes[pit[1]]));
     if (realIndex.length && url.pathname === `/tapes/${HEAVY_ID}.json`) {
       return send(200, 'application/json', fs.readFileSync(path.join(webDir, 'tapes', `${realIndex[0].id}.json`)));
     }
@@ -318,6 +341,7 @@ async function a11y(page) {
 console.log(`viewer.check: ${base}  (sample tape: ${ev.length} events)`);
 
 const WIDTHS = [390, 768, 1440];
+const stageStartIndex = (tape, stage) => tape.events.find((e) => e.type === 'stage_start' && e.stage === stage).i;
 const stops = [
   ['lobby', IDX.lobby, 'lobby'],
   ['bridge-waiting', IDX.waiting, 'bridge'],
@@ -605,6 +629,15 @@ for (const mode of ['missing', 'empty', 'full']) {
       assert(/deepseek/.test(await page.locator('#stats tbody tr:first-child th').innerText()), 'sorted by mean place');
       const o = await overflow(page);
       assert(o.sw <= o.iw, 'no page overflow with the stats table');
+      assert(/Out: pit/.test(text), 'pit deaths column');
+      assert(/Stats for rules v3 \(12 games\)\. Older rules: v1 24 games, v2 8 games, not counted here\./.test(await page.locator('#stats .stats-rules').innerText()), 'rules line');
+      const pitCol = await page.evaluate(() => {
+        const idx = [...document.querySelectorAll('#stats thead th')].findIndex((th) => /Out: pit/.test(th.textContent));
+        return [...document.querySelectorAll('#stats tbody tr')].map((tr) => tr.children[idx].textContent);
+      });
+      assert(pitCol.sort().join() === '0,0,4', `pit column values: ${pitCol}`);
+      const before = await page.locator('#stats .stats-rules').evaluate((el) => el.getBoundingClientRect().bottom <= document.querySelector('#stats .table-wrap').getBoundingClientRect().top);
+      assert(before, 'rules line sits above the table');
     } else {
       assert(/No model stats yet/.test(text), `friendly empty state: ${text.slice(0, 80)}`);
     }
@@ -613,6 +646,30 @@ for (const mode of ['missing', 'empty', 'full']) {
   await closePage(page);
 }
 statsMode = 'empty';
+
+{
+  statsMode = 'full';
+  const page = await openPage(390);
+  await check('stats at 390px: pit column and rules line stay usable', async () => {
+    await page.waitForTimeout(300);
+    const o = await overflow(page);
+    assert(o.sw <= o.iw, 'no page overflow');
+    const info = await page.evaluate(() => {
+      const wrap = document.querySelector('#stats .table-wrap');
+      const first = document.querySelector('#stats tbody th').getBoundingClientRect();
+      const th = [...document.querySelectorAll('#stats thead th button')].find((b) => /Out: pit/.test(b.textContent));
+      const rules = document.querySelector('#stats .stats-rules');
+      return { scrolls: wrap.scrollWidth > wrap.clientWidth, firstW: first.width, header: th ? th.getBoundingClientRect().height : 0, rulesW: rules.getBoundingClientRect().width, vw: innerWidth };
+    });
+    assert(info.scrolls, 'the table scrolls sideways inside its wrapper');
+    assert(info.firstW <= 130, `model column stays narrow (${info.firstW}px)`);
+    assert(info.header >= 44, `pit header is a tap target (${info.header}px)`);
+    assert(info.rulesW <= info.vw, 'rules line fits');
+    noIssues(page);
+  });
+  await closePage(page);
+  statsMode = 'empty';
+}
 
 console.log('\n== resilience ==');
 {
@@ -736,7 +793,435 @@ const auditPage = () => {
   return problems;
 };
 
-for (const entry of realIndex) {
+
+// ------------------------------------------------------------------ the Pit (rules v3)
+console.log('\n== the pit ==');
+const ptape = (name) => pitTapes[name];
+const pev = (name, pred) => ptape(name).events.find(pred);
+const pitLeakWords = /glass eye|wedge|feather|forger|anchor|forged by/i;
+
+// Extra in-page audit for the pit: no bubble sits on a figure, nothing important is clipped.
+const auditPit = () => {
+  const problems = [];
+  const arenaEl = document.getElementById('arena');
+  if (arenaEl.dataset.scene !== 'pit') return problems;
+  const arena = arenaEl.getBoundingClientRect();
+  const figs = [...document.querySelectorAll('.fig:not(.gone):not(.off)')].map((f) => ({ name: f.dataset.name, r: f.querySelector('.fig-in').getBoundingClientRect() }));
+  for (const b of document.querySelectorAll('#arena .bubble')) {
+    if (b.hidden || b.classList.contains('fade')) continue;
+    const r = b.getBoundingClientRect();
+    for (const f of figs) {
+      const ox = Math.min(r.right, f.r.right) - Math.max(r.left, f.r.left);
+      const oy = Math.min(r.bottom, f.r.bottom) - Math.max(r.top, f.r.top);
+      if (ox > 0 && oy > 0 && (ox * oy) / (f.r.width * f.r.height) > 0.3) problems.push(`bubble covers ${f.name}`);
+    }
+  }
+  for (const c of document.querySelectorAll('.fig:not(.gone):not(.off) .act, .fig:not(.gone):not(.off) .note')) {
+    if (c.hidden) continue;
+    const r = c.getBoundingClientRect();
+    if (r.left < arena.left - 1 || r.right > arena.right + 1 || r.bottom > arena.bottom + 1) problems.push(`chip clipped: ${c.textContent}`);
+  }
+  return problems;
+};
+
+// the three core scenarios get every width and both cuts; the special cases (feather, anchor, ...) one phone and one desktop pass
+const CORE = ['volunteer', 'rope', 'big'];
+for (const name of pitNames) {
+  const tape = ptape(name);
+  const n = tape.events.length;
+  for (const width of CORE.includes(name) ? WIDTHS : [390, 1440]) {
+    const page = await openPage(width, { url: `/?tape=pit-${name}&i=0` });
+    for (const cut of CORE.includes(name) ? (width === 768 ? [false] : [false, true]) : [width === 390]) {
+      await check(`pit ${name} ${width}px${cut ? ' cut' : ''}: stepping through all ${n} events never throws, bubbles, chips and layout hold`, async () => {
+        const out = await page.evaluate(
+          ([audit, extra, withCut]) => {
+            const base = new Function(`return (${audit})`)();
+            const more = new Function(`return (${extra})`)();
+            const v = window.__viewer;
+            v.setCut(withCut);
+            const bad = new Map();
+            const total = v.app.tape.events.length;
+            for (let i = 0; i < total; i++) {
+              try {
+                v.goto(i, { animate: false });
+                const ev = v.app.tape.events[i];
+                if (ev.type === 'say' || ev.type === 'death' || ev.type === 'reveal' || ev.type === 'action' || i % 9 === 0) for (const p of [...base(), ...more()]) bad.set(`${p} @${i}`, 1);
+              } catch (err) {
+                bad.set(`threw @${i}: ${err.message}`, 1);
+              }
+            }
+            return [...bad.keys()].slice(0, 8);
+          },
+          [auditPage.toString(), auditPit.toString(), cut]
+        );
+        assert(out.length === 0, out.join(' | '));
+      });
+    }
+    await check(`pit ${name} ${width}px: no console errors, no failed requests`, async () => noIssues(page));
+    await closePage(page);
+  }
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-volunteer&i=0' });
+  const tape = ptape('volunteer');
+  const reveals = tape.events.filter((e) => e.type === 'reveal' && e.what === 'pit');
+
+  await check('pit: the scrubber has a Pit marker, jumping there shows the pit scene', async () => {
+    assert((await page.locator('#chapters .chapter[data-chapter=pit]').innerText()) === 'Pit', 'marker says Pit');
+    const order = await page.locator('#chapters .chapter').evaluateAll((b) => b.map((x) => x.dataset.chapter));
+    assert(order.indexOf('pit') > order.indexOf('crusher') && order.indexOf('pit') < order.indexOf('disc'), `order ${order}`);
+    await page.click('#chapters .chapter[data-chapter=pit]');
+    assert((await page.locator('#arena').getAttribute('data-scene')) === 'pit', 'pit scene');
+    assert(await page.locator('#chapters .chapter[data-chapter=pit].on').count(), 'marker highlighted');
+    assert((await page.locator('.hud-title').innerText()) === 'The Pit', 'hud title');
+    const ticks = await page.locator('#ticks i').count();
+    assert(ticks >= 4, `tick marks ${ticks}`);
+  });
+
+  await check('pit: water climbs one notch a round, the gauge follows, climbers stand on the rim', async () => {
+    let lastTop = Infinity;
+    for (const r of reveals) {
+      await go(page, r.i);
+      const info = await page.evaluate(() => {
+        const w = document.querySelector('.pit-water');
+        const now = document.querySelector('.pit-gauge .plate.now');
+        const figs = Object.fromEntries([...document.querySelectorAll('.fig:not(.gone):not(.off)')].map((f) => [f.dataset.name, parseFloat(f.style.top)]));
+        return { dry: w.classList.contains('dry'), top: w.getBoundingClientRect().top, now: now ? now.textContent : null, figs };
+      });
+      assert(!info.dry, `water visible at flood ${r.data.flood}`);
+      assert(info.top < lastTop, `water rose at round ${r.data.flood} (${info.top} vs ${lastTop})`);
+      lastTop = info.top;
+      assert(info.now === String(r.data.flood), `gauge shows ${r.data.flood}, not ${info.now}`);
+      for (const nme of r.data.out) assert(info.figs[nme] < 45, `${nme} is on the rim (top ${info.figs[nme]}%)`);
+      for (const nme of r.data.down) assert(info.figs[nme] > 52, `${nme} is down in the pit (top ${info.figs[nme]}%)`);
+    }
+    await go(page, stageStartIndex(tape, 'pit') + 1);
+    assert((await page.locator('.pit-water').evaluate((w) => w.classList.contains('dry'))) === true, 'no water before round 1 resolves');
+  });
+
+  await check('pit: the base kneels with the step stance and a "the step" chip, then stands again after a rescue', async () => {
+    const first = reveals.find((r) => r.data.base);
+    await go(page, first.i);
+    assert((await page.locator('.fig.base').count()) === 1, 'exactly one base');
+    assert((await page.locator('.fig.base').getAttribute('data-name')) === first.data.base, 'the right figure kneels');
+    assert(/the step/.test(await page.locator('.fig.base .note').innerText()), 'the step chip');
+    const pose = await page.locator('.fig.base .fig-in').evaluate((el) => getComputedStyle(el).transform);
+    assert(pose !== 'none', 'crouch transform applied');
+    const plank = await page.locator('.fig.base').evaluate((el) => getComputedStyle(el, '::after').content);
+    assert(plank !== 'none' && plank !== 'normal', 'the step plank is drawn');
+    await go(page, 0);
+  });
+
+  await check('pit: action chips under the name tags (offers back, climbs, pushes X, waits)', async () => {
+    const seen = new Set();
+    for (const name of ['volunteer', 'pushed']) {
+      const p2 = await openPage(1440, { url: `/?tape=pit-${name}&i=0` });
+      for (const e of ptape(name).events.filter((x) => x.type === 'action' && x.stage === 'pit')) {
+        await go(p2, e.i);
+        const chip = await p2.locator(`.fig[data-name=${e.name}] .act`).innerText().catch(() => '');
+        seen.add(chip);
+        const verb = e.action.split(':')[0];
+        const want = { offer_back: /offers back/, climb: /climbs/, push_base: /pushes/, wait: /waits|^$/, leave: /^$/, reach_down: /throws rope/ }[verb];
+        const isBase = await p2.evaluate(([i, n]) => window.__viewer.stateAt(i).pit.base === n, [e.i, e.name]);
+        if (want && !isBase) assert(want.test(chip), `${e.name} ${e.action} shows "${chip}"`);
+        if (verb === 'push_base') {
+          const cls = await p2.locator(`.fig[data-name=${e.name}]`).getAttribute('class');
+          assert(/shove/.test(cls), 'the pusher is in the shove pose');
+          assert(chip === `pushes ${e.action.split(':')[1]}`, `chip "${chip}"`);
+        }
+      }
+      await closePage(p2);
+    }
+    assert([...seen].some((t) => /offers back/.test(t)) && [...seen].some((t) => /climbs/.test(t)) && [...seen].some((t) => /pushes/.test(t)) && [...seen].some((t) => /waits/.test(t)), `chips seen: ${[...seen].join(' | ')}`);
+  });
+
+  await check('pit: climbing animates along the wall (waypoints) and is instant when scrubbing', async () => {
+    const lift = reveals.find((r) => r.data.lifted.length);
+    assert(lift, 'a climb in the tape');
+    await go(page, lift.i - 1);
+    await page.evaluate((i) => window.__viewer.goto(i, { animate: true }), lift.i);
+    const climber = lift.data.lifted[0];
+    const running = await page.locator(`.fig[data-name=${climber}]`).evaluate((el) => el.getAnimations().filter((a) => a.effect && a.effect.getKeyframes().length >= 4).length);
+    assert(running >= 1, `waypoint animation running (${running})`);
+    await page.waitForTimeout(1700);
+    await go(page, lift.i - 1);
+    await go(page, lift.i);
+    const instant = await page.locator(`.fig[data-name=${climber}]`).evaluate((el) => el.getAnimations().length);
+    assert(instant === 0, `no animation when scrubbing (${instant})`);
+  });
+  noIssues(page);
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-rope&i=0' });
+  const tape = ptape('rope');
+  const rope = pev('rope', (e) => e.type === 'reveal' && e.what === 'rope');
+  const after = tape.events.find((e) => e.i > rope.i && e.type === 'reveal' && e.what === 'pit');
+  const ropeShown = () => page.evaluate(() => {
+    const svg = document.querySelector('.pit-rope');
+    return { shown: getComputedStyle(svg).display !== 'none', d: document.querySelector('.rope-in').getAttribute('d') || '', limp: svg.classList.contains('limp') };
+  });
+  await check('pit: the rope hangs from the rim only once it is thrown, the rescuer leans and shows the burn chip', async () => {
+    await go(page, rope.i - 1);
+    assert(!(await ropeShown()).shown, 'no rope before the rope reveal');
+    await go(page, rope.i);
+    const r = await ropeShown();
+    assert(r.shown && r.d.startsWith('M'), `rope drawn: ${r.d.slice(0, 30)}`);
+    const cls = await page.locator(`.fig[data-name=${rope.data.by}]`).getAttribute('class');
+    assert(/lean/.test(cls), `rescuer leans: ${cls}`);
+    assert(/hands burned: -1 footing/.test(await page.locator(`.fig[data-name=${rope.data.by}] .note`).innerText()), 'burn chip');
+    assert(!r.limp, 'taut while it hauls');
+    assert(/The rope: .* hauls .* out/.test(await page.locator('#now').innerText()), 'caption');
+    await shot(page, 'pit-rope-1440');
+    await go(page, after.i);
+    const r2 = await ropeShown();
+    assert(r2.shown && r2.limp, 'the rope stays, hanging limp, after the haul');
+    assert((await page.locator('.fig.base').count()) === 0, 'no base after the rescue');
+    assert(/hands burned/.test(await page.locator(`.fig[data-name=${rope.data.by}] .note`).innerText()), 'burn chip stays');
+    const outTop = await page.locator(`.fig[data-name=${rope.data.saved}]`).evaluate((el) => parseFloat(el.style.top));
+    assert(outTop < 45, `the hauled-out base is on the rim (top ${outTop}%)`);
+  });
+  await check('pit: the rope price shows in the ledge pips of the thrower', async () => {
+    const ledge = tape.events.find((e) => e.type === 'stage_start' && e.stage === 'ledge');
+    await go(page, ledge.i + 1);
+    const pips = await page.locator(`.fig[data-name=${rope.data.by}] .pips i:not(.off)`).count();
+    const power = tape.players.find((p) => p.name === rope.data.by).power;
+    const full = power === 'anchor' ? 4 : 3;
+    assert(pips === Math.max(1, full - rope.data.cost) || power === 'feather', `${rope.data.by} starts the ledge with ${pips} pips`);
+  });
+  noIssues(page);
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-sink&i=0' });
+  const tape = ptape('sink');
+  const sinks = tape.events.filter((e) => e.type === 'death' && e.style === 'sink');
+  for (const d of sinks) {
+    await check(`pit: ${d.name} sinks (death at ${d.i}): state, caption, bubbles, waving hand`, async () => {
+      await go(page, d.i);
+      assert((await page.locator(`.fig[data-name=${d.name}]`).getAttribute('data-fate')) === 'sink', 'data-fate sink');
+      assert(await page.locator(`.fig[data-name=${d.name}]`).evaluate((el) => el.classList.contains('gone')), 'gone when scrubbed to');
+      assert(new RegExp(`${d.name} .*left in the pit`).test(await page.locator('#now').innerText()), 'caption');
+      let before = d.i - 1;
+      while (before > 0 && ['thought', 'whisper'].includes(tape.events[before].type)) before--;
+      await go(page, before);
+      assert(await page.locator(`.fig[data-name=${d.name}]`).evaluate((el) => !el.classList.contains('gone')), 'visible just before');
+      await page.click('#btn-fwd');
+      let landed = await page.evaluate(() => window.__viewer.app.idx);
+      for (let g = 0; landed < d.i && g < 6; g++) {
+        await page.click('#btn-fwd');
+        landed = await page.evaluate(() => window.__viewer.app.idx);
+      }
+      assert(landed === d.i, `stepping reaches the death (landed ${landed})`);
+      await page.waitForSelector('#arena .fx-chip.fx-sink', { timeout: 1500 });
+      assert(/GLUB/.test(await page.locator('#arena .fx-chip.fx-sink').first().innerText()), 'GLUB chip');
+      assert((await page.locator(`.fig[data-name=${d.name}] .fig-in`).evaluate((el) => el.getAnimations().length)) > 0, 'the figure is sinking');
+      assert((await page.locator('#arena .fx-hand').count()) === 1, 'a hand waves above the water');
+      await page.waitForTimeout(300);
+      assert((await page.locator('#arena .fx-bubble').count()) >= 3, 'bubbles rise');
+      if (d.i === sinks[0].i) {
+        await page.waitForTimeout(500);
+        await shot(page, 'pit-sink-1440');
+      }
+      await page.waitForFunction((nm) => document.querySelector(`.fig[data-name=${nm}]`).classList.contains('gone'), d.name, { timeout: 5000 });
+    });
+  }
+  await check('pit: the other figures stay put while somebody sinks', async () => {
+    const a = sinks[0];
+    const b = sinks[1];
+    if (!b) return;
+    await go(page, a.i);
+    const p1 = await page.locator(`.fig[data-name=${b.name}]`).evaluate((el) => [el.style.left, el.style.top]);
+    await go(page, a.i - 1);
+    const p0 = await page.locator(`.fig[data-name=${b.name}]`).evaluate((el) => [el.style.left, el.style.top]);
+    assert(p0.join() === p1.join(), `${b.name} moved from ${p0} to ${p1}`);
+  });
+  noIssues(page);
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-anchor&i=0' });
+  const tape = ptape('anchor');
+  const e = pev('anchor', (x) => x.type === 'ability_use' && x.power === 'anchor' && x.stage === 'pit');
+  await check('pit: a failed push shows a "bounces off" chip; the Director cut names the power, the plain view does not', async () => {
+    await go(page, e.i - 1);
+    await page.evaluate((i) => window.__viewer.goto(i, { animate: true }), e.i);
+    await page.waitForSelector('#arena .fx-chip.fx-ability', { timeout: 1500 });
+    assert(/BOUNCES OFF/.test(await page.locator('#arena .fx-chip.fx-ability').first().innerText()), 'bounce chip');
+    assert((await page.locator(`.fig[data-name=${e.name}]`).getAttribute('class')).includes('bounce'), 'target bounces');
+    const pub = await page.locator('#now').innerText();
+    assert(/would not budge/.test(pub) && !/anchor/i.test(pub), `public caption: ${pub}`);
+    const transcript = await page.locator('#transcript').innerText();
+    assert(!/anchor/i.test(transcript.replace(/“[^”]*”/g, '')), 'no power name in the plain transcript');
+    await go(page, e.i, true);
+    assert(/uses Anchor/.test(await page.locator('#now').innerText()), 'cut names the power');
+    assert(/Anchor/.test(await page.locator('#transcript').innerText()), 'cut transcript names it');
+  });
+  await check('pit: plain view never shows a power name on any chip, caption or highlight', async () => {
+    for (let i = 0; i < tape.events.length; i += 3) {
+      await go(page, i, false);
+      // a spoken line is the agent's own words (a liar can say anything), so the caption is skipped while it shows one
+      const texts = await page.evaluate(() => {
+        const cap = window.__viewer.app.state.caption;
+        const skipNow = cap && cap.kind === 'say';
+        return [...document.querySelectorAll(`.fig .act, .fig .note, .fx-chip, .hud-title, .hud-sub, .hud-right, #highlights button${skipNow ? '' : ', #now'}`)].map((n) => n.textContent).join(' | ');
+      });
+      assert(!pitLeakWords.test(texts), `leak at ${i}: ${texts.match(pitLeakWords)}`);
+    }
+  });
+  noIssues(page);
+  await closePage(page);
+}
+
+{
+  const page = await openPage(390, { url: '/?tape=pit-feather&i=0' });
+  const tape = ptape('feather');
+  await check('pit: feather and floor saves float out, with their own chips', async () => {
+    const f = pev('feather', (x) => x.type === 'ability_use' && x.power === 'feather' && x.stage === 'pit');
+    await go(page, f.i);
+    assert(/floats right out of the pit/.test(await page.locator('#now').innerText()), 'feather caption');
+    assert(!/feather/i.test(await page.locator('#now').innerText()), 'no power name');
+    const top = await page.locator(`.fig[data-name=${f.name}]`).evaluate((el) => parseFloat(el.style.top));
+    assert(top < 45, `${f.name} floated to the rim (top ${top}%)`);
+    const p2 = await openPage(390, { url: '/?tape=pit-floor3&i=0' });
+    const lk = ptape('floor3').events.find((x) => x.type === 'lucky_save' && x.stage === 'pit');
+    await go(p2, lk.i);
+    assert(/plank floats by/.test(await p2.locator('#now').innerText()), 'plank caption');
+    assert((await p2.locator(`.fig[data-name=${lk.name}]`).evaluate((el) => parseFloat(el.style.top))) < 45, 'saved figure is out of the water');
+    await closePage(p2);
+    void tape;
+  });
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-photoShoves&i=0' });
+  await check('ledge: the photo finish lucky save reads well and has a highlight', async () => {
+    const lk = pev('photoShoves', (x) => x.type === 'lucky_save' && /photo finish/.test(x.why));
+    await go(page, lk.i);
+    const text = await page.locator('#now').innerText();
+    assert(/won the photo finish on shoves/.test(text) && !/lucky break/.test(text), `caption: ${text}`);
+    const labels = await page.locator('#highlights button').allInnerTexts();
+    assert(labels.some((t) => /Photo finish on shoves/.test(t)), `highlights: ${labels.join(' | ')}`);
+    await page.locator('#highlights button', { hasText: 'Photo finish' }).click();
+    assert((await page.evaluate(() => window.__viewer.app.idx)) === lk.i, 'chip jumps to the save');
+  });
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-volunteer&i=0' });
+  await check('pit: highlight chips for volunteer, shove, rope and flood', async () => {
+    const want = [['volunteer', /volunteers to be the step/], ['pushed', /is shoved down as the step/], ['rope', /The rope: \w+ hauls \w+ out/], ['sink', /is left in the pit/]];
+    for (const [name, re] of want) {
+      await page.goto(`${base}/?tape=pit-${name}&i=0`);
+      await page.waitForFunction(() => window.__viewer);
+      const labels = await page.locator('#highlights button').allInnerTexts();
+      assert(labels.some((t) => re.test(t)), `${name}: ${labels.join(' | ')}`);
+      assert(labels.every((t) => !pitLeakWords.test(t)), `leak in ${labels.join(' | ')}`);
+    }
+  });
+  await check('picker and badge: rules v3 tapes say so, older tapes do not', async () => {
+    await page.goto(`${base}/?tape=pit-volunteer&i=0`);
+    await page.waitForFunction(() => window.__viewer);
+    const opt = await page.locator('#tape-picker option[value="pit-volunteer"]').innerText();
+    assert(/\bv3\b/.test(opt) && opt.length < 70, `label: ${opt}`);
+    assert(/rules v3/.test(await page.locator('#tape-meta .rules-badge').innerText()), 'meta badge');
+    assert((await page.locator('#tape-meta .tier-badge').count()) === 0, 'no tier badge on a tape without a tier');
+    if (realIndex.length) {
+      const old = realIndex.find((e) => !(Number(e.rules) >= 3));
+      if (old) {
+        const label = await page.locator(`#tape-picker option[value="${old.id}"]`).innerText();
+        assert(!/\bv3\b/.test(label), `old label: ${label}`);
+        await page.goto(`${base}/?tape=${old.id}&i=0`);
+        await page.waitForFunction(() => window.__viewer);
+        assert((await page.locator('#tape-meta .rules-badge').count()) === 0, 'no rules badge on old tapes');
+      }
+    }
+  });
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { url: '/?tape=pit-volcano&i=0' });
+  await check('an unknown future stage and reveal never crash the viewer', async () => {
+    const k = volcanoTape.events.findIndex((e) => e.stage === 'volcano');
+    for (let i = k - 1; i < volcanoTape.events.length; i += 1) {
+      await go(page, i, i % 2 === 0);
+      assert((await page.locator('#arena').getAttribute('data-scene')).length > 0, 'a scene is always mounted');
+    }
+    await go(page, k);
+    assert((await page.locator('#arena').getAttribute('data-scene')) === 'lobby', 'unknown stages fall back to the lobby scene');
+    assert((await page.locator('.fig:not(.off):not(.gone)').count()) >= 4, 'figures are still shown');
+    await go(page, volcanoTape.events.length - 1);
+    assert(await page.locator('#results').isVisible(), 'the result still renders');
+    noIssues(page);
+  });
+  await closePage(page);
+}
+
+{
+  const page = await openPage(1440, { reducedMotion: 'reduce', url: '/?tape=pit-sink&i=0' });
+  await check('pit with prefers-reduced-motion: no waypoints, no sink fx, still correct', async () => {
+    const tape = ptape('sink');
+    const lift = tape.events.find((e) => e.type === 'reveal' && e.what === 'pit' && e.data.lifted.length);
+    const d = tape.events.find((e) => e.type === 'death' && e.style === 'sink');
+    await go(page, lift.i - 1);
+    await page.click('#chapters .chapter[data-chapter=pit]');
+    await page.evaluate((i) => window.__viewer.goto(i - 1), d.i);
+    await page.click('#btn-fwd');
+    await page.waitForTimeout(200);
+    assert((await page.locator('#arena .fx-chip, #arena .fx-hand, #arena .fx-bubble').count()) === 0, 'no fx nodes');
+    assert((await page.locator('.fig[data-name]').evaluateAll((els) => els.reduce((n, el) => n + el.getAnimations().length, 0))) === 0, 'no running animations on figures');
+    assert(await page.locator('.pit-water').evaluate((w) => getComputedStyle(w).transitionDuration === '0s'), 'water changes instantly');
+    noIssues(page);
+  });
+  await closePage(page);
+}
+
+// screenshots of the pit at the three widths, looked at by a human
+for (const width of WIDTHS) {
+  const page = await openPage(width, { url: '/?tape=pit-big&i=0' });
+  await check(`pit ${width}px: screenshots and layout of the key moments`, async () => {
+    const tape = ptape('big');
+    const reveals = tape.events.filter((e) => e.type === 'reveal' && e.what === 'pit');
+    const first = reveals.find((r) => r.data.base);
+    const mid = reveals.find((r) => r.data.flood >= 3 && r.data.out.length >= 2) || reveals[reveals.length - 1];
+    const stops = [
+      ['start', stageStartIndex(tape, 'pit') + 1],
+      ['base', first.i],
+      ['climbed', mid.i],
+    ];
+    const death = tape.events.find((e) => e.type === 'death' && e.style === 'sink');
+    if (death) stops.push(['flooded', death.i - 1]);
+    stops.push(['end', tape.events.find((e) => e.type === 'stage_end' && e.stage === 'pit').i]);
+    for (const [label, i] of stops) {
+      await go(page, i);
+      assert((await page.locator('#arena').getAttribute('data-scene')) === 'pit', `${label}: pit scene`);
+      const o = await overflow(page);
+      assert(o.sw <= o.iw, `${label}: overflow ${o.sw} > ${o.iw}`);
+      const bad = await page.evaluate(([audit, extra]) => [...new Function(`return (${audit})`)()(), ...new Function(`return (${extra})`)()()], [auditPage.toString(), auditPit.toString()]);
+      assert(bad.length === 0, `${label}: ${bad.join(' | ')}`);
+      await shot(page, `09-pit-${label}-${width}`);
+    }
+    // a line of speech in the pit, with its bubble in a clear lane
+    const say = tape.events.find((e) => e.type === 'say' && e.stage === 'pit' && e.round >= 2);
+    if (say) {
+      await go(page, say.i);
+      await shot(page, `09-pit-speech-${width}`);
+    }
+  });
+  await closePage(page);
+}
+
+// SKIP_REAL=1 skips the long per-event sweep of the real tapes (for quick iterations on the pit)
+// REAL_RULES=3 keeps only the rules v3 tapes (the ones with a pit)
+const realRun = process.env.SKIP_REAL === '1' ? [] : process.env.REAL_RULES ? realIndex.filter((e) => Number(e.rules) >= Number(process.env.REAL_RULES)) : realIndex;
+for (const entry of realRun) {
   const tape = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', `${entry.id}.json`), 'utf8'));
   const events = tape.events;
 
@@ -775,8 +1260,10 @@ for (const entry of realIndex) {
     for (const cut of width === 768 ? [false] : [false, true]) {
       await check(`${entry.id} ${width}px${cut ? ' cut' : ''}: stepping through all ${events.length} events never throws, bubbles and layout hold`, async () => {
         const out = await page.evaluate(
-          ([audit, withCut]) => {
-            const check = new Function(`return (${audit})`)();
+          ([audit, extra, withCut]) => {
+            const base = new Function(`return (${audit})`)();
+            const more = new Function(`return (${extra})`)();
+            const check = () => [...base(), ...more()];
             const v = window.__viewer;
             v.setCut(withCut);
             const bad = new Map();
@@ -792,7 +1279,7 @@ for (const entry of realIndex) {
             }
             return [...bad.keys()].slice(0, 8);
           },
-          [auditPage.toString(), cut]
+          [auditPage.toString(), auditPit.toString(), cut]
         );
         assert(out.length === 0, out.join(' | '));
       });

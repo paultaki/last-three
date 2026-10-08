@@ -4,7 +4,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stateAt, aliveNames, chapters, isStepWorthy } from '../../web/lib/state.js';
+import { stateAt, aliveNames, chapters, isStepWorthy, timeline } from '../../web/lib/state.js';
+import { normalizeStats, rulesLine } from '../../web/ui/stats-panel.js';
+import { highlights } from '../../web/ui/highlights.js';
+import { describeEvent, deathCaption } from '../../web/lib/text.js';
+import { buildPitTapes } from './pit-fixtures.mjs';
 
 const tapesDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'web', 'tapes');
 const load = (id) => JSON.parse(fs.readFileSync(path.join(tapesDir, `${id}.json`), 'utf8'));
@@ -116,3 +120,194 @@ for (const id of ['42', '7']) {
     assert.ok(aliveNames(end).length <= 3);
   });
 }
+
+// ---------------------------------------------------------------- the Pit (rules v3)
+const pitTapes = await buildPitTapes();
+const SECRET = /glass eye|wedge|feather|forger|anchor|forged by/i;
+const pitOf = (tape) => tape.events.filter((e) => e.stage === 'pit');
+
+test('chapters: the pit sits between the crusher and the disc', () => {
+  const ids = chapters(pitTapes.volunteer).map((c) => c.id);
+  assert.deepEqual(ids.slice(0, 5), ['start', 'bridge', 'crusher', 'pit', 'disc'].slice(0, 5));
+  assert.ok(ids.includes('pit') && ids.indexOf('pit') > ids.indexOf('crusher'));
+  assert.ok(!chapters(sample).some((c) => c.id === 'pit'), 'old tapes have no pit marker');
+});
+
+test('old tapes keep working: no pit state, rules default to 1', () => {
+  const end = stateAt(sample, sample.events.length - 1);
+  assert.equal(end.pit, null);
+  assert.equal(end.rules, 1);
+  assert.equal(stateAt(sample, 0).rules, 1);
+  assert.equal(stateAt(pitTapes.volunteer, 0).rules, 3);
+  assert.match(stateAt(pitTapes.volunteer, 0).caption.text, /Five obstacles/);
+  assert.match(stateAt(sample, 0).caption.text, /Four obstacles/);
+});
+
+for (const [name, tape] of Object.entries(pitTapes)) {
+  test(`pit tape ${name}: every index folds, ends consistently, never leaks a power with the cut off`, () => {
+    for (let i = -1; i < tape.events.length; i += 1) {
+      const s = stateAt(tape, i);
+      if (s.caption && s.caption.kind !== 'say') assert.ok(!SECRET.test(s.caption.text), `caption leaks at ${i}: ${s.caption.text}`);
+      for (const line of s.speech) assert.ok(line.kind !== 'say' || !line.forgedAs || !/forged by/.test(line.text));
+    }
+    const end = stateAt(tape, tape.events.length - 1);
+    assert.equal(end.ended, true);
+    assert.ok(aliveNames(end).length <= 3);
+    for (const line of timeline(tape)) if (line.pub && line.kind !== 'say') assert.ok(!SECRET.test(line.pub), `transcript leak: ${line.pub}`);
+  });
+}
+
+for (const name of ['volunteer', 'pushed', 'rope', 'sink', 'floor3', 'feather', 'anchor', 'big']) {
+  test(`pit tape ${name}: the folded pit follows each engine reveal`, () => {
+    const tape = pitTapes[name];
+    assert.ok(tape, `scenario ${name} exists`);
+    let sawBase = false;
+    for (const e of tape.events) {
+      if (e.type !== 'reveal' || e.what !== 'pit') continue;
+      const s = stateAt(tape, e.i);
+      const d = e.data;
+      assert.equal(s.pit.flood, d.flood);
+      assert.equal(s.pit.base, d.base);
+      assert.deepEqual([...s.pit.down].sort(), [...d.down].sort());
+      assert.deepEqual([...s.pit.out].sort(), [...d.out].sort());
+      assert.equal(s.pit.ropeUsed, d.ropeUsed);
+      assert.deepEqual(s.pit.lifted, d.lifted);
+      assert.equal(s.pit.roped, d.roped);
+      assert.equal(s.pit.rescued, d.rescued);
+      if (d.base) sawBase = true;
+      if (d.base && d.base !== stateAt(tape, e.i - 1).pit.base) assert.ok(['volunteer', 'pushed'].includes(s.pit.baseHow), 'how the base was chosen');
+    }
+    if (name === 'volunteer' || name === 'pushed') assert.ok(sawBase);
+  });
+}
+
+test('pit: a volunteer beats a push, and a pushed base is called pushed', () => {
+  for (const [name, how] of [['volunteer', 'volunteer'], ['pushed', 'pushed']]) {
+    const tape = pitTapes[name];
+    const reveal = tape.events.find((e) => e.type === 'reveal' && e.what === 'pit' && e.data.base);
+    const s = stateAt(tape, reveal.i);
+    assert.equal(s.pit.baseHow, how, name);
+    assert.equal(s.pit.baseNew, true);
+    const cap = s.caption.text;
+    assert.match(cap, how === 'pushed' ? /shoved down as the step/ : /volunteers to be the step/);
+  }
+});
+
+test('pit: the rope reveal is folded, hauls the base out and costs the thrower ledge footing', () => {
+  const tape = pitTapes.rope;
+  const rope = tape.events.find((e) => e.type === 'reveal' && e.what === 'rope');
+  const at = stateAt(tape, rope.i);
+  assert.deepEqual(at.pit.rope, { by: rope.data.by, saved: rope.data.saved, cost: rope.data.cost });
+  assert.equal(at.pit.ropeUsed, false, 'the rope is only spent at the round reveal');
+  assert.match(at.caption.text, /^The rope: /);
+  const after = stateAt(tape, rope.i + 1);
+  assert.equal(after.pit.ropeUsed, true);
+  assert.ok(after.pit.out.includes(rope.data.saved));
+  assert.equal(after.pit.base, null);
+  const ledge = tape.events.find((e) => e.type === 'stage_start' && e.stage === 'ledge');
+  const l = stateAt(tape, ledge.i);
+  const power = tape.players.find((p) => p.name === rope.data.by).power;
+  const full = power === 'anchor' ? 4 : power === 'feather' && l.spent[rope.data.by] ? 1 : 3;
+  assert.equal(l.ledge.footing[rope.data.by], Math.max(1, full - rope.data.cost), 'the rope price shows in the ledge pips');
+});
+
+test('pit: sink deaths are folded, the flood caption is funny, and nobody is left down', () => {
+  const tape = pitTapes.sink;
+  const deaths = tape.events.filter((e) => e.type === 'death' && e.style === 'sink');
+  assert.ok(deaths.length >= 1);
+  for (const d of deaths) {
+    const s = stateAt(tape, d.i);
+    assert.equal(s.players[d.name].alive, false);
+    assert.equal(s.players[d.name].fate.style, 'sink');
+    assert.equal(s.players[d.name].fate.cause, 'pit');
+    assert.ok(!s.pit.down.includes(d.name));
+    assert.ok(s.pit.sunk.includes(d.name));
+    assert.match(s.caption.text, /was left in the pit/);
+  }
+  const end = tape.events.find((e) => e.type === 'stage_end' && e.stage === 'pit');
+  assert.equal(stateAt(tape, end.i).pit.down.length, 0);
+  assert.match(deathCaption('Ash', 'sink', 1), /Ash was left in the pit/);
+});
+
+test('pit: feather and floor saves float out instead of dying', () => {
+  for (const [name, text] of [['feather', /floats right out of the pit/], ['floor3', /plank floats by/]]) {
+    const tape = pitTapes[name];
+    const e = tape.events.find((x) => x.stage === 'pit' && (x.type === 'lucky_save' || (x.type === 'ability_use' && x.power === 'feather')));
+    const s = stateAt(tape, e.i);
+    assert.ok(s.players[e.name].alive, `${name}: saved player is alive`);
+    assert.ok(s.pit.out.includes(e.name), `${name}: saved player is out of the pit`);
+    assert.ok(s.pit.floated.includes(e.name));
+    assert.match(s.caption.text, text);
+    assert.ok(s.flash && s.flash.i === e.i);
+  }
+});
+
+test('pit: a failed push on an anchor is public as "would not budge" but never names the power', () => {
+  const tape = pitTapes.anchor;
+  const e = tape.events.find((x) => x.type === 'ability_use' && x.power === 'anchor' && x.stage === 'pit');
+  const s = stateAt(tape, e.i);
+  assert.match(s.caption.text, /would not budge/);
+  assert.ok(!/anchor/i.test(s.caption.text));
+  assert.match(s.captionCut.text, /uses Anchor/);
+  assert.equal(s.pit.pushFail.target, e.name);
+  assert.ok(s.pit.pushFail.by && s.pit.pushFail.by !== e.name);
+  assert.equal(s.flash.text, 'BOUNCES OFF!');
+});
+
+test('pit: stepping skips quiet waits and leaves', () => {
+  assert.equal(isStepWorthy({ type: 'action', action: 'leave' }, false), false);
+  assert.equal(isStepWorthy({ type: 'action', action: 'wait' }, false), false);
+  assert.equal(isStepWorthy({ type: 'action', action: 'climb' }, false), true);
+  assert.equal(isStepWorthy({ type: 'action', action: 'push_base:Cole' }, false), true);
+});
+
+test('highlights: pit and tie-break moments, with no power leaks', () => {
+  const label = (tape) => highlights(tape).map((h) => h.pub).join(' | ');
+  assert.match(label(pitTapes.volunteer), /volunteers to be the step/);
+  assert.match(label(pitTapes.pushed), /is shoved down as the step/);
+  assert.match(label(pitTapes.rope), /The rope: \w+ hauls \w+ out/);
+  assert.match(label(pitTapes.sink), /is left in the pit/);
+  assert.match(label(pitTapes.photoShoves), /Photo finish on shoves/);
+  assert.match(label(pitTapes.photoFooting), /Photo finish on footing/);
+  assert.match(highlights(pitTapes.photoShoves).find((h) => /Photo finish/.test(h.pub)).cut, /wins a photo finish on shoves landed/);
+  for (const tape of Object.values(pitTapes)) {
+    const list = highlights(tape);
+    assert.ok(list.length >= 1 && list.length <= 8);
+    for (const h of list) {
+      assert.ok(!SECRET.test(h.pub), `leak: ${h.pub}`);
+      assert.ok(h.pub.length < 60, `too long: ${h.pub}`);
+    }
+  }
+});
+
+test('lucky_save captions read well for the new reasons', () => {
+  const cap = (why) => describeEvent({ type: 'lucky_save', name: 'Ash', why }, { players: {} }, {}).pub;
+  assert.match(cap('won the photo finish on footing'), /^Ash won the photo finish on footing/);
+  assert.match(cap('won the photo finish on shoves landed'), /photo finish on shoves/);
+  assert.match(cap('a last toe-hold'), /last toe-hold/);
+  assert.match(cap('a plank floats by'), /plank/);
+  assert.match(cap('the glass holds'), /lucky break: the glass holds/);
+});
+
+test('stats panel: pit deaths default to 0 in old stats, rules line and older rules', () => {
+  const old = normalizeStats({ models: [{ model: 'a/b', games: 3, meanPlace: 2, wins: 1, deathsByStage: { bridge: 1, crusher: 0, disc: 1, ledge: 0 } }] });
+  assert.equal(old[0].pit, 0);
+  const next = normalizeStats({ models: [{ model: 'a/b', games: 3, deathsByStage: { bridge: 1, crusher: 0, pit: 2, disc: 1, ledge: 0 } }] });
+  assert.equal(next[0].pit, 2);
+  assert.equal(normalizeStats({ models: [{ model: 'a/b', games: 1 }] })[0].pit, null, 'no deaths object at all stays unknown');
+  assert.equal(rulesLine({}), null);
+  assert.equal(rulesLine({ rulesVersion: 3, games: 6, tapesByRules: { 1: 24, 2: 8, 3: 6 } }), 'Stats for rules v3 (6 games). Older rules: v1 24 games, v2 8 games, not counted here.');
+  assert.equal(rulesLine({ rulesVersion: 2, games: 8, tapesByRules: { 2: 8 } }), 'Stats for rules v2 (8 games).');
+  assert.equal(rulesLine({ rulesVersion: 3, games: 1, tapesByRules: { 2: 8, 3: 1 } }), 'Stats for rules v3 (1 game). Older rules: v2 8 games, not counted here.');
+});
+
+test('unknown future stages and reveals never crash the reducer', () => {
+  const tape = JSON.parse(JSON.stringify(pitTapes.volunteer));
+  const k = tape.events.findIndex((e) => e.type === 'stage_start' && e.stage === 'pit');
+  tape.events.splice(k + 1, 0, { type: 'stage_start', stage: 'volcano', alive: tape.events[k].alive, note: 'lava', round: null }, { type: 'reveal', what: 'lava', data: { depth: 3 } }, { type: 'round_start', stage: 'volcano', round: 1, phase: 'x', roundsTotal: 2 }, { type: 'death', name: tape.events[k].alive[0], stage: 'volcano', cause: 'lava', style: 'melt' }, { type: 'stage_end', stage: 'volcano', survivors: [] });
+  tape.events = tape.events.map((e, i) => ({ ...e, i }));
+  for (let i = -1; i < tape.events.length; i += 1) stateAt(tape, i);
+  assert.equal(stateAt(tape, k + 1).stage, 'volcano');
+  assert.ok(timeline(tape).length > 10);
+  assert.deepEqual(chapters(tape).map((c) => c.id).includes('volcano'), false, 'unknown stages get no scrubber marker');
+});

@@ -29,7 +29,7 @@ export default {
     });
     return {
       pos,
-      hud: { left: "Tonight's contestants", right: `${names.length} players, 4 obstacles, 3 prizes`, sub: 'Press play to start the show' },
+      hud: { left: "Tonight's contestants", right: `${names.length} players, ${state.rules >= 3 ? 5 : 4} obstacles, 3 prizes`, sub: 'Press play to start the show' },
     };
   },
 };

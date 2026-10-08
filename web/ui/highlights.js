@@ -21,10 +21,30 @@ export function highlights(tape) {
   let forged = 0;
   let lucky = 0;
   let shoves = 0;
+  let pitLeft = 0;
+  let pitBase = null;
+  let pitActs = [];
   events.forEach((e, k) => {
     if (!e) return;
     const i = Number.isFinite(e.i) ? e.i : k;
-    if ((e.type === 'say' || e.type === 'whisper') && e.forgedAs && forged < 2) {
+    if (e.type === 'round_start' && e.stage === 'pit') pitActs = [];
+    if (e.type === 'action' && e.stage === 'pit' && e.valid !== false) pitActs.push(String(e.action));
+    if (e.type === 'reveal' && e.what === 'pit' && e.data && typeof e.data === 'object') {
+      const base = typeof e.data.base === 'string' ? e.data.base : null;
+      if (base && base !== pitBase) {
+        const pushed = !pitActs.includes('offer_back') && pitActs.includes(`push_base:${base}`);
+        add(i, 3, pushed ? `${base} is shoved down as the step` : `${base} volunteers to be the step`);
+      }
+      pitBase = base;
+    } else if (e.type === 'reveal' && e.what === 'rope' && e.data && e.data.by) {
+      add(i, 2, `The rope: ${e.data.by} hauls ${e.data.saved || 'the step'} out`);
+    } else if (e.type === 'death' && e.stage === 'pit' && pitLeft < 1) {
+      pitLeft++;
+      add(i, 3, `${e.name} is left in the pit`);
+    } else if (e.type === 'lucky_save' && /^won the photo finish/.test(String(e.why))) {
+      const what = /footing/.test(e.why) ? 'footing' : 'shoves';
+      add(i, 2, `Photo finish on ${what}`, `${e.name} wins a photo finish on ${what}${what === 'shoves' ? ' landed' : ''}`);
+    } else if ((e.type === 'say' || e.type === 'whisper') && e.forgedAs && forged < 2) {
       forged++;
       add(i, 2, 'Someone faked a message', `${e.name || e.from} forged a message as ${e.forgedAs}`);
     } else if (e.type === 'ability_use' && e.power === 'feather') {
@@ -42,7 +62,7 @@ export function highlights(tape) {
         shoves++;
         add(i, 3, `${e.name} shoves ${target} off the ledge`);
       }
-    } else if (e.type === 'lucky_save' && lucky < 1) {
+    } else if (e.type === 'lucky_save' && e.stage !== 'pit' && lucky < 1) {
       lucky++;
       add(i, 4, `${e.name} hangs on by a toe-hold`);
     }
