@@ -53,7 +53,7 @@ test('stageState has the documented keys for each stage', async () => {
   assert.deepEqual(keys('bridge'), ['front', 'rowsCrossed', 'wallRoundsLeft', 'weakPanesRevealed']);
   assert.deepEqual(keys('crusher'), ['ceiling', 'leverHolder']);
   assert.deepEqual(keys('disc'), ['openCount', 'tiles']);
-  assert.deepEqual(keys('ledge'), ['footing', 'shrinkIn']);
+  assert.deepEqual(keys('ledge'), ['footing', 'lastDefence', 'shrinkIn']);
   const crusher = views.filter((v) => v.stage === 'crusher');
   assert.ok(crusher.every((v) => Number.isInteger(v.stageState.ceiling) && v.stageState.ceiling >= 0 && v.stageState.ceiling <= 5));
   const ledge = views.filter((v) => v.stage === 'ledge');

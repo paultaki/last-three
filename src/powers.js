@@ -6,7 +6,7 @@ export const POWERS = [
   },
   {
     id: 'wedge',
-    description: 'In the crusher room, you can jam the lever open: everyone leaves, nobody is crushed. Once.',
+    description: 'In the crusher room, you can jam the lever open once: every other contestant walks out. But you are caught in the jaws like a lever holder and survive the squeeze only about half the time. Risky.',
     blurb: 'Someone can jam a lever.'
   },
   {

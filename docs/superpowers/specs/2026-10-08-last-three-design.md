@@ -51,7 +51,7 @@ Eight seats named **Ash, Bex, Cole, Dara, Eli, Fenn, Gus, Hana** (seat order = t
 | Power | Effect (private description to its holder) | Public blurb (everyone is told this list exists) |
 |---|---|---|
 | `glass_eye` | At the start of the bridge stage, the holder privately learns the safe side (L or R) of all 8 rows. | "Someone can see through glass." |
-| `wedge` | In the crusher room, action `jam_lever` jams the lever open: everyone leaves, nobody is crushed. Once. | "Someone can jam a lever." |
+| `wedge` | In the crusher room, action `jam_lever` jams the lever open: every other agent walks out, but the holder is caught in the jaws like a lever holder and survives the dive with probability 0.5 (rules v2). Once. | "Someone can jam a lever." |
 | `map` | At game start, the holder is told the rules text of all four stages in advance. Everyone else only learns a stage's rules when it begins. | "Someone knows what lies ahead." |
 | `feather` | The first time the holder would be eliminated by any means, they survive instead, with 1 footing left on the ledge. Passive, once. | "Someone survives one deadly fall." |
 | `swap` | On the disc, action `swap_tile:<name>` swaps the holder's tile with the named agent's tile, before the doors open. Once. | "Someone can trade places." |
@@ -110,14 +110,14 @@ States: `alive`, `dead`. The game runs stages in order, skipping a stage when it
 
 Skipped if alive <= 3. Otherwise the alive agents enter a room where the ceiling descends. A lever opens the door only while someone holds it.
 
-- **5 rounds** (`roundsTotal: 5`). Each round every alive agent acts. Legal actions: `stay`, `hold_lever`, `push_lever:<name>`, plus `jam_lever` for the Wedge holder only.
+- **5 rounds** (`roundsTotal: 5`). Each round every alive agent acts. Legal actions: `stay`, `hold_lever`, `push_lever:<name>`, plus `jam_lever` for the Wedge holder only (while unspent).
 - **Resolution each round, in order:**
-  1. If any agent used `jam_lever` (Wedge holder, once): the lever is jammed open. Everyone survives the room, nobody is crushed. Stage ends. (The Wedge is spent.)
+  1. If any agent used `jam_lever` (Wedge holder, once): the lever is jammed open and every other alive agent walks out. The jammer is caught in the jaws like a lever holder, but gets a better dive: survives with probability 0.5 (one seeded RNG draw; `hold_lever` holders keep 0.25). If they fail: eliminated (cause `crusher`, style `flatten`; the feather and floor rules apply as for any elimination). Stage ends. (The Wedge is spent.) The `ceiling` reveal carries `{ ceiling, jammed: true, leverHolder: <jammer>, dive: <bool> }`. A jam beats any `hold_lever` or push in the same round, and those agents are not caught. The wedge's private description and `holderNote` say plainly that the jam is risky (about half the time).
   2. Else determine the lever holder: if an agent chose `hold_lever`, they become the holder (if several chose it, the RNG picks one). If nobody chose it, and some agents chose `push_lever:<name>`, the pushed agent becomes the holder unless the target holds `anchor` (push fails, logged). If several pushes, the RNG picks one valid target.
   3. If there is a holder: the door opens; every other alive agent escapes. The holder then has one dive to escape as the ceiling falls: survives with probability 0.25 (seeded RNG). If they fail: eliminated (cause `crusher`, style `flatten`).
   4. If there is no holder this round and it is round 5 (deadline): the ceiling falls on everyone still in the room; every alive agent is eliminated (cause `crusher`, style `flatten`) except the floor-rule survivor. This is the brutal case. With rounds 1 to 4 and no holder, nothing happens; the ceiling just lowers (`reveal` ceiling height).
 - **Stage default action:** `stay`.
-- The holder does not choose to dive; dive is automatic with p = 0.25.
+- The holder does not choose to dive; dive is automatic with p = 0.25 (0.5 for a Wedge jammer).
 
 ### 4.3 Disc ("The Trapdoor Disc")
 
@@ -132,7 +132,8 @@ Skipped if alive <= 3. With N alive, the disc has N tiles numbered 1 to N. Exact
 Runs when alive >= 2 (normally 3). A shrinking ledge over a pit. Last standing is 1st.
 
 - **Footing:** each agent starts at 3 (anchor holder: 4).
-- **Each round**, every alive agent chooses one: `shove:<name>`, `brace`, `dodge`. Default: `brace`.
+- **Each round**, every alive agent chooses one: `shove:<name>`, `brace`, `dodge`. Default: `brace`, or `dodge` when `brace` is forbidden this round (see next point).
+- **No repeated defence (rules v2).** An agent may not make the same defensive move two rounds in a row: if it chose `brace` last round it cannot choose `brace` this round, and if it chose `dodge` last round it cannot choose `dodge` this round. `shove:<name>` is never restricted, and a shove clears the restriction (the agent's last defence becomes null). Round 1 has no restriction. The restriction is enforced in the engine's `legalActions` (the forbidden move is simply absent), so choosing it is invalid: the `action` event records the default with `valid: false` and a note such as "brace not allowed twice in a row". The viewing agent sees `stageState.lastDefence` (`null`, `"brace"` or `"dodge"`): its own last defence only. Reason: in 15 of 24 real games every agent braced every round, the shrink took everyone to 0 footing, and the floor rule picked the winner by coin flip.
 - **Resolution per round, simultaneous:**
   - For each agent X: let S be the set of agents who shoved X.
   - If X chose `brace`: each shover loses 1 footing; X loses none.
@@ -174,7 +175,7 @@ For every ask, the engine builds a plain-JSON `view` and passes it to `agent.act
 }
 ```
 
-`publicLog` carries the lines since this agent's last ask, capped at the last 40 lines. `whispersToYou` carries whispers received since the last ask. `stageState` differs per stage: bridge: `{ rowsCrossed, weakPanesRevealed: [{row, weak: "L"}], front: "Ash" }`; crusher: `{ ceiling: 0-5, leverHolder: null }`; disc: `{ tiles: {"1":"Ash"}, openCount }`; ledge: `{ footing: {"Ash": 3}, shrinkIn: 1 }`. Include everything an agent legitimately knows, nothing hidden.
+`publicLog` carries the lines since this agent's last ask, capped at the last 40 lines. `whispersToYou` carries whispers received since the last ask. `stageState` differs per stage: bridge: `{ rowsCrossed, weakPanesRevealed: [{row, weak: "L"}], front: "Ash" }`; crusher: `{ ceiling: 0-5, leverHolder: null }`; disc: `{ tiles: {"1":"Ash"}, openCount }`; ledge: `{ footing: {"Ash": 3}, shrinkIn: 1, lastDefence: null }` (`lastDefence` is the viewer's own). Include everything an agent legitimately knows, nothing hidden.
 
 `rules` is written by the engine (single source of truth) in plain words, includes the numbers, and never mentions powers the agent does not hold. The Map holder additionally receives `privateKnowledge` entries with the rules text of all four stages at game start.
 
@@ -200,6 +201,7 @@ Every game produces a tape, a plain JSON object:
 ```json
 {
   "version": 1,
+  "rulesVersion": 2,
   "id": "20261008-0001",
   "seed": 12345,
   "createdAt": "ISO timestamp",
@@ -214,6 +216,8 @@ Every game produces a tape, a plain JSON object:
   "usage": { "inputTokens": 0, "outputTokens": 0, "usd": 0, "calls": 0 }
 }
 ```
+
+`rulesVersion` is a positive integer written by the engine (`RULES_VERSION` in `src/engine.js`, currently 2: Wedge jam dive and no repeated ledge defence). Tapes from before rules v2 lack the field and stay valid; stats should treat them as rules v1.
 
 Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null, ... }`, `i` strictly increasing from 0. Event types and required fields:
 
@@ -233,7 +237,7 @@ Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null,
 | `stage_end` | `stage`, `survivors` |
 | `game_end` | `places` |
 
-`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, a first event index other than 0, non-increasing `i`, unknown event type, missing or mistyped required fields (including `ability_use.detail`, `lucky_save.why`, `stage_start.note`), a missing or non-finite `usage`, a `game_start` roster that is not the eight `players`, names not in `players` anywhere (alive lists, survivors, `forgedAs`, whisper ends, deaths, places, line and footing reveals), alive lists that disagree with the deaths so far, deaths without a stage, a null place without `diedAt`, places that do not follow from who reached the ledge and the order they fell in, places not forming 1..3 for the survivors, or a power assigned twice.
+`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, a `rulesVersion` that is present but not a positive integer, a first event index other than 0, non-increasing `i`, unknown event type, missing or mistyped required fields (including `ability_use.detail`, `lucky_save.why`, `stage_start.note`), a missing or non-finite `usage`, a `game_start` roster that is not the eight `players`, names not in `players` anywhere (alive lists, survivors, `forgedAs`, whisper ends, deaths, places, line and footing reveals), alive lists that disagree with the deaths so far, deaths without a stage, a null place without `diedAt`, places that do not follow from who reached the ledge and the order they fell in, places not forming 1..3 for the survivors, or a power assigned twice.
 
 ## 8. LLM agents
 

@@ -5,6 +5,7 @@ import { LEDGE_BASE_FOOTING, LEDGE_MAX_ROUNDS, ledgeRules } from '../rules.js';
 const ANCHOR_FOOTING = LEDGE_BASE_FOOTING + 1;
 const FEATHER_FOOTING = 1;
 const FIRST_SHRINK_EVERY_ROUND = 7;
+const DEFENCES = ['brace', 'dodge'];
 
 export async function runLedge(g) {
   const fighters = g.aliveList();
@@ -13,8 +14,9 @@ export async function runLedge(g) {
   const maxRounds = g.config.ledgeMaxRounds ?? LEDGE_MAX_ROUNDS;
   g.emit('reveal', { what: 'footing', data: { footing: shownFooting(footing, fighters) } });
 
+  const lastDefence = Object.fromEntries(fighters.map((name) => [name, null]));
   for (let round = 1; round <= maxRounds && g.alive.size > 1; round++) {
-    await ledgeRound(g, footing, round, maxRounds);
+    await ledgeRound(g, footing, lastDefence, round, maxRounds);
   }
   if (g.alive.size > 1) collapse(g, footing);
   g.endStage();
@@ -33,19 +35,34 @@ function startingFooting(g, fighters) {
 const shrinkIn = (round) => (round >= FIRST_SHRINK_EVERY_ROUND || round % 2 === 0 ? 1 : 2);
 const shrinks = (round) => round >= FIRST_SHRINK_EVERY_ROUND || round % 2 === 0;
 
-async function ledgeRound(g, footing, round, maxRounds) {
+/** Rules v2: nobody repeats a defence. Last round's brace or dodge is closed to that agent now. */
+const defencesFor = (lastDefence, name) => DEFENCES.filter((d) => d !== lastDefence[name]);
+
+/** The default for a missing or illegal choice: brace, or dodge when brace is closed. */
+const defaultDefence = (_name, view) => (view.legalActions.includes('brace') ? 'brace' : 'dodge');
+
+const repeatNote = (proposed, view) => {
+  const repeated = view.stageState.lastDefence;
+  return proposed === repeated ? `${proposed} not allowed twice in a row` : null;
+};
+
+async function ledgeRound(g, footing, lastDefence, round, maxRounds) {
   g.beginRound('play', round, maxRounds);
   const names = g.aliveList();
   const specFor = (name) => ({
     phase: 'play',
     roundsTotal: maxRounds,
-    stageState: { footing: shownFooting(footing, names), shrinkIn: shrinkIn(round) },
-    legalActions: ['brace', 'dodge', ...names.filter((n) => n !== name).map((n) => `shove:${n}`)],
+    stageState: { footing: shownFooting(footing, names), shrinkIn: shrinkIn(round), lastDefence: lastDefence[name] ?? null },
+    legalActions: [...defencesFor(lastDefence, name), ...names.filter((n) => n !== name).map((n) => `shove:${n}`)],
     rules: ledgeRules(shrinkIn(round)),
   });
-  const results = await g.ask(names, specFor, () => 'brace');
+  const results = await g.ask(names, specFor, defaultDefence, repeatNote);
   g.speak(names, results);
   g.emitActions(names, results);
+  for (const name of names) {
+    const action = results[name].action;
+    lastDefence[name] = DEFENCES.includes(action) ? action : null; // a shove clears the restriction
+  }
 
   const loss = resolveShoves(g, names, results);
   for (const name of names) footing[name] -= loss[name];

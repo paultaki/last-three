@@ -237,7 +237,7 @@ test('the ledge rules explain how simultaneous falls and the round-20 collapse a
     assert.match(text, /everyone would fall (at once|in the same round)[^.]*highest footing/i);
     assert.match(text, /round 20[^.]*collapse|collapse[^.]*round 20/i);
     assert.match(text, /collapse[^.]*footing/i);
-    assert.ok(words(text) <= 170, `ledge rules are ${words(text)} words`);
+    assert.ok(words(text) <= 230, `ledge rules are ${words(text)} words`);
   }
 });
 

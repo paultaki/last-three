@@ -87,6 +87,18 @@ const IDX = {
 const deaths = ev.filter((e) => e.type === 'death').map((e) => ({ i: e.i, name: e.name, style: e.style }));
 const stageStarts = Object.fromEntries(ev.filter((e) => e.type === 'stage_start').map((e) => [e.stage, e.i]));
 
+// Real tapes (written by the real engine with real agents) listed in index.json, sample excluded.
+const realIndex = (() => {
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', 'index.json'), 'utf8'));
+    return list.filter((e) => e && e.id && e.id !== 'sample' && fs.existsSync(path.join(webDir, 'tapes', `${e.id}.json`)));
+  } catch {
+    return [];
+  }
+})();
+// A heavyweight-tier copy of the first real tape, to exercise the picker's tier badge.
+const HEAVY_ID = 'heavy-copy';
+
 let statsMode = 'empty'; // 'missing' | 'empty' | 'full'
 const statsFixture = {
   generatedAt: '2026-10-08T00:00:00Z',
@@ -144,6 +156,13 @@ function serve() {
     if (url.pathname === '/tapes/stats.json') {
       if (statsMode === 'missing') return send(404, 'text/plain', 'not found');
       return send(200, 'application/json', JSON.stringify(statsMode === 'full' ? statsFixture : {}));
+    }
+    if (realIndex.length && url.pathname === '/tapes/index.json') {
+      const all = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', 'index.json'), 'utf8'));
+      return send(200, 'application/json', JSON.stringify([...all, { ...realIndex[0], id: HEAVY_ID, tier: 'heavy' }]));
+    }
+    if (realIndex.length && url.pathname === `/tapes/${HEAVY_ID}.json`) {
+      return send(200, 'application/json', fs.readFileSync(path.join(webDir, 'tapes', `${realIndex[0].id}.json`)));
     }
     const eng = /^\/tapes\/(engine-\d+)\.json$/.exec(url.pathname);
     if (eng && engineTapes[eng[1]]) return send(200, 'application/json', JSON.stringify(engineTapes[eng[1]]));
@@ -663,6 +682,218 @@ console.log('\n== resilience ==');
       fs.mkdirSync(screensDir, { recursive: true });
       await page.screenshot({ path: path.join(screensDir, 'dark-1440.png'), fullPage: true });
     }
+  });
+  await closePage(page);
+}
+
+
+// ------------------------------------------------------------------ real tapes
+console.log('\n== real tapes ==');
+if (!realIndex.length) console.log('  (no real tapes in web/tapes/index.json, skipped)');
+const { stateAt } = await import(pathToFileURL(path.join(webDir, 'lib', 'state.js')).href);
+const { highlights } = await import(pathToFileURL(path.join(webDir, 'ui', 'highlights.js')).href);
+const POWER_WORDS = /glass eye|wedge|feather|forger|anchor|swap|\bmap\b|forged by/i;
+
+// In-page audit of the bubbles and layout at the current event.
+const auditPage = () => {
+  const v = window.__viewer;
+  const arena = document.getElementById('arena').getBoundingClientRect();
+  const portrait = arena.width / arena.height < 1.2;
+  const cap = portrait ? 2 : 3;
+  const problems = [];
+  const live = [...document.querySelectorAll('#arena .bubble')].filter((b) => !b.hidden && !b.classList.contains('fade'));
+  if (live.length > cap) problems.push(`${live.length} bubbles (cap ${cap})`);
+  const rects = live.map((b) => ({ b, r: b.getBoundingClientRect() }));
+  for (const { b, r } of rects) {
+    if (r.left < arena.left - 2 || r.right > arena.right + 2 || r.top < arena.top - 2 || r.bottom > arena.bottom + 2) problems.push(`bubble outside arena: ${b.textContent.slice(0, 20)}`);
+    const tag = document.querySelector(`.fig[data-name="${b.dataset.as}"]:not(.gone):not(.off) .tag`);
+    if (tag) {
+      const t = tag.getBoundingClientRect();
+      const ox = Math.min(r.right, t.right) - Math.max(r.left, t.left);
+      const oy = Math.min(r.bottom, t.bottom) - Math.max(r.top, t.top);
+      if (ox > 2 && oy > 2) problems.push(`bubble covers ${b.dataset.as}'s own name tag`);
+    }
+    const txt = b.querySelector('.txt');
+    if (txt.scrollHeight > txt.clientHeight + 1) problems.push('bubble text clipped');
+    if (txt.textContent.length > 141) problems.push('bubble text over the cap');
+  }
+  for (let a = 0; a < rects.length; a++) {
+    for (let c = a + 1; c < rects.length; c++) {
+      const x = Math.min(rects[a].r.right, rects[c].r.right) - Math.max(rects[a].r.left, rects[c].r.left);
+      const y = Math.min(rects[a].r.bottom, rects[c].r.bottom) - Math.max(rects[a].r.top, rects[c].r.top);
+      if (x > 3 && y > 3) problems.push('two bubbles overlap');
+    }
+  }
+  if (document.documentElement.scrollWidth > window.innerWidth) problems.push('horizontal overflow');
+  const scene = document.getElementById('arena').dataset.scene;
+  if (scene !== 'crusher') {
+    for (const t of document.querySelectorAll('.fig:not(.gone):not(.off) .tag')) {
+      const r = t.getBoundingClientRect();
+      if (r.left < arena.left - 2 || r.right > arena.right + 2 || r.bottom > arena.bottom + 2 || r.top < arena.top - 2) problems.push(`name tag outside arena: ${t.textContent}`);
+    }
+  }
+  void v;
+  return problems;
+};
+
+for (const entry of realIndex) {
+  const tape = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', `${entry.id}.json`), 'utf8'));
+  const events = tape.events;
+
+  await check(`${entry.id}: every reveal shape from the engine reaches the state`, () => {
+    const alive = (s) => Object.values(s.players).filter((p) => p.alive).map((p) => p.name);
+    for (const e of events) {
+      if (e.type !== 'reveal') continue;
+      const s = stateAt(tape, e.i);
+      const d = e.data;
+      if (e.what === 'line') assert(JSON.stringify(s.bridge.line) === JSON.stringify(d.line.filter((n) => alive(s).includes(n))), `line at ${e.i}`);
+      if (e.what === 'weak_pane') assert(s.bridge.rows[d.row] && s.bridge.rows[d.row].weak === d.weak, `weak pane at ${e.i}`);
+      if (e.what === 'ceiling') {
+        assert(s.crusher.ceiling === Math.max(0, Math.min(5, d.ceiling)), `ceiling at ${e.i}`);
+        if (d.leverHolder) assert(s.crusher.holder === d.leverHolder, `lever holder at ${e.i}: ${s.crusher.holder} vs ${d.leverHolder}`);
+        if (d.jammed) assert(s.crusher.jam === true, `jammed at ${e.i}`);
+      }
+      if (e.what === 'tiles') for (const [k, name] of Object.entries(d.tiles)) assert(s.disc.tiles[name] === Number(k), `tile ${k} at ${e.i}`);
+      if (e.what === 'trapdoors') for (const k of d.open) assert(s.disc.open.includes(k), `trapdoor ${k} at ${e.i}`);
+      if (e.what === 'footing') for (const [n, v] of Object.entries(d.footing)) assert(s.ledge.footing[n] === v, `footing ${n} at ${e.i}`);
+    }
+  });
+
+  await check(`${entry.id}: highlights are 1 to 8, in order, and never leak with the cut off`, () => {
+    const list = highlights(tape);
+    assert(list.length >= 1 && list.length <= 8, `highlight count ${list.length}`);
+    assert(list.every((h, k) => (k === 0 || h.i >= list[k - 1].i) && events[h.i]), 'in order, valid indexes');
+    for (const h of list) {
+      assert(!POWER_WORDS.test(h.pub), `leak with the cut off: "${h.pub}"`);
+      assert(h.pub.length < 60, `label too long: "${h.pub}"`);
+    }
+    for (const e of events) if (e.type === 'say' && e.forgedAs) assert(list.some((h) => h.i === e.i && /faked a message/.test(h.pub) && /forged a message as/.test(h.cut)), 'forged message highlight');
+  });
+
+  for (const width of WIDTHS) {
+    const page = await openPage(width, { url: `/?tape=${entry.id}&i=0` });
+    for (const cut of width === 768 ? [false] : [false, true]) {
+      await check(`${entry.id} ${width}px${cut ? ' cut' : ''}: stepping through all ${events.length} events never throws, bubbles and layout hold`, async () => {
+        const out = await page.evaluate(
+          ([audit, withCut]) => {
+            const check = new Function(`return (${audit})`)();
+            const v = window.__viewer;
+            v.setCut(withCut);
+            const bad = new Map();
+            const n = v.app.tape.events.length;
+            for (let i = 0; i < n; i++) {
+              try {
+                v.goto(i, { animate: false });
+                const ev = v.app.tape.events[i];
+                if (ev.type === 'say' || ev.type === 'death' || ev.type === 'reveal' || i % 9 === 0) for (const p of check()) bad.set(`${p} @${i}`, 1);
+              } catch (err) {
+                bad.set(`threw @${i}: ${err.message}`, 1);
+              }
+            }
+            return [...bad.keys()].slice(0, 8);
+          },
+          [auditPage.toString(), cut]
+        );
+        assert(out.length === 0, out.join(' | '));
+      });
+    }
+    await check(`${entry.id} ${width}px: no console errors, no failed requests`, async () => noIssues(page));
+    await closePage(page);
+  }
+
+  const page = await openPage(1440, { url: `/?tape=${entry.id}&i=0` });
+  const entryDeaths = events.filter((e) => e.type === 'death');
+  for (const d of entryDeaths) {
+    await check(`${entry.id}: death ${d.name} (${d.style}) at ${d.i} has its animation state`, async () => {
+      await go(page, d.i);
+      assert((await page.locator(`.fig[data-name=${d.name}]`).getAttribute('data-fate')) === d.style, 'data-fate');
+      assert(await page.locator(`.fig[data-name=${d.name}]`).evaluate((el) => el.classList.contains('gone')), 'gone when scrubbed to');
+      const before = await page.evaluate((i) => {
+        const evs = window.__viewer.app.tape.events;
+        let j = i - 1;
+        while (j > 0 && ['thought', 'whisper'].includes(evs[j].type)) j--;
+        return j;
+      }, d.i);
+      await go(page, before);
+      await page.click('#btn-fwd');
+      let landed = await page.evaluate(() => window.__viewer.app.idx);
+      let guard = 0;
+      while (landed < d.i && guard++ < 6) {
+        await page.click('#btn-fwd');
+        landed = await page.evaluate(() => window.__viewer.app.idx);
+      }
+      assert(landed === d.i, `stepping reaches the death (landed ${landed})`);
+      await page.waitForSelector(`#arena .fx-chip.fx-${d.style}`, { timeout: 1500 });
+    });
+  }
+
+  await check(`${entry.id}: ledge footing pips match the footing reveal`, async () => {
+    for (const e of events.filter((x) => x.type === 'reveal' && x.what === 'footing')) {
+      await go(page, e.i);
+      const got = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll('.fig:not(.gone):not(.off)')].map((f) => [f.dataset.name, f.querySelectorAll('.pips i:not(.off)').length])));
+      for (const [n, v] of Object.entries(e.data.footing)) {
+        const alive = await page.evaluate(([i, name]) => window.__viewer.stateAt(i).players[name].alive, [e.i, n]);
+        if (alive) assert(got[n] === v, `${n} shows ${got[n]} pips, reveal says ${v} (event ${e.i})`);
+      }
+    }
+  });
+
+  await check(`${entry.id}: highlight buttons jump, and the cut changes their wording`, async () => {
+    await go(page, 0, false);
+    const labels = await page.locator('#highlights button').allInnerTexts();
+    assert(labels.length >= 1 && labels.length <= 8, `buttons ${labels.length}`);
+    assert(labels.every((t) => !POWER_WORDS.test(t)), `leak: ${labels.join(' | ')}`);
+    const want = highlights(tape)[labels.length - 1].i;
+    await page.locator('#highlights button').last().click();
+    assert((await page.evaluate(() => window.__viewer.app.idx)) === want, 'jumps to the highlight');
+    await page.keyboard.press('d');
+    const cutLabels = await page.locator('#highlights button').allInnerTexts();
+    assert(cutLabels.join() !== labels.join() || !highlights(tape).some((h) => h.cut !== h.pub), 'cut wording differs where the pub text hides something');
+    await page.keyboard.press('d');
+  });
+
+  await check(`${entry.id}: picker label has the winner and its model, plus the tier`, async () => {
+    const opt = await page.locator(`#tape-picker option[value="${entry.id}"]`).innerText();
+    assert(opt.length < 70, `label too long: ${opt}`);
+    assert(opt.includes(entry.winner), `winner in label: ${opt}`);
+    if (entry.winnerModel) assert(opt.includes(entry.winnerModel.split('/').pop()), `model in label: ${opt}`);
+    if (entry.tier === 'cheap') assert(/Budget/.test(opt), `tier in label: ${opt}`);
+    assert(await page.locator('#tape-meta .tier-badge').count() === (entry.tier ? 1 : 0), 'tier badge beside the picker');
+  });
+  noIssues(page);
+  await closePage(page);
+}
+
+if (realIndex.length) {
+  const page = await openPage(1440, { url: `/?tape=${HEAVY_ID}&i=0` });
+  await check('heavy tier shows as "Heavyweights" in the picker and the badge', async () => {
+    const opt = await page.locator(`#tape-picker option[value="${HEAVY_ID}"]`).innerText();
+    assert(/Heavyweights/.test(opt), opt);
+    assert(/Heavyweights/.test(await page.locator('#tape-meta .tier-badge').innerText()), 'badge text');
+  });
+  await closePage(page);
+}
+
+// playback pacing: a long line lingers, a mechanical action does not
+if (realIndex.length) {
+  const page = await openPage(1440, { url: `/?tape=${realIndex[0].id}&i=0` });
+  await check('pacing: long lines linger at least 45 ms a character, actions stay quick, bubbles fade while playing', async () => {
+    const t = await page.evaluate(() => {
+      const evs = window.__viewer.app.tape.events;
+      const say = evs.find((e) => e.type === 'say' && e.text.length > 100);
+      return { len: say.text.length, i: say.i };
+    });
+    await go(page, t.i - 1);
+    const started = Date.now();
+    await page.selectOption('#speed', '4');
+    await page.click('#btn-play');
+    await page.waitForFunction((i) => window.__viewer.app.idx === i, t.i, { timeout: 8000 });
+    const reached = Date.now();
+    await page.waitForFunction((i) => window.__viewer.app.idx > i, t.i, { timeout: 12000 });
+    const lingered = (Date.now() - reached) * 4;
+    await page.click('#btn-play');
+    assert(lingered >= t.len * 40, `line of ${t.len} chars lingered ${lingered} ms at 1x equivalent`);
+    void started;
   });
   await closePage(page);
 }

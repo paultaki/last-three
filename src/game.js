@@ -248,14 +248,15 @@ export class Game {
   /**
    * Ask `names` (seat order) in parallel and normalise every answer. `specFor(name)` builds the
    * view spec, `fallbackFor(name, view)` returns the default action and is only called when needed.
+   * `illegalNote(proposed, view)` may return a more specific note than the generic "illegal action".
    */
-  async ask(names, specFor, fallbackFor) {
+  async ask(names, specFor, fallbackFor, illegalNote = null) {
     const views = names.map((name) => this.view(name, specFor(name)));
     const raws = await Promise.all(names.map((name, k) => this.#callAgent(name, views[k])));
-    return Object.fromEntries(names.map((name, k) => [name, this.#normalize(raws[k], views[k], name, fallbackFor)]));
+    return Object.fromEntries(names.map((name, k) => [name, this.#normalize(raws[k], views[k], name, fallbackFor, illegalNote)]));
   }
 
-  #normalize(raw, view, name, fallbackFor) {
+  #normalize(raw, view, name, fallbackFor, illegalNote) {
     const result = { thought: null, say: null, whisper: null, forge: null, forgeRejected: false, action: '', valid: false, notes: [] };
     let response = null;
     if (!raw.ok) {
@@ -275,7 +276,7 @@ export class Game {
       result.action = proposed;
     } else {
       result.action = fallbackFor(name, view);
-      if (response) result.notes.push(proposed ? `illegal action "${clip(proposed, 40)}"` : 'missing action');
+      if (response) result.notes.push(proposed ? (illegalNote?.(proposed, view) ?? `illegal action "${clip(proposed, 40)}"`) : 'missing action');
     }
     return result;
   }

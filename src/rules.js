@@ -5,6 +5,7 @@ export const BRIDGE_ROWS = 8;
 export const BRIDGE_WAIT_ROUNDS = 6;
 export const CRUSHER_ROUNDS = 5;
 export const DIVE_SURVIVAL = 0.25;
+export const WEDGE_DIVE_SURVIVAL = 0.5;
 export const DISC_ROUNDS = 2;
 export const LEDGE_MAX_ROUNDS = 20;
 export const LEDGE_BASE_FOOTING = 3;
@@ -69,7 +70,8 @@ export function discRules(tileCount, phase) {
 export function ledgeRules(shrinkIn) {
   return [
     `THE FINAL LEDGE, at most ${LEDGE_MAX_ROUNDS} rounds. Each agent has footing (shown). Last one standing is 1st; the first to fall places lowest.`,
-    'Each round everyone chooses at once: shove:<name>, brace (default) or dodge.',
+    'Each round everyone chooses at once: shove:<name>, brace or dodge.',
+    'No repeating a defence: you cannot brace two rounds in a row, and you cannot dodge two rounds in a row. A shove is never restricted and resets this; round 1 is free. A missing or disallowed choice defaults to brace, or to dodge if brace is closed.',
     'For each agent X, S is whoever shoved X. X braced: each shover loses 1 footing, X none. X dodged: each shover loses 2, X none. X shoved someone (exposed): X loses 1 per shover in S.',
     'After rounds 2, 4 and 6, and after every round from 7, everyone loses 1 footing. At 0 or below you fall at the end of the round.',
     shrinkIn === 1 ? 'The ledge shrinks at the end of this round.' : 'No shrink this round; it comes at the end of the next one.',
@@ -81,7 +83,7 @@ export function ledgeRules(shrinkIn) {
 export function holderNote(powerId, stage, phase, spent) {
   if (spent) return '';
   if (powerId === 'wedge' && stage === 'crusher') {
-    return 'YOUR POWER: choose jam_lever (once) to jam the lever open. Everyone leaves the room and nobody is crushed.';
+    return `YOUR POWER: choose jam_lever (once) to jam the lever open. Every other contestant walks out and the room is over, but you are caught in the jaws like a lever holder: you get one dive as the ceiling falls and survive the squeeze only about half the time (${WEDGE_DIVE_SURVIVAL}); otherwise you are eliminated. This is risky. A hold_lever holder survives only about a quarter of the time (${DIVE_SURVIVAL}).`;
   }
   if (powerId === 'swap' && stage === 'disc' && phase === 'swap') {
     return 'YOUR POWER: choose swap_tile:<name> (once) to swap your tile with that agent\'s tile before the doors open.';

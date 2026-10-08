@@ -53,7 +53,7 @@ function saintBot(view, rng) {
     case 'crusher':
       return reply('hold_lever', { ...base, say: 'I will hold the lever. Everyone go.' });
     case 'ledge':
-      return reply('brace', base);
+      return reply(view.legalActions.includes('brace') ? 'brace' : 'dodge', base);
     default:
       return reply(prefer(view, 'wait', rng), base);
   }
@@ -67,7 +67,7 @@ function cowardBot(view, rng) {
     case 'crusher':
       return reply(view.round >= 3 ? pushOther(view, rng) : 'stay', { ...base, say: view.round >= 3 ? 'Not me. Try them.' : null });
     case 'ledge':
-      return reply('dodge', base);
+      return reply(view.legalActions.includes('dodge') ? 'dodge' : 'brace', base);
     default:
       return reply(prefer(view, 'wait', rng), base);
   }

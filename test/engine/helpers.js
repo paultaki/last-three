@@ -66,7 +66,7 @@ const THREE = ['Ash', 'Bex', 'Cole'];
 /** Ledge game with `fighters` alive; `plan[round][seat]` is an action, everyone else braces. */
 export function ledgeGame({ fighters = THREE, powers = { Ash: 'nothing', Bex: 'map', Cole: 'wedge' }, plan = {}, views = [], config = {}, seed = 1 } = {}) {
   const dead = ['Ash', 'Bex', 'Cole', 'Dara', 'Eli', 'Fenn', 'Gus', 'Hana'].filter((n) => !fighters.includes(n));
-  const agents = fixedAgents(spy((view) => reply(plan[view.round]?.[view.you] ?? 'brace'), views));
+  const agents = fixedAgents(spy((view) => reply(plan[view.round]?.[view.you] ?? (view.legalActions.includes('brace') ? 'brace' : 'dodge')), views));
   const g = makeGame({ seed, powers, agents, config, dead });
   g.stage = 'ledge';
   return g;

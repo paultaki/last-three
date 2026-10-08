@@ -89,14 +89,57 @@ test('a valid push still works when another push at the anchor fails; holders be
   assert.equal(ofType(h.events, 'reveal')[0].data.leverHolder, 'Ash');
 });
 
-test('wedge jam_lever: everybody survives, stage ends that round, the jam beats a lever holder', async () => {
+test('wedge jam_lever: every other agent walks out, the stage ends that round, the jam beats a lever holder', async () => {
   const g = crusherGame({ Fenn: 'jam_lever', Ash: 'hold_lever' }, { powers: { Fenn: 'wedge' } });
   await runCrusher(g);
-  assert.equal(deathsOf(g).length, 0);
-  assert.equal(g.alive.size, 8);
+  const dead = deathsOf(g);
+  assert.ok(dead.length <= 1 && dead.every((d) => d.name === 'Fenn' && d.cause === 'crusher' && d.style === 'flatten'), 'only the jammer can be caught');
+  assert.equal(g.alive.size, 8 - dead.length);
+  assert.ok(g.alive.has('Ash'), 'the lever holder is not caught: the jam wins');
   assert.equal(ofType(g.events, 'round_start').length, 1);
   assert.deepEqual(ofType(g.events, 'ability_use').map((e) => [e.name, e.power]), [['Fenn', 'wedge']]);
   assert.ok(g.spent.has('Fenn'));
+  const reveal = ofType(g.events, 'reveal')[0].data;
+  assert.equal(reveal.jammed, true);
+  assert.equal(reveal.leverHolder, 'Fenn');
+  assert.equal(reveal.dive, dead.length === 0);
+});
+
+test('wedge jam_lever: the jammer survives the dive about half the time, and the same seed always gives the same result', async () => {
+  const run = async (seed) => {
+    const g = crusherGame({ Fenn: 'jam_lever' }, { seed, powers: { Fenn: 'wedge' } });
+    await runCrusher(g);
+    return g.alive.has('Fenn');
+  };
+  let survived = 0;
+  const trials = 600;
+  for (let seed = 1; seed <= trials; seed++) {
+    const first = await run(seed);
+    assert.equal(first, await run(seed), `seed ${seed} is deterministic`);
+    if (first) survived += 1;
+  }
+  const rate = survived / trials;
+  assert.ok(rate > 0.44 && rate < 0.56, `jam dive survival rate ${rate}`);
+});
+
+test('wedge jam_lever: the jammer who loses the dive dies on the crusher and everyone else is untouched', async () => {
+  for (let seed = 1; seed <= 40; seed++) {
+    const g = crusherGame({ Fenn: 'jam_lever' }, { seed, powers: { Fenn: 'wedge' } });
+    await runCrusher(g);
+    if (g.alive.has('Fenn')) continue;
+    assert.deepEqual(deathsOf(g).map((d) => [d.name, d.cause, d.style]), [['Fenn', 'crusher', 'flatten']]);
+    assert.equal(g.alive.size, 7);
+    return;
+  }
+  assert.fail('no failed dive in 40 seeds');
+});
+
+test('a feather held by someone else never fires when the jammer is caught', async () => {
+  for (let seed = 1; seed <= 40; seed++) {
+    const g = crusherGame({ Fenn: 'jam_lever' }, { seed, powers: { Fenn: 'wedge', Ash: 'feather' } });
+    await runCrusher(g);
+    assert.equal(ofType(g.events, 'ability_use').filter((e) => e.power === 'feather').length, 0);
+  }
 });
 
 test('jam_lever is only legal for an unspent wedge holder; others using it are invalid', async () => {
@@ -137,5 +180,8 @@ test('crusher view: legal actions, ceiling 5 down to 1, rules never mention powe
   assert.deepEqual(ash[0].legalActions, ['stay', 'hold_lever', ...SEATS.slice(1).map((n) => `push_lever:${n}`)]);
   assert.ok(ash.every((v) => v.roundsTotal === 5 && v.stageState.leverHolder === null && v.phase === 'play'));
   for (const v of ash) assert.doesNotMatch(v.rules, /jam|wedge/i);
-  assert.match(views.find((v) => v.you === 'Fenn').rules, /jam_lever/);
+  const fenn = views.find((v) => v.you === 'Fenn');
+  assert.match(fenn.rules, /jam_lever/);
+  assert.match(fenn.rules, /only about half the time/);
+  assert.match(fenn.power.description, /about half the time/);
 });

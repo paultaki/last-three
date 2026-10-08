@@ -50,8 +50,9 @@ export function validateTape(tape) {
   validateUsage(tape.usage);
 }
 
-function validateHeader({ version, id, seed, createdAt }) {
+function validateHeader({ version, rulesVersion, id, seed, createdAt }) {
   if (version !== 1) fail(`Bad version: expected 1, got ${version}`);
+  if (rulesVersion !== undefined && (!Number.isInteger(rulesVersion) || rulesVersion < 1)) fail(`Bad rulesVersion: expected a positive integer, got ${rulesVersion}`);
   if (typeof id !== 'string' || !id) fail('Missing or invalid id');
   if (!Number.isInteger(seed)) fail('Seed must be an integer');
   if (typeof createdAt !== 'string' || !createdAt) fail('Missing or invalid createdAt');

@@ -12,6 +12,9 @@ import { runLedge } from './stages/ledge.js';
 
 export { SEATS };
 
+/** Bumped whenever the rules change in a way that makes old tapes incomparable. v2: Wedge dive, no repeated ledge defence. */
+export const RULES_VERSION = 2;
+
 const DEFAULT_DATE = '20261008';
 const DEFAULT_CREATED_AT = '2026-10-08T00:00:00.000Z';
 
@@ -52,6 +55,7 @@ export async function runGame({ seed, agents, config = {} }) {
 
   return {
     version: 1,
+    rulesVersion: RULES_VERSION,
     id: config.id ?? `${DEFAULT_DATE}-${String(seed).padStart(4, '0')}`,
     seed,
     createdAt: config.createdAt ?? DEFAULT_CREATED_AT,

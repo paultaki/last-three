@@ -1,7 +1,7 @@
 // Stage 2: the Crusher Room (spec 4.2). Runs only with more than 3 alive.
 
 import { SEATS } from '../game.js';
-import { CRUSHER_ROUNDS, DIVE_SURVIVAL, crusherRules, holderNote } from '../rules.js';
+import { CRUSHER_ROUNDS, DIVE_SURVIVAL, WEDGE_DIVE_SURVIVAL, crusherRules, holderNote } from '../rules.js';
 
 const FEATHER_DETAIL = 'Crushed, but the feather lifted the holder clear.';
 const LUCKY_WHY = 'a crate jams the ceiling';
@@ -35,13 +35,20 @@ async function crusherRound(g, round) {
   g.speak(names, results);
   g.emitActions(names, results);
 
-  // 1. Jam beats everything: nobody is crushed and the room is over.
+  // 1. Jam beats everything: every other agent walks out and the room is over. The jammer is
+  //    caught in the jaws like a lever holder, with a better dive than a hold_lever holder gets.
   const jammer = names.find((n) => results[n].action === 'jam_lever');
   if (jammer) {
     g.spent.add(jammer);
-    g.emit('ability_use', { name: jammer, power: 'wedge', detail: 'Jammed the lever open; everyone walks out.' });
-    g.emit('reveal', { what: 'ceiling', data: { ceiling: CRUSHER_ROUNDS + 1 - round, jammed: true } });
-    g.announce('The lever is jammed open. Everyone walks out of the room.');
+    g.emit('ability_use', { name: jammer, power: 'wedge', detail: 'Jammed the lever open; everyone else walks out, but the jaws catch the jammer.' });
+    const survives = g.rng.chance(WEDGE_DIVE_SURVIVAL);
+    g.emit('reveal', { what: 'ceiling', data: { ceiling: CRUSHER_ROUNDS + 1 - round, jammed: true, leverHolder: jammer, dive: survives } });
+    g.announce(`The lever is jammed open. Everyone but ${jammer} walks out of the room.`);
+    if (survives) {
+      g.announce(`${jammer} dives clear as the ceiling slams down.`);
+    } else {
+      g.eliminate([jammer], { cause: 'crusher', style: 'flatten', featherDetail: FEATHER_DETAIL, luckyWhy: LUCKY_WHY });
+    }
     return true;
   }
 
