@@ -126,6 +126,7 @@ export function saveTape(tape, outPath = null, extra = {}) {
     winnerModel: tape.players.find((p) => p.name === winner)?.model ?? null,
     calls: tape.usage?.calls ?? 0,
     usd: tape.usage?.usd ?? 0,
+    rules: tape.rulesVersion ?? 1,
     ...extra,
   };
   writeJsonAtomic(outPath ?? resolve(TAPES_DIR, `${tape.id}.json`), tape);

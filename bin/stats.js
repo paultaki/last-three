@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Read every tape in web/tapes and write web/tapes/stats.json.
-// Usage: node bin/stats.js
+// Usage: node bin/stats.js [--rules N]   (default: the highest rulesVersion present; tapes without one are rules 1)
 import { readdirSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { computeStats } from '../src/stats.js';
 
 const TAPES_DIR = resolve(fileURLToPath(new URL('../', import.meta.url)), 'web/tapes');
-const SKIP = new Set(['index.json', 'stats.json']);
+const SKIP = new Set(['index.json', 'stats.json', 'sample.json']); // sample.json is hand-authored for the viewer, never real data
 
 function loadTapes() {
   const tapes = [];
@@ -33,9 +33,13 @@ function printTable(stats) {
   for (const row of rows) console.log(line(row));
 }
 
-const stats = computeStats(loadTapes());
+const rulesOf = (tape) => tape.rulesVersion ?? 1;
+const all = loadTapes();
+const flag = process.argv.indexOf('--rules');
+const rules = flag > -1 ? Number(process.argv[flag + 1]) : Math.max(1, ...all.map(rulesOf));
+const stats = { ...computeStats(all.filter((t) => rulesOf(t) === rules)), rulesVersion: rules, tapesByRules: Object.fromEntries([...new Set(all.map(rulesOf))].sort().map((v) => [v, all.filter((t) => rulesOf(t) === v).length])) };
 const out = resolve(TAPES_DIR, 'stats.json');
 writeFileSync(`${out}.tmp`, `${JSON.stringify(stats, null, 2)}\n`);
 renameSync(`${out}.tmp`, out);
-console.log(`${stats.games} tapes -> web/tapes/stats.json`);
+console.log(`${stats.games} tapes under rules v${rules} -> web/tapes/stats.json (all versions: ${JSON.stringify(stats.tapesByRules)})`);
 printTable(stats);
