@@ -7,7 +7,7 @@ import { SpendCapError } from './ledger.js';
 export const DEFAULT_ROSTER = [
   'anthropic/claude-haiku-5.5',
   'openai/gpt-oss-120b',
-  'google/gemini-3.1-flash-lite',
+  'google/gemini-2.5-flash-lite',
   'deepseek/deepseek-v4-flash',
   'alibaba/qwen3.8-flash',
   'zai/glm-5.3-flash',
@@ -15,14 +15,26 @@ export const DEFAULT_ROSTER = [
   'meta/llama-4-maverick',
 ];
 
+/** Heavyweight 8-seat roster: stronger (about 20x pricier) models, better bluffers. */
+export const HEAVY_ROSTER = [
+  'anthropic/claude-sonnet-5.5',
+  'google/gemini-3.1-pro-preview',
+  'openai/gpt-5.6-luna',
+  'moonshotai/kimi-k2.6',
+  'deepseek/deepseek-v4-pro',
+  'minimax/minimax-m3',
+  'spacexai/grok-4.1-fast-reasoning',
+  'zai/glm-5.3-flashx',
+];
+
 /** Substitutes for any roster model that fails its probe. */
 export const RESERVE_MODELS = [
   'openai/gpt-5-nano',
-  'google/gemini-2.5-flash-lite',
+  'google/gemini-3.1-flash-lite',
   'mistral/mistral-small',
 ];
 
-const MAX_TOKENS = 500;
+const MAX_TOKENS = 800;
 const REPAIR_NOTE =
   'Your last reply could not be used. Reply again with ONLY the JSON object: ' +
   '{"thought": "...", "say": "..." or null, "whisper": {"to": "Name", "text": "..."} or null, ' +

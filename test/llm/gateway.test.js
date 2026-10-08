@@ -31,7 +31,8 @@ test('success returns text, usage and sends bearer token + json response_format'
   assert.equal(seen.url, 'https://ai-gateway.vercel.sh/v1/chat/completions');
   assert.equal(seen.init.headers.authorization, 'Bearer old-token');
   assert.deepEqual(seen.body.response_format, { type: 'json_object' });
-  assert.equal(seen.body.max_tokens, 500);
+  assert.equal(seen.body.max_tokens, 800);
+  assert.deepEqual(seen.body.reasoning, { enabled: false });
   assert.equal(seen.body.temperature, 1);
 });
 
@@ -160,4 +161,18 @@ test('caller abort is not retried', async () => {
   );
   await assert.rejects(chat({ ...req, signal: controller.signal }));
   assert.equal(calls, 1);
+});
+
+test('reasoning rejection retries without the param and is remembered per model', async () => {
+  const bodies = [];
+  setFetch(async (_url, init) => {
+    bodies.push(JSON.parse(init.body));
+    if (bodies.length === 1) return new Response('unknown field reasoning', { status: 400 });
+    return new Response(JSON.stringify({ choices: [{ message: { content: '{}' } }], usage: { prompt_tokens: 1, completion_tokens: 1 } }), { status: 200 });
+  });
+  await chat({ model: 'x/no-reasoning', system: 's', user: 'u' });
+  await chat({ model: 'x/no-reasoning', system: 's', user: 'u' });
+  assert.deepEqual(bodies[0].reasoning, { enabled: false });
+  assert.equal('reasoning' in bodies[1], false);
+  assert.equal('reasoning' in bodies[2], false);
 });

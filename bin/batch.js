@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Play many LLM games under a spend cap.
-// Usage: node bin/batch.js --games N [--start-seed S] [--cap USD] [--per-game-cap USD] [--concurrency 2]
+// Usage: node bin/batch.js --games N [--start-seed S] [--cap USD] [--per-game-cap USD] [--concurrency 2] [--tier cheap|heavy]
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
 import { createLedger, SpendCapError } from '../src/llm/ledger.js';
-import { DEFAULT_ROSTER } from '../src/llm/llmAgent.js';
+import { DEFAULT_ROSTER, HEAVY_ROSTER } from '../src/llm/llmAgent.js';
 import { playLlmGame, resolveRoster, saveTape } from './run-llm.js';
 
 const DEFAULT_PER_GAME_CAP_USD = 0.6;
@@ -17,6 +17,7 @@ function readOptions() {
       cap: { type: 'string' },
       'per-game-cap': { type: 'string' },
       concurrency: { type: 'string', default: '2' },
+      tier: { type: 'string', default: 'cheap' },
     },
   });
   const games = Number(values.games);
@@ -27,6 +28,7 @@ function readOptions() {
     games,
     startSeed,
     concurrency,
+    tier: values.tier,
     capUsd: values.cap === undefined ? undefined : Number(values.cap),
     perGameCapUsd: values['per-game-cap'] === undefined ? DEFAULT_PER_GAME_CAP_USD : Number(values['per-game-cap']),
   };
@@ -37,7 +39,7 @@ function readOptions() {
  * stops starting new games when the cap is reached or the next game is projected to exceed it.
  * @returns {Promise<{played: number, failed: number, stopped: string|null}>}
  */
-export async function runBatch({ games, startSeed, concurrency, ledger, models, log = console.log }) {
+export async function runBatch({ games, startSeed, concurrency, ledger, models, tier = 'cheap', log = console.log }) {
   const costs = [];
   let next = 0;
   let inFlight = 0;
@@ -55,7 +57,7 @@ export async function runBatch({ games, startSeed, concurrency, ledger, models, 
     const before = ledger.totals().usd;
     try {
       const tape = await playLlmGame({ seed, models, ledger });
-      saveTape(tape);
+      saveTape(tape, null, { tier });
       played += 1;
       costs.push(tape.usage.usd);
       log(`game ${tape.id} seed ${seed}: winner ${tape.result.places.find((p) => p.place === 1)?.name}, $${tape.usage.usd.toFixed(4)}`);
@@ -95,7 +97,8 @@ async function main() {
     perGameCapUsd: opts.perGameCapUsd,
   });
   await ledger.ready();
-  const models = await resolveRoster(DEFAULT_ROSTER, ledger);
+  if (!['cheap', 'heavy'].includes(opts.tier)) throw new Error('--tier must be cheap or heavy');
+  const models = await resolveRoster(opts.tier === 'heavy' ? HEAVY_ROSTER : DEFAULT_ROSTER, ledger);
   const result = await runBatch({ ...opts, ledger, models });
   console.log(`done: ${result.played} played, ${result.failed} failed${result.stopped ? `; stopped: ${result.stopped}` : ''}`);
   console.log(`total spend $${ledger.totals().usd.toFixed(4)} of $${ledger.cap.toFixed(2)} cap`);

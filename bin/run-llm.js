@@ -115,7 +115,7 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() 
 }
 
 /** Write the tape file and prepend its entry to web/tapes/index.json (newest first). */
-export function saveTape(tape, outPath = null) {
+export function saveTape(tape, outPath = null, extra = {}) {
   const winner = tape.result?.places?.find((p) => p.place === 1)?.name ?? null;
   const entry = {
     id: tape.id,
@@ -126,6 +126,7 @@ export function saveTape(tape, outPath = null) {
     winnerModel: tape.players.find((p) => p.name === winner)?.model ?? null,
     calls: tape.usage?.calls ?? 0,
     usd: tape.usage?.usd ?? 0,
+    ...extra,
   };
   writeJsonAtomic(outPath ?? resolve(TAPES_DIR, `${tape.id}.json`), tape);
   if (!outPath) {

@@ -32,6 +32,7 @@ const hooks = {
 let cachedToken = null;
 let refreshPromise = null;
 const noJsonFormat = new Set();
+const noReasoningParam = new Set();
 
 /** Inject a fetch implementation (tests). */
 export function setFetch(fn) {
@@ -56,6 +57,7 @@ export function resetGateway() {
   cachedToken = null;
   refreshPromise = null;
   noJsonFormat.clear();
+  noReasoningParam.clear();
 }
 
 function readEnvToken() {
@@ -155,10 +157,10 @@ function isRetryable(status) {
 /**
  * Send one chat completion.
  * @param {{model: string, system: string, user: string, maxTokens?: number,
- *   temperature?: number, json?: boolean, signal?: AbortSignal}} opts
+ *   temperature?: number, json?: boolean, thinking?: boolean, signal?: AbortSignal}} opts
  * @returns {Promise<{text: string, usage: {inputTokens: number, outputTokens: number}, model: string}>}
  */
-export async function chat({ model, system, user, maxTokens = 500, temperature = 1, json = true, signal }) {
+export async function chat({ model, system, user, maxTokens = 800, temperature = 1, json = true, thinking = false, signal }) {
   const buildBody = () => {
     const body = {
       model,
@@ -170,6 +172,8 @@ export async function chat({ model, system, user, maxTokens = 500, temperature =
       ],
     };
     if (json && !noJsonFormat.has(model)) body.response_format = { type: 'json_object' };
+    // Thinking models spend the whole token budget on hidden reasoning and return nothing; the game wants quick answers.
+    if (!thinking && !noReasoningParam.has(model)) body.reasoning = { enabled: false };
     return body;
   };
 
@@ -202,6 +206,10 @@ export async function chat({ model, system, user, maxTokens = 500, temperature =
     }
     if (res.status === 400 && json && !noJsonFormat.has(model) && /response_format/i.test(detail)) {
       noJsonFormat.add(model);
+      continue;
+    }
+    if (res.status === 400 && !thinking && !noReasoningParam.has(model) && /reasoning/i.test(detail)) {
+      noReasoningParam.add(model);
       continue;
     }
     if (isRetryable(res.status) && attempt < MAX_RETRIES) {
