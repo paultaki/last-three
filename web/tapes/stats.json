@@ -1,7 +1,29 @@
 {
-  "generatedAt": "2026-10-08T09:19:47.995Z",
+  "generatedAt": "2026-10-08T09:38:29.524Z",
   "games": 32,
   "models": [
+    {
+      "model": "anthropic/claude-sonnet-5.5",
+      "games": 8,
+      "meanPlace": 2.25,
+      "wins": 4,
+      "top3": 5,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 0,
+        "disc": 3,
+        "ledge": 1
+      },
+      "volunteers": 1,
+      "frontOfBridge": 1,
+      "holdLever": 2,
+      "pushLever": 2,
+      "shoves": 0,
+      "lies": {
+        "power": 0,
+        "side": 3
+      }
+    },
     {
       "model": "anthropic/claude-haiku-5.5",
       "games": 24,
@@ -25,91 +47,69 @@
       }
     },
     {
-      "model": "spacexai/grok-4.1-fast-reasoning",
+      "model": "google/gemini-3.1-pro-preview",
       "games": 8,
-      "meanPlace": 2.625,
-      "wins": 3,
+      "meanPlace": 2.75,
+      "wins": 2,
       "top3": 4,
       "deathsByStage": {
-        "bridge": 2,
+        "bridge": 1,
         "crusher": 0,
-        "disc": 2,
-        "ledge": 1
+        "disc": 3,
+        "ledge": 2
       },
-      "volunteers": 2,
+      "volunteers": 1,
       "frontOfBridge": 2,
       "holdLever": 0,
-      "pushLever": 2,
+      "pushLever": 5,
       "shoves": 0,
       "lies": {
-        "power": 2,
-        "side": 3
+        "power": 1,
+        "side": 1
       }
     },
     {
-      "model": "openai/gpt-5-nano",
+      "model": "spacexai/grok-4.1-fast-reasoning",
       "games": 8,
-      "meanPlace": 2.875,
-      "wins": 3,
+      "meanPlace": 3,
+      "wins": 2,
       "top3": 3,
       "deathsByStage": {
-        "bridge": 0,
+        "bridge": 2,
         "crusher": 0,
-        "disc": 4,
+        "disc": 3,
         "ledge": 1
       },
-      "volunteers": 0,
-      "frontOfBridge": 0,
-      "holdLever": 0,
+      "volunteers": 3,
+      "frontOfBridge": 2,
+      "holdLever": 1,
       "pushLever": 0,
       "shoves": 0,
       "lies": {
         "power": 0,
-        "side": 0
+        "side": 8
       }
     },
     {
-      "model": "anthropic/claude-sonnet-5.5",
+      "model": "zai/glm-5.3-flashx",
       "games": 8,
-      "meanPlace": 3,
-      "wins": 1,
+      "meanPlace": 3.125,
+      "wins": 0,
       "top3": 4,
       "deathsByStage": {
-        "bridge": 0,
-        "crusher": 3,
-        "disc": 1,
-        "ledge": 3
+        "bridge": 1,
+        "crusher": 0,
+        "disc": 3,
+        "ledge": 4
       },
       "volunteers": 1,
       "frontOfBridge": 2,
-      "holdLever": 1,
-      "pushLever": 1,
-      "shoves": 1,
-      "lies": {
-        "power": 0,
-        "side": 4
-      }
-    },
-    {
-      "model": "moonshotai/kimi-k2.6",
-      "games": 8,
-      "meanPlace": 3,
-      "wins": 0,
-      "top3": 5,
-      "deathsByStage": {
-        "bridge": 0,
-        "crusher": 1,
-        "disc": 2,
-        "ledge": 5
-      },
-      "volunteers": 0,
-      "frontOfBridge": 0,
       "holdLever": 0,
-      "pushLever": 2,
-      "shoves": 5,
+      "pushLever": 5,
+      "shoves": 4,
       "lies": {
-        "power": 0,
-        "side": 6
+        "power": 1,
+        "side": 3
       }
     },
     {
@@ -201,28 +201,6 @@
       }
     },
     {
-      "model": "deepseek/deepseek-v4-pro",
-      "games": 8,
-      "meanPlace": 3.375,
-      "wins": 0,
-      "top3": 4,
-      "deathsByStage": {
-        "bridge": 0,
-        "crusher": 0,
-        "disc": 3,
-        "ledge": 5
-      },
-      "volunteers": 1,
-      "frontOfBridge": 1,
-      "holdLever": 0,
-      "pushLever": 2,
-      "shoves": 6,
-      "lies": {
-        "power": 0,
-        "side": 1
-      }
-    },
-    {
       "model": "mistral/mistral-small",
       "games": 24,
       "meanPlace": 3.417,
@@ -267,46 +245,46 @@
       }
     },
     {
-      "model": "zai/glm-5.3-flashx",
+      "model": "alibaba/qwen3.8-max",
       "games": 8,
       "meanPlace": 3.5,
-      "wins": 1,
-      "top3": 2,
+      "wins": 0,
+      "top3": 3,
       "deathsByStage": {
         "bridge": 1,
-        "crusher": 0,
-        "disc": 5,
-        "ledge": 1
+        "crusher": 1,
+        "disc": 3,
+        "ledge": 3
       },
-      "volunteers": 3,
-      "frontOfBridge": 4,
-      "holdLever": 0,
-      "pushLever": 4,
-      "shoves": 0,
+      "volunteers": 1,
+      "frontOfBridge": 2,
+      "holdLever": 2,
+      "pushLever": 2,
+      "shoves": 1,
       "lies": {
         "power": 1,
-        "side": 1
+        "side": 2
       }
     },
     {
-      "model": "google/gemini-3.1-pro-preview",
+      "model": "deepseek/deepseek-v4-pro",
       "games": 8,
-      "meanPlace": 3.75,
+      "meanPlace": 3.5,
       "wins": 0,
-      "top3": 1,
+      "top3": 4,
       "deathsByStage": {
-        "bridge": 2,
-        "crusher": 1,
-        "disc": 3,
-        "ledge": 2
+        "bridge": 0,
+        "crusher": 0,
+        "disc": 4,
+        "ledge": 4
       },
-      "volunteers": 0,
+      "volunteers": 1,
       "frontOfBridge": 2,
       "holdLever": 0,
-      "pushLever": 4,
-      "shoves": 0,
+      "pushLever": 2,
+      "shoves": 5,
       "lies": {
-        "power": 0,
+        "power": 1,
         "side": 1
       }
     },
@@ -339,19 +317,41 @@
       "wins": 0,
       "top3": 1,
       "deathsByStage": {
-        "bridge": 1,
+        "bridge": 0,
         "crusher": 2,
-        "disc": 4,
+        "disc": 5,
         "ledge": 1
       },
-      "volunteers": 0,
+      "volunteers": 1,
       "frontOfBridge": 1,
-      "holdLever": 0,
-      "pushLever": 2,
+      "holdLever": 1,
+      "pushLever": 4,
       "shoves": 2,
       "lies": {
-        "power": 1,
-        "side": 4
+        "power": 0,
+        "side": 2
+      }
+    },
+    {
+      "model": "moonshotai/kimi-k2.6",
+      "games": 8,
+      "meanPlace": 4,
+      "wins": 0,
+      "top3": 0,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 0,
+        "disc": 8,
+        "ledge": 0
+      },
+      "volunteers": 1,
+      "frontOfBridge": 1,
+      "holdLever": 0,
+      "pushLever": 4,
+      "shoves": 0,
+      "lies": {
+        "power": 0,
+        "side": 1
       }
     }
   ],
