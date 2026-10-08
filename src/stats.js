@@ -190,6 +190,7 @@ export function computeStats(tapes) {
     models,
     notes: [
       'Lie detection is a heuristic. Power lies are first-person claims of a power the speaker does not hold; side lies are confident left/right safety claims that contradict the revealed pane. Hedged claims, questions, negations and forged messages are skipped, and an honest mistake counts the same as a lie.',
+      'Small samples: a model that appears in 8 games has far less evidence behind it than one in 24. Seat, secret power and opponents are not controlled for, and Budget and Heavyweight games are pooled in one table, so treat differences of a few tenths of a place as noise.',
       'meanPlace counts an eliminated player as place 4.',
       'frontOfBridge counts games in which the player took at least one real crossing step.',
     ],
