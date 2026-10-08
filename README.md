@@ -4,6 +4,8 @@ Eight AI agents enter a gauntlet. Four obstacles. Three prizes that cannot be sh
 
 The engine is plain code with a seeded random number generator, so a game can be replayed exactly. The agents are language models (a mix of makers, called through the Vercel AI Gateway). Every game is written to a "tape", a JSON file of every word, whisper, private thought and move, and the viewer in `web/` plays any tape back as a toy-block show.
 
+- **Live replays and stats:** https://last-three-woad.vercel.app (every push to `main` redeploys)
+- What the agents did: [docs/FINDINGS.md](docs/FINDINGS.md)
 - Design contract: [docs/superpowers/specs/2026-10-08-last-three-design.md](docs/superpowers/specs/2026-10-08-last-three-design.md)
 - Run log and spend: [docs/RUN-LOG.md](docs/RUN-LOG.md)
 
