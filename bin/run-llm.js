@@ -91,6 +91,29 @@ function seatModels(seed, models, seats, shuffle) {
  * Play one game with already-probed `models` and return the validated tape.
  * Throws SpendCapError (and writes nothing) if a cap was hit mid-game.
  */
+/** A game is unusable as data if one agent's calls mostly failed (it sat out on default actions). */
+export class DegenerateGameError extends Error {}
+const MAX_AGENT_ERROR_RATE = 0.25;
+const MIN_ACTIONS_FOR_GATE = 8;
+
+/**
+ * Agents whose action events are mostly `agent error` defaults.
+ * @returns {{name: string, model: string, errors: number, actions: number}[]}
+ */
+export function degenerateAgents(tape) {
+  const stats = new Map();
+  for (const e of tape.events) {
+    if (e.type !== 'action') continue;
+    const row = stats.get(e.name) ?? { errors: 0, actions: 0 };
+    row.actions += 1;
+    if (typeof e.note === 'string' && e.note.startsWith('agent error')) row.errors += 1;
+    stats.set(e.name, row);
+  }
+  return [...stats]
+    .filter(([, r]) => r.actions >= MIN_ACTIONS_FOR_GATE && r.errors / r.actions > MAX_AGENT_ERROR_RATE)
+    .map(([name, r]) => ({ name, model: tape.players.find((p) => p.name === name)?.model ?? '?', ...r }));
+}
+
 export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() }) {
   const { runGame, SEATS } = await import('../src/engine.js');
   const { validateTape } = await import('../src/tape.js');
@@ -107,6 +130,11 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() 
   const tape = await runGame({ seed, agents, config: { id, createdAt: new Date().toISOString() } });
   const capError = Object.values(agents).map((a) => a.capError()).find(Boolean);
   if (capError) throw new SpendCapError(`${capError.message}; tape ${id} discarded`, capError);
+  const bad = degenerateAgents(tape);
+  if (bad.length) {
+    const who = bad.map((b) => `${b.name} (${b.model}) ${b.errors}/${b.actions} failed`).join(', ');
+    throw new DegenerateGameError(`game ${id} discarded: ${who}`);
+  }
   tape.id = id;
   tape.createdAt ??= new Date().toISOString();
   tape.usage = sumUsage(agents);

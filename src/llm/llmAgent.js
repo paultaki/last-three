@@ -22,16 +22,16 @@ export const HEAVY_ROSTER = [
   'openai/gpt-5.6-luna',
   'moonshotai/kimi-k2.6',
   'deepseek/deepseek-v4-pro',
-  'minimax/minimax-m3',
+  'alibaba/qwen3.8-max',
   'spacexai/grok-4.1-fast-reasoning',
   'zai/glm-5.3-flashx',
 ];
 
 /** Substitutes for any roster model that fails its probe. */
 export const RESERVE_MODELS = [
-  'openai/gpt-5-nano',
-  'google/gemini-3.1-flash-lite',
   'mistral/mistral-small',
+  'google/gemini-3.1-flash-lite',
+  'alibaba/qwen3.8-omni-flash',
 ];
 
 const MAX_TOKENS = 800;
