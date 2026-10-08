@@ -34,6 +34,16 @@ export const POWER_BLURBS = {
   nothing: 'No power at all.',
 };
 
+// Bubbles show at most this many characters; the transcript and caption keep the full line.
+export const BUBBLE_CAP = 140;
+export function capText(text, max = BUBBLE_CAP) {
+  const t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(' ');
+  return `${(sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s,;:.!?-]+$/, '')}\u2026`;
+}
+
 export function powerName(id) {
   return POWER_NAMES[id] || (id ? String(id).replace(/_/g, ' ') : 'Unknown');
 }

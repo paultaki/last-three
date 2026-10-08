@@ -87,7 +87,7 @@ export default {
     const alive = state.order.filter((n) => state.players[n].alive);
     const n = dsc.n;
     let waitK = 0;
-    const rim = hd.R * 0.5;
+    const rim = hd.R * 0.56;
     for (const name of alive) {
       const tile = dsc.tiles[name];
       if (tile != null && tile >= 1 && tile <= n) {
@@ -99,7 +99,7 @@ export default {
       } else {
         const k = waitK++;
         pos[name] = env.portrait
-          ? { x: [16, 39, 61, 84][k % 4], y: k < 4 ? 12 : 94, cls: '' }
+          ? { x: [16, 39, 61, 84][k % 4], y: k < 4 ? 12 : 89, cls: '' }
           : { x: k % 2 === 0 ? 9 : 91, y: 26 + Math.floor(k / 2) * 20, cls: '' };
       }
     }
@@ -107,6 +107,7 @@ export default {
     const opened = dsc.open.length;
     return {
       pos,
+      keep: [{ x: ((hd.cx - hd.R) / env.W) * 100, y: ((hd.cy - hd.R) / env.H) * 100, w: ((2 * hd.R) / env.W) * 100, h: ((2 * hd.R) / env.H) * 100, wt: 2 }],
       hud: {
         left: 'The Trapdoor Disc',
         right: opened ? `${opened} trapdoor${opened > 1 ? 's' : ''} open` : `${n} tiles, ${dsc.openCount} will open`,

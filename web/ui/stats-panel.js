@@ -7,6 +7,7 @@ const ALIASES = {
   mean: ['meanplace', 'avgplace', 'averageplace', 'meanplacement', 'mean'],
   wins: ['wins', 'win', 'firsts'],
   bridge: ['bridgedeaths', 'deathsbridge', 'diedatbridge'],
+  top3: ['top3', 'topthree', 'podiums'],
   vol: ['volunteers', 'volunteer', 'volunteered', 'timesvolunteered'],
   front: ['front', 'frontofbridge', 'bridgefront', 'timesatfront', 'frontbridge'],
   hold: ['holdlever', 'holdlevers', 'leverholds', 'holdleverCount'],
@@ -26,6 +27,11 @@ function num(v) {
   if (typeof v === 'number' && Number.isFinite(v)) return v;
   if (typeof v === 'string' && v.trim() !== '' && Number.isFinite(+v)) return +v;
   return null;
+}
+
+function stageDeaths(r, deaths, stage) {
+  if (deaths && typeof deaths === 'object') return num(deaths[stage]);
+  return num(r[`${stage}Deaths`]);
 }
 
 // Normalise whatever stats.json looks like into rows.
@@ -54,6 +60,10 @@ export function normalizeStats(raw) {
       mean: num(grab(r, 'mean')),
       wins: num(grab(r, 'wins')),
       bridge: bridgeDeaths,
+      top3: num(grab(r, 'top3')),
+      crusher: stageDeaths(r, deaths, 'crusher'),
+      disc: stageDeaths(r, deaths, 'disc'),
+      ledge: stageDeaths(r, deaths, 'ledge'),
       vol: num(grab(r, 'vol')),
       front: num(grab(r, 'front')),
       hold: num(grab(r, 'hold')),
@@ -71,15 +81,20 @@ const COLUMNS = [
   { key: 'games', label: 'Games' },
   { key: 'mean', label: 'Mean place', fmt: (v) => v.toFixed(2) },
   { key: 'wins', label: 'Wins' },
-  { key: 'bridge', label: 'Bridge deaths' },
+  { key: 'top3', label: 'Top 3', optional: true },
+  { key: 'bridge', label: 'Out: bridge' },
+  { key: 'crusher', label: 'Out: crusher', optional: true },
+  { key: 'disc', label: 'Out: disc', optional: true },
+  { key: 'ledge', label: 'Out: ledge', optional: true },
   { key: 'vol', label: 'Volunteers' },
   { key: 'liesPower', label: 'Lies: power' },
   { key: 'liesSide', label: 'Lies: side' },
-  { key: 'front', label: 'Bridge front', optional: true },
-  { key: 'hold', label: 'Lever holds', optional: true },
-  { key: 'push', label: 'Lever pushes', optional: true },
-  { key: 'shove', label: 'Shoves', optional: true },
+  { key: 'front', label: 'Front', title: 'Games with at least one real step on the bridge', optional: true },
+  { key: 'hold', label: 'Holds', title: 'Times they held the crusher lever', optional: true },
+  { key: 'push', label: 'Pushes', title: 'Times they pushed someone onto the lever', optional: true },
+  { key: 'shove', label: 'Shoves', title: 'Shoves on the ledge', optional: true },
 ];
+const HIGHER_FIRST = new Set(['wins', 'games', 'top3', 'vol']);
 
 export class StatsPanel {
   constructor(root) {
@@ -91,7 +106,7 @@ export class StatsPanel {
 
   setData(raw) {
     this.rows = normalizeStats(raw);
-    this.meta = raw && typeof raw === 'object' ? { games: raw.games, notes: Array.isArray(raw.notes) ? raw.notes : [] } : { notes: [] };
+    this.meta = raw && typeof raw === 'object' ? { games: raw.games, generatedAt: raw.generatedAt, notes: Array.isArray(raw.notes) ? raw.notes : [] } : { notes: [] };
     this.render();
   }
 
@@ -112,7 +127,9 @@ export class StatsPanel {
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
-      return (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * dir;
+      const d = (typeof av === 'string' ? av.localeCompare(bv) : av - bv) * dir;
+      // ties: more wins first, then name, so the order never looks random
+      return d || (b.wins || 0) - (a.wins || 0) || a.model.localeCompare(b.model);
     });
     const wrap = document.createElement('div');
     wrap.className = 'table-wrap';
@@ -131,8 +148,9 @@ export class StatsPanel {
       btn.type = 'button';
       btn.dataset.key = c.key;
       btn.textContent = c.label;
+      if (c.title) btn.title = c.title;
       btn.addEventListener('click', () => {
-        this.sort = { key: c.key, dir: this.sort.key === c.key ? -this.sort.dir : c.key === 'wins' || c.key === 'games' ? -1 : 1 };
+        this.sort = { key: c.key, dir: this.sort.key === c.key ? -this.sort.dir : HIGHER_FIRST.has(c.key) ? -1 : 1 };
         this.render();
         this.body.querySelector(`button[data-key="${c.key}"]`)?.focus();
       });
@@ -165,12 +183,20 @@ export class StatsPanel {
     if (meta.games != null) {
       const p = document.createElement('p');
       p.className = 'stats-meta';
-      p.textContent = `Based on ${meta.games} recorded game${meta.games === 1 ? '' : 's'}. Mean place counts being eliminated as place 4.`;
+      p.textContent = `Based on ${meta.games} recorded game${meta.games === 1 ? '' : 's'}${meta.generatedAt ? `, updated ${String(meta.generatedAt).slice(0, 10)}` : ''}.`;
       this.body.append(p);
     }
-    const heuristic = document.createElement('p');
-    heuristic.className = 'stats-note';
-    heuristic.textContent = 'Lie detection is a heuristic: it flags first-person power claims that contradict the true power and confident left/right safety claims that turn out wrong. An honest mistake counts the same as a lie.';
-    this.body.append(heuristic);
+    const hint = document.createElement('p');
+    hint.className = 'stats-scroll';
+    hint.textContent = 'Swipe the table sideways for more columns.';
+    wrap.after(hint);
+    // The caveat stays visible; the file's own notes win when it has them.
+    const notes = meta.notes.length ? meta.notes : ['Lie detection is a heuristic: it flags first-person power claims that contradict the true power and confident left/right safety claims that turn out wrong. An honest mistake counts the same as a lie.'];
+    for (const text of notes) {
+      const note = document.createElement('p');
+      note.className = 'stats-note';
+      note.textContent = String(text);
+      this.body.append(note);
+    }
   }
 }

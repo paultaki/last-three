@@ -153,6 +153,10 @@ export default {
       sub = left ? `The wall arrives in ${left} round${left > 1 ? 's' : ''}` : 'The wall pushes everyone onto the glass';
     }
     void sideWord;
-    return { pos, hud: { left: 'The Glass Bridge', right, sub } };
+    // row numbers should stay readable
+    const keepOut = env.portrait ? [{ x: g.span.x - 6, y: g.span.y, w: 6, h: g.span.h }] : [{ x: g.span.x, y: g.span.y, w: g.span.w, h: 5 }];
+    // while crossing, the panes carry the story: keep speech off them where there is room
+    if (crossing && !b.finished) keepOut.push({ x: g.span.x, y: g.span.y, w: g.span.w, h: g.span.h, wt: 4 });
+    return { pos, keep: keepOut, hud: { left: 'The Glass Bridge', right, sub } };
   },
 };

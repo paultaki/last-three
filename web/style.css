@@ -592,7 +592,8 @@ main {
 /* ---------------------------------------------------------------- bubbles + fx */
 .bubble {
   position: absolute;
-  max-width: 250px;
+  isolation: isolate;
+  max-width: 290px;
   padding: 6px 11px 7px;
   background: #fff;
   color: #1c2340;
@@ -600,42 +601,41 @@ main {
   border-radius: 16px;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
   font: 600 14px/1.3 var(--font-body);
-  transform-origin: var(--tail, 50%) 100%;
+  overflow-wrap: anywhere;
+  transition: opacity 0.4s, visibility 0s;
 }
 .bubble[hidden] { display: none; }
+.bubble.fade { opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0s 0.4s; }
 .bubble.pop { animation: pop 0.22s ease-out; }
 @keyframes pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
 .bubble .who {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font: 800 14px/1.2 var(--font-display);
   color: #46507a;
 }
-.bubble .txt {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  overflow: hidden;
+.bubble .dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #1c2340;
+  border-radius: 4px;
+  background: var(--c);
 }
-.bubble::after {
-  content: "";
+.bubble .txt { display: block; }
+.bubble .leader {
   position: absolute;
-  left: var(--tail, 50%);
-  bottom: -10px;
-  width: 14px;
-  height: 14px;
-  background: inherit;
-  border-right: 3px solid #1c2340;
-  border-bottom: 3px solid #1c2340;
-  transform: translateX(-50%) rotate(45deg);
-  border-radius: 0 0 4px 0;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  z-index: -1;
+  pointer-events: none;
 }
-.bubble.side::after { display: none; }
-.bubble.below::after {
-  bottom: auto;
-  top: -10px;
-  transform: translateX(-50%) rotate(225deg);
-}
+.bubble .leader line { stroke: #1c2340; stroke-width: 3; stroke-linecap: round; }
+.bubble .leader circle { fill: var(--c); stroke: #1c2340; stroke-width: 2.5; }
 .bubble.thought {
   background: #eef2ff;
   border-style: dashed;
@@ -643,27 +643,20 @@ main {
   border-radius: 24px;
 }
 .bubble.thought .who::after { content: " (thinks)"; font-weight: 600; }
-.bubble.thought::after {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 3px dashed #1c2340;
-  bottom: -17px;
-  transform: translateX(-50%);
-}
-.bubble.thought.below::after { top: -17px; bottom: auto; }
+.bubble.thought .leader line { stroke-dasharray: 2 7; }
 .bubble.whisper {
   background: #fff0f6;
   border-color: #b4235a;
   border-style: dotted;
 }
-.bubble.whisper::after { border-color: #b4235a; }
+.bubble.whisper .leader line { stroke: #b4235a; }
 .bubble .forge {
   display: block;
   margin-top: 2px;
   font: 800 14px var(--font-display);
   color: #b4232a;
 }
+.arena.reduced .bubble, .arena.instant .bubble.fade { transition: none; }
 
 .fx-chip {
   position: absolute;
@@ -1200,6 +1193,19 @@ main {
   text-overflow: ellipsis;
 }
 .chapter:hover { border-color: var(--ink); }
+.highlights { align-items: center; margin-top: -2px; }
+.hl-label { flex: 0 0 100%; font: 800 14px var(--font-display); color: var(--ink-soft); }
+.chapter.hl { flex: 0 1 auto; padding: 8px 12px; overflow: visible; text-align: left; line-height: 1.2; border-style: dashed; }
+.tier-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--sun);
+  color: #1c2340;
+  font: 800 14px/1.3 var(--font-display);
+}
 .chapter.on { background: var(--navy); color: #fff; border-color: var(--navy); }
 
 /* ---------------------------------------------------------------- side panel */
@@ -1346,7 +1352,7 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .stats-table thead th button {
   width: 100%;
   min-height: 44px;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border: 0;
   background: transparent;
   color: #fff;
@@ -1358,6 +1364,16 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
 .stats-table thead th[aria-sort="ascending"] button::after { content: " \25B2"; }
 .stats-table thead th[aria-sort="descending"] button::after { content: " \25BC"; }
 .stats-table tbody th { white-space: nowrap; }
+.stats-table th, .stats-table td { padding: 6px 6px; }
+.stats-table thead th:first-child, .stats-table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 1px 0 0 var(--line);
+}
+.stats-table tbody th { background: var(--card); }
+.stats-table thead th:first-child { background: var(--navy); }
+.stats-scroll { display: none; margin: 6px 0 0; font-size: 14px; color: var(--ink-soft); }
 .stats-meta, .stats-note, .empty { margin: 10px 0 0; font-size: 14px; color: var(--ink-soft); max-width: 75ch; }
 .empty { padding: 18px; border: 3px dashed var(--line); border-radius: 14px; text-align: center; }
 .footer { max-width: 1320px; margin: 0 auto; padding: 0 16px 28px; font-size: 14px; color: var(--ink-soft); }
@@ -1372,6 +1388,9 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .hud-right { text-align: left; align-self: flex-start; }
   .btn { padding: 0 12px; }
   .btn-text { white-space: nowrap; }
+  .stats-scroll { display: block; }
+  .stats-table thead th button { white-space: normal; min-width: 66px; line-height: 1.15; }
+  .stats-table tbody th { white-space: normal; overflow-wrap: anywhere; min-width: 96px; max-width: 110px; }
   .speed { margin-left: 0; }
   .now { font-size: 17px; }
 }

@@ -443,7 +443,20 @@ function applyReveal(next, s, ev, idx) {
     next.disc = { ...s.disc, open: uniq([...s.disc.open, ...list.map(toNum).filter((v) => v != null)]), tilesPublic: true };
   } else if (what === 'ceiling' && s.crusher) {
     const h = toNum(data && typeof data === 'object' ? (data.ceiling != null ? data.ceiling : data.height) : data);
-    if (h != null) next.crusher = { ...s.crusher, ceiling: Math.max(0, Math.min(5, h)) };
+    // The engine names the lever holder and says whether the lever was jammed: trust it over our guess.
+    const obj = data && typeof data === 'object' ? data : {};
+    const holder = typeof obj.leverHolder === 'string' && s.players[obj.leverHolder] ? obj.leverHolder : s.crusher.holder;
+    const jam = obj.jammed === true || s.crusher.jam;
+    if (h != null || holder !== s.crusher.holder || jam !== s.crusher.jam) {
+      next.crusher = {
+        ...s.crusher,
+        ceiling: h != null ? Math.max(0, Math.min(5, h)) : s.crusher.ceiling,
+        holder,
+        holdChosen: s.crusher.holdChosen || !!holder,
+        jam,
+        door: s.crusher.door || !!holder || jam,
+      };
+    }
   } else if (what === 'footing' && s.ledge) {
     const src = data && typeof data === 'object' ? (data.footing && typeof data.footing === 'object' ? data.footing : data) : {};
     const footing = { ...s.ledge.footing };

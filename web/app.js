@@ -1,11 +1,12 @@
 // Last Three replay viewer: loads a tape, then renders stateAt(tape, i). Nothing else is simulated.
 import { stateAt, chapters, isStepWorthy } from './lib/state.js';
-import { STAGE_SHORT, shortModel } from './lib/text.js';
+import { STAGE_SHORT, shortModel, capText } from './lib/text.js';
 import { Arena } from './scenes/arena.js';
 import { Transcript } from './ui/transcript.js';
 import { Cast } from './ui/cast.js';
 import { renderResults } from './ui/results.js';
 import { StatsPanel } from './ui/stats-panel.js';
+import { Highlights } from './ui/highlights.js';
 
 const $ = (id) => document.getElementById(id);
 const reducedQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false, addEventListener() {} };
@@ -28,6 +29,7 @@ const els = {
   scrubLabel: $('scrub-label'),
   ticks: $('ticks'),
   chapters: $('chapters'),
+  highlights: $('highlights'),
   cut: $('btn-cut'),
   share: $('btn-share'),
   shareStatus: $('share-status'),
@@ -59,6 +61,10 @@ const transcript = new Transcript(els.transcript, els.transcriptScroll, (i) => {
   goto(i, { animate: false });
 });
 const statsPanel = new StatsPanel(els.stats);
+const highlightsUi = new Highlights(els.highlights, (i) => {
+  pause();
+  goto(i, { animate: false });
+});
 
 const safeId = (id) => (/^[A-Za-z0-9._-]+$/.test(String(id)) ? String(id) : null);
 const lastIndex = () => (app.tape ? app.tape.events.length - 1 : 0);
@@ -80,10 +86,26 @@ function validTape(tape) {
   return tape && Array.isArray(tape.players) && tape.players.length > 0 && Array.isArray(tape.events) && tape.events.length > 0;
 }
 
+const TIER_NAMES = { heavy: 'Heavyweights', cheap: 'Budget' };
+const tierName = (t) => (t ? TIER_NAMES[t] || String(t).charAt(0).toUpperCase() + String(t).slice(1) : '');
+
+// Short picker label: tier, winner with its model, then date and number.
 function describeEntry(e) {
-  const when = e.createdAt ? new Date(e.createdAt).toISOString().slice(0, 10) : '';
-  const winner = e.winner ? `${e.winner} wins` : 'no winner';
-  return `${e.id} • ${winner}${when ? ` • ${when}` : ''}`;
+  const m = /^(\d{4})(\d{2})(\d{2})-(\d+)$/.exec(e.id);
+  const head = m ? `${m[2]}-${m[3]} #${m[4]}` : e.id;
+  const model = e.winnerModel ? ` (${shortModel(e.winnerModel)})` : '';
+  const winner = e.winner ? `${e.winner}${model} wins` : 'no winner';
+  const tier = tierName(e.tier);
+  // tier and winner first: a phone's picker only has room for the start of the label
+  return `${tier ? `${tier} \u2022 ` : ''}${winner} \u2022 ${head}`;
+}
+
+// The winner and model from the tape itself, for index entries that do not carry them.
+function tapeWinner(tape) {
+  const end = [...tape.events].reverse().find((e) => e && e.type === 'game_end');
+  const first = end && Array.isArray(end.places) ? end.places.find((p) => p && p.place === 1) : null;
+  const player = first && tape.players.find((p) => p.name === first.name);
+  return first ? { winner: first.name, winnerModel: player && player.model } : {};
 }
 
 function fillPicker(selected) {
@@ -121,11 +143,25 @@ async function loadTape(id, startAt = 0) {
     castUi.setTape(tape);
     transcript.setTape(tape);
     setupScrubber(tape);
+    const known = app.index.find((e) => e.id === safe);
+    if (known && (!known.winner || !known.winnerModel)) {
+      const w = tapeWinner(tape);
+      known.winner = known.winner || w.winner;
+      known.winnerModel = known.winnerModel || w.winnerModel;
+    }
     fillPicker(safe);
     const entry = app.index.find((e) => e.id === safe);
     const models = new Set(tape.players.map((p) => shortModel(p.model)));
     const when = tape.createdAt ? new Date(tape.createdAt).toISOString().slice(0, 10) : '';
     els.meta.textContent = `${tape.events.length} events, ${models.size} different models${when ? `, recorded ${when}` : ''}${entry && entry.usd != null ? `, $${Number(entry.usd).toFixed(2)}` : ''}`;
+    if (entry && entry.tier) {
+      const badge = document.createElement('span');
+      badge.className = 'tier-badge';
+      badge.textContent = tierName(entry.tier);
+      els.meta.append(badge);
+    }
+    highlightsUi.setTape(tape);
+    highlightsUi.render(app.cut);
     goto(startAt, { animate: false });
   } catch (err) {
     showError(`Could not load tape "${safe}": ${err.message}`);
@@ -171,7 +207,7 @@ function goto(i, { animate = false } = {}) {
   const state = stateAt(app.tape, idx);
   app.state = state;
   const doAnimate = animate && !reduced();
-  arena.render(state, { animate: doAnimate, speed: app.speed });
+  arena.render(state, { animate: doAnimate, speed: app.speed, fade: doAnimate && app.playing });
   transcript.update(idx, app.cut);
   castUi.update(state, app.cut);
   renderResults(els.results, state, app.tape);
@@ -220,27 +256,33 @@ function nextWorthy(from, dir) {
   return Math.max(0, Math.min(last, j));
 }
 
+// How long an event stays on screen at 1x. Lines are paced by reading time; mechanics are quick.
+const READ_MS = 50; // per character of a spoken line
+const MIN_READ = 900;
+
 function dwell(ev) {
   if (!ev) return 400;
-  const len = (ev.text || '').length;
+  const len = String(ev.text || '').length;
   switch (ev.type) {
     case 'say':
-      return Math.min(3400, 900 + len * 34);
+      return Math.min(8500, Math.max(MIN_READ, READ_MS * len));
     case 'thought':
     case 'whisper':
-      return app.cut ? Math.min(3000, 800 + len * 30) : 30;
-    case 'death':
-      return 2600;
+      return app.cut ? Math.min(6500, Math.max(MIN_READ, 38 * capText(ev.text).length)) : 30;
+    case 'death': {
+      const next = app.tape.events[ev.i + 1];
+      return next && next.type === 'death' ? 1700 : 3000; // let the cartoon finish
+    }
     case 'stage_start':
-      return 2000;
+      return 2400;
     case 'stage_end':
       return 1200;
     case 'round_start':
-      return 700;
+      return 500;
     case 'reveal':
-      return ev.what === 'weak_pane' ? 1000 : 750;
+      return ev.what === 'weak_pane' ? 1100 : ev.what === 'ceiling' || ev.what === 'trapdoors' ? 1200 : 600;
     case 'ability_use':
-      return app.cut ? 1500 : 1300;
+      return app.cut ? 1700 : 1400;
     case 'lucky_save':
       return 1800;
     case 'game_start':
@@ -248,9 +290,9 @@ function dwell(ev) {
     case 'game_end':
       return 1500;
     case 'action':
-      return ev.auto ? 700 : 620;
+      return ev.auto ? 400 : 480;
     default:
-      return 500;
+      return 400;
   }
 }
 
@@ -296,9 +338,11 @@ function play() {
 }
 
 function pause() {
+  const wasPlaying = app.playing;
   app.playing = false;
   clearTimeout(app.timer);
   setPlayingUi();
+  if (wasPlaying) arena.pinBubbles(); // bring faded bubbles back for reading
 }
 
 function step(dir) {
@@ -311,6 +355,7 @@ function setCut(on) {
   app.cut = !!on;
   els.cut.setAttribute('aria-pressed', String(app.cut));
   arena.setCut(app.cut);
+  highlightsUi.render(app.cut);
   if (app.tape) goto(app.idx, { animate: false });
 }
 
@@ -392,7 +437,7 @@ async function boot() {
   }
   const start = Number.parseInt(params.get('i') || '0', 10);
   await loadTape(wanted, Number.isFinite(start) ? start : 0);
-  window.__viewer = { app, goto, stateAt: (i) => stateAt(app.tape, i), setCut };
+  window.__viewer = { app, goto, stateAt: (i) => stateAt(app.tape, i), setCut, arena };
 }
 
 boot();

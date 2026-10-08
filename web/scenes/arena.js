@@ -3,7 +3,7 @@ import { h, measure } from './common.js';
 import { Figure } from './figure.js';
 import { Bubbles } from './bubbles.js';
 import { playDeath, popChip } from './fx.js';
-import { powerName } from '../lib/text.js';
+import { powerName, capText } from '../lib/text.js';
 import lobby from './lobby.js';
 import bridge from './bridge.js';
 import crusher from './crusher.js';
@@ -14,6 +14,7 @@ import podium from './podium.js';
 const SCENES = { lobby, bridge, crusher, disc, ledge, podium };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAX_BUBBLES = 3;
+const MAX_BUBBLES_NARROW = 2; // a phone screen has no room for a third without covering faces
 
 export class Arena {
   constructor(root, hud) {
@@ -30,6 +31,7 @@ export class Arena {
     root.replaceChildren(this.sceneLayer, this.figLayer, this.overLayer, this.linkSvg, this.fxLayer, this.bubbleLayer);
     this.bubbles = new Bubbles(this.bubbleLayer, this.linkSvg);
     this.figures = new Map();
+    this.seats = new Map();
     this.sceneId = null;
     this.handle = null;
     this.prev = null;
@@ -61,6 +63,7 @@ export class Arena {
     (tape.players || []).forEach((p, k) => {
       const fig = new Figure(p, k);
       this.figures.set(p.name, fig);
+      this.seats.set(p.name, k % 8);
       this.figLayer.append(fig.el);
     });
   }
@@ -144,7 +147,8 @@ export class Arena {
       fig.setAct(player.alive || sceneId === 'podium' ? L.act : '');
     }
 
-    this.renderBubbles(state, anchors, env, animate);
+    this.keep = (layout.keep || []).map((k) => ({ name: null, wt: k.wt || 9, l: (k.x / 100) * env.W, r: ((k.x + k.w) / 100) * env.W, t: (k.y / 100) * env.H, b: ((k.y + k.h) / 100) * env.H }));
+    this.renderBubbles(state, anchors, env, animate, !!opts.fade, speed);
     this.renderFlash(state, anchors, animate);
     this.renderHud(layout.hud, state);
     this.prev = state;
@@ -211,12 +215,19 @@ export class Arena {
     }
   }
 
-  renderBubbles(state, anchors, env, animate) {
+  renderBubbles(state, anchors, env, animate, fade, speed) {
+    // Newest speakers first: only lines whose speaker is on screen count towards the cap.
     const items = state.speech
-      .filter((s) => s.kind === 'say' || this.cut)
-      .slice(env.portrait ? -2 : -MAX_BUBBLES)
-      .map((s) => ({ key: `${s.i}${this.cut ? 'c' : ''}`, kind: s.kind, name: s.name, as: s.as, to: s.to, text: s.text, forgedAs: s.forgedAs }));
-    this.bubbles.render(items, anchors, env, { animate, cut: this.cut, u: this.uf || env.u });
+      .filter((s) => (s.kind === 'say' || this.cut) && (anchors[s.as] || anchors[s.name]))
+      .slice(env.portrait ? -MAX_BUBBLES_NARROW : -MAX_BUBBLES)
+      .map((s) => ({ key: `${s.i}${this.cut ? 'c' : ''}`, kind: s.kind, seat: this.seats.get(s.as) ?? this.seats.get(s.name) ?? 0, name: s.name, as: s.as, to: s.to, text: capText(s.text), forgedAs: s.forgedAs }));
+    this.bubbles.render(items, anchors, env, { animate, cut: this.cut, u: this.uf || env.u, fade, speed, keep: this.keep || [] });
+  }
+
+  // Paused or scrubbed: bring faded bubbles back so nothing is lost while reading.
+  pinBubbles() {
+    this.bubbles.pin();
+    if (this.lastState) this.render(this.lastState, { animate: false, speed: this.lastOpts.speed || 1 });
   }
 
   renderFlash(state, anchors, animate) {
