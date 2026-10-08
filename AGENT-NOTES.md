@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · claude-code (later)
+- **Did:** Paul said "put it out there" and pointed at his unused Cloudflare domain thecriticalfew.com. Made the repo public (history scanned first: no tokens, keys or personal paths). Published the site at https://www.thecriticalfew.com/last-three/ (apex redirects to www). Done with two Vercel project routes on the existing `the-critical-few` project (a 308 from `/last-three` to `/last-three/` and a regex rewrite `^/last-three/(.*)$` to `https://last-three-woad.vercel.app/$1`), so pushes to this repo still update the page with no extra step. The old homepage of that site is untouched.
+- **Why:** The wrangler login has no DNS edit permission and the domain's DNS is DNS-only pointing at Vercel, so a path rewrite on the Vercel project was the safe, reversible route; no DNS records were created or changed.
+- **Next:** To undo, restore the previous (empty) route version of project `the-critical-few` (prj_UO8DBHcdtt5va0J7XukAGKsBcrHU) in the Vercel dashboard, Routes tab. Paul also suggested a new obstacle (a pit everyone jumps into where one player must be left behind as the others climb out on shoulders); see the design discussion in the session, not yet built.
+- **Watch out:** The viewer must keep using relative URLs (no leading slash) because it is served from a subpath. Rewriting through the-critical-few means a Vercel outage on either project takes the path down.
+
 ## 2026-10-08 · claude-code
 - **Did:** Built Last Three end to end in one session: spec, engine (4 stages, 8 powers, seeded, replayable tapes), model layer over the Vercel AI Gateway with a hard spend ledger, scripted bots, a static replay viewer with director's cut, stats, 56 real tapes (24 budget under rules v1, 24 budget + 8 heavyweight under rules v2), private GitHub repo `paultaki/last-three`, Vercel project `last-three` (auto-deploys on push) at https://last-three-woad.vercel.app. 245 tests plus a 300-game fuzz and a Playwright viewer check.
 - **Why:** Paul asked for a maze/obstacle gauntlet where cheap AI agents face selfish-vs-sacrifice choices (glass bridge, secret powers, a lever someone has to hold, trapdoors, a final fight) and wanted it working by morning, GitHub plus Vercel authorised, models under about $20 (spent $7.48).
