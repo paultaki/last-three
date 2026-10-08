@@ -104,7 +104,7 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() 
   const agents = Object.fromEntries(
     seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: id })]),
   );
-  const tape = await runGame({ seed, agents, config: { id } });
+  const tape = await runGame({ seed, agents, config: { id, createdAt: new Date().toISOString() } });
   const capError = Object.values(agents).map((a) => a.capError()).find(Boolean);
   if (capError) throw new SpendCapError(`${capError.message}; tape ${id} discarded`, capError);
   tape.id = id;

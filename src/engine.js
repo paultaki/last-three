@@ -1,0 +1,83 @@
+// runGame({ seed, agents, config }) -> tape. Orchestrates the four stages in order (spec section 4).
+//
+// config (all optional): id, createdAt (fixed defaults keep tapes byte-reproducible; callers that
+// want real timestamps pass one), agentTimeoutMs, and two test hooks: powers (seat -> power id)
+// and ledgeMaxRounds.
+
+import { Game, SEATS } from './game.js';
+import { runBridge } from './stages/bridge.js';
+import { runCrusher } from './stages/crusher.js';
+import { runDisc } from './stages/disc.js';
+import { runLedge } from './stages/ledge.js';
+
+export { SEATS };
+
+const DEFAULT_DATE = '20261008';
+const DEFAULT_CREATED_AT = '2026-10-08T00:00:00.000Z';
+
+/** Stage order and preconditions (spec section 4). Bridge always runs. */
+const STAGES = [
+  { run: runBridge, canRun: () => true },
+  { run: runCrusher, canRun: (g) => g.alive.size > 3 },
+  { run: runDisc, canRun: (g) => g.alive.size > 3 },
+  { run: runLedge, canRun: (g) => g.alive.size >= 2 },
+];
+
+export async function runGame({ seed, agents, config = {} }) {
+  const g = new Game({ seed, agents, config });
+  const players = SEATS.map((name) => ({
+    name,
+    model: String(agents[name].model ?? 'unknown'),
+    power: g.powerOf(name),
+  }));
+  g.emit('game_start', { players });
+
+  for (const stage of STAGES) {
+    if (g.alive.size <= 1) break; // exactly one left: they are 1st and the game is over
+    if (stage.canRun(g)) await stage.run(g);
+  }
+
+  if (g.alive.size !== 1) {
+    throw new Error(`engine invariant broken: ${g.alive.size} agents alive at the end of the game`);
+  }
+  const [winner] = g.alive;
+  g.places.set(winner, 1);
+
+  const places = SEATS.map((name) => {
+    const place = g.places.get(name) ?? null;
+    if (place) return { name, place };
+    return { name, place: null, diedAt: g.deaths.find((d) => d.name === name).stage };
+  });
+  g.emit('game_end', { places: structuredClone(places) });
+
+  return {
+    version: 1,
+    id: config.id ?? `${DEFAULT_DATE}-${String(seed).padStart(4, '0')}`,
+    seed,
+    createdAt: config.createdAt ?? DEFAULT_CREATED_AT,
+    players,
+    events: g.events,
+    result: {
+      places,
+      deaths: g.deaths.map(({ name, stage, cause, style }) => ({ name, stage, cause, style })),
+    },
+    usage: sumUsage(agents),
+  };
+}
+
+/** Agents may expose usage() (LLM agents do); scripted bots do not. */
+function sumUsage(agents) {
+  const total = { inputTokens: 0, outputTokens: 0, usd: 0, calls: 0 };
+  for (const name of SEATS) {
+    let usage;
+    try {
+      usage = agents[name].usage?.();
+    } catch {
+      continue;
+    }
+    for (const key of Object.keys(total)) {
+      if (Number.isFinite(usage?.[key])) total[key] += usage[key];
+    }
+  }
+  return total;
+}
