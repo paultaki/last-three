@@ -51,6 +51,8 @@ test('systemPrompt is static and states objective and schema', () => {
   assert.match(systemPrompt(), /Nothing else matters/);
   assert.match(systemPrompt(), /"whisper"/);
   assert.match(systemPrompt(), /forger/);
+  assert.match(systemPrompt(), /rivals, not your friends/);
+  assert.match(systemPrompt(), /Never help a rival for free/);
 });
 
 const base = '{"thought":"t","say":"hi","whisper":null,"action":"hold","forge":null}';
