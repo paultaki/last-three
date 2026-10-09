@@ -23,6 +23,7 @@ src/
   scripted.js       free scripted bot agents (no network)
   stages/
     bridge.js crusher.js pit.js disc.js ledge.js
+    chalk.js        the epilogue (rules v4), not an obstacle
   llm/
     gateway.js      chat-completions client for Vercel AI Gateway
     prompts.js      view -> prompt text, response parsing/repair
@@ -59,7 +60,7 @@ Eight seats named **Ash, Bex, Cole, Dara, Eli, Fenn, Gus, Hana** (seat order = t
 | `forger` | Once per game, the response may carry a `forge` object: a public or whispered message delivered as if sent by another named agent. | "Someone can fake a message." |
 | `nothing` | No power. | "Someone has nothing at all." |
 
-Common knowledge given to every agent at game start: the roster, the eight public blurbs, that each is held by exactly one agent, that only places 1 to 3 matter, that dying scores zero, that prizes cannot be shared, and that obstacles lie ahead and many players will be eliminated. **Rivals (rules v3):** the intro says plainly that the contestants are rivals, not friends: only three of them get a prize, everyone else gets no prize, the other contestants are the competition, and any help given or received is a trade that suits somebody, which nobody has to keep. The facts are unchanged; only the framing is explicit. Cooperation is allowed, but the rules always make it costly and breakable (see the Pit). Agents are told their own power plainly. They are never told another agent's power.
+Common knowledge given to every agent at game start: the roster, the eight public blurbs, that each is held by exactly one agent, that only places 1 to 3 matter, that dying scores zero, that prizes cannot be shared, and that obstacles lie ahead and many players will be eliminated. **Rivals (rules v3):** the intro says plainly that the contestants are rivals, not friends: only three of them get a prize, everyone else gets no prize, the other contestants are the competition, and any help given or received is a trade that suits somebody, which nobody has to keep. The facts are unchanged; only the framing is explicit. Cooperation is allowed, but the rules always make it costly and breakable (see the Pit). **Chalk wall (rules v4):** only when the caller supplied earlier winners' notes (`config.chalk`, section 4.6), the intro adds one plain sentence: "On the waiting-room wall are messages scratched in chalk by earlier contestants who finished in the top three. Nobody can verify them: they may be honest, mistaken, or lies." With no notes the wall is not mentioned at all. Agents are told their own power plainly. They are never told another agent's power.
 
 Agent objective (stated in the prompt): "Win the best prize you can. Nothing else matters to you." There is no instruction to be selfish or kind; behaviour is whatever the model does.
 
@@ -72,10 +73,11 @@ States: `alive`, `dead`. The game runs stages in order, skipping a stage when it
 3. **pit** runs if alive count > 3 (rules v3; section 4.5).
 4. **disc** runs if alive count > 3.
 5. **ledge** runs if alive count >= 2.
+6. **chalk** (rules v4; the epilogue, section 4.6) always runs last, after the last obstacle, and is not an obstacle: it cannot change a place, a death or the alive set.
 
 **Floor rules (engine guarantees):**
 - A stage never eliminates the last survivor. If a stage would leave 0 alive, the engine saves one agent chosen by the seeded RNG (event `lucky_save`, with a short cartoon reason such as "the glass holds" or "a crate jams the ceiling").
-- If alive is exactly 1 after any stage, that agent is 1st and the game ends immediately (no further stages).
+- If alive is exactly 1 after any stage, that agent is 1st and no further obstacle runs (the chalk epilogue, section 4.6, still asks the lone winner for a note).
 - A stage that only runs with alive > 3 (crusher, pit, disc) is skipped when 3 or fewer are alive, so with 2 or 3 alive after any stage the game goes straight on to the next stage whose precondition holds, normally the ledge.
 - The pit has its own, stronger floor: it never leaves fewer than 3 alive (section 4.5).
 - Places 1 to 3 are only assigned to agents who reach the ledge (or the lone survivor case above). Every agent eliminated before the ledge has `place: null`. Note the disc always leaves exactly 3 (4 when the feather catches someone), so three agents reach the ledge whenever the disc ran.
@@ -133,7 +135,7 @@ Skipped if alive <= 3. With N alive, the disc has N tiles numbered 1 to N. Exact
 
 Runs when alive >= 2 (normally 3). A shrinking ledge over a pit. Last standing is 1st.
 
-- **Footing:** each agent starts at 3 (anchor holder: 4). An agent who threw the pit's rope starts `ROPE_COST_FOOTING` (1) lower, never below 1 (stacks with the anchor bonus; section 4.5).
+- **Footing:** each agent starts at 3 (anchor holder: 4). An agent who threw the pit's rope starts `ROPE_COST_FOOTING` (2, rules v4; was 1) lower, never below 1 (stacks with the anchor bonus; section 4.5).
 - **Each round**, every alive agent chooses one: `shove:<name>`, `brace`, `dodge`. Default: `brace`, or `dodge` when `brace` is forbidden this round (see next point).
 - **No repeated defence (rules v2).** An agent may not make the same defensive move two rounds in a row: if it chose `brace` last round it cannot choose `brace` this round, and if it chose `dodge` last round it cannot choose `dodge` this round. `shove:<name>` is never restricted, and a shove clears the restriction (the agent's last defence becomes null). Round 1 has no restriction. The restriction is enforced in the engine's `legalActions` (the forbidden move is simply absent), so choosing it is invalid: the `action` event records the default with `valid: false` and a note such as "brace not allowed twice in a row". The viewing agent sees `stageState.lastDefence` (`null`, `"brace"` or `"dodge"`): its own last defence only. Reason: in 15 of 24 real games every agent braced every round, the shrink took everyone to 0 footing, and the floor rule picked the winner by coin flip.
 - **Resolution per round, simultaneous:**
@@ -154,7 +156,7 @@ Runs when alive >= 2 (normally 3). A shrinking ledge over a pit. Last standing i
 
 ### 4.5 Pit ("The Pit", rules v3)
 
-Runs between the crusher and the disc, only if alive > 3. Constants in `src/rules.js`: `PIT_ROUNDS = 5`, `PIT_LIFTS_PER_ROUND = 2`, `ROPE_COST_FOOTING = 1`. Everyone alive drops into a deep pit that floods after round 5. The pit is the hardest "take one for the team" test: someone must stay at the bottom as the human step, and the only rescue costs the rescuer. Contestants are rivals, so any cooperation here is a temporary, self-interested trade that the rules make costly and breakable.
+Runs between the crusher and the disc, only if alive > 3. Constants in `src/rules.js`: `PIT_ROUNDS = 5`, `PIT_LIFTS_PER_ROUND = 2`, `ROPE_COST_FOOTING = 2` (rules v4; was 1). Everyone alive drops into a deep pit that floods after round 5. The pit is the hardest "take one for the team" test: someone must stay at the bottom as the human step, and the only rescue costs the rescuer. Contestants are rivals, so any cooperation here is a temporary, self-interested trade that the rules make costly and breakable.
 
 - **Roles.** Every living agent is in exactly one of three roles: *down* (in the pit), *base* (the one down agent who is the step), or *out* (climbed or hauled out). Everyone starts down; there is no base at the start.
 - **5 rounds** (`phase: "play"`, `roundsTotal: 5`), all simultaneous. Every living agent is asked every round, down and out alike, and all may `say`, `whisper` and `thought` as in any stage. Legal actions:
@@ -165,13 +167,27 @@ Runs between the crusher and the disc, only if alive > 3. Constants in `src/rule
 - **Resolution each round, in this order:**
   1. **Base.** If there is no base: the agents who chose `offer_back` are the volunteers; if any, the RNG picks one as the base (the other volunteers stay down as ordinary agents and may climb later). Else the valid `push_base:<name>` targets (target down, alive, not the pusher) are collected; a push on the `anchor` holder fails and is logged as an `ability_use` (power `anchor`) like the crusher's; if any valid target remains, the RNG picks one as the base. Volunteering always beats pushing.
   2. **Lifts.** Once a base exists (including one chosen this round), up to `PIT_LIFTS_PER_ROUND` of the down non-base agents who chose `climb` get out; if more climbers than lifts, the RNG picks which, and the rest stay down and may try again. Without a base nobody climbs.
-  3. **Rope.** Any agent who was already *out at the start of this round* and chose `reach_down`, while a base is still down and the rope is unused: the RNG picks one rescuer if several. The base is hauled out alive (it is now out), the rope is spent for good, and the rescuer pays: their footing at the start of the ledge is reduced by `ROPE_COST_FOOTING` (1), stacking with the anchor's +1 but never below 1 (recorded in `Game.ropeCost` and applied by the ledge). A public log line says who threw the rope. After a rescue there is no base again; the down agents who remain need a new volunteer or push, and that new base is left behind (the rope cannot be reused) unless the feather saves them.
+  3. **Rope.** Any agent who was already *out at the start of this round* and chose `reach_down`, while a base is still down and the rope is unused: the RNG picks one rescuer if several. The base is hauled out alive (it is now out), the rope is spent for good, and the rescuer pays: their footing at the start of the ledge is reduced by `ROPE_COST_FOOTING` (2), stacking with the anchor's +1 (anchor 4 - 2 = 2, everyone else 3 - 2 = 1) but never below 1 (recorded in `Game.ropeCost` and applied by the ledge). A public log line says who threw the rope. After a rescue there is no base again; the down agents who remain need a new volunteer or push, and that new base is left behind (the rope cannot be reused) unless the feather saves them.
 - **Early finish.** If nobody is down at the start of a round, the stage ends at once (no flood, no deaths).
 - **The flood.** After round 5, every agent still down is eliminated, base included (cause `pit`, style `sink`), through the normal elimination path: the feather cancels one elimination (the holder floats out; `ability_use`). The pit's own floor rule is stronger than the global one: it never leaves fewer than 3 alive. If the flood would, the engine saves randomly chosen doomed agents (`lucky_save`, `why: "a plank floats by"`) until 3 are alive.
 - **Skipped** when alive <= 3 (so alive is always >= 4 inside the pit and >= 3 after it).
 - **Events.** `stage_start`/`round_start` as usual; after each round's resolution one `reveal` with `what: "pit"` (data below), plus one `reveal` with `what: "rope"` and `data: { by, saved, cost }` just before it in the round of a rescue; `ability_use` for anchor push failures and the feather; `death` (`cause: "pit"`, `style: "sink"`, no `place`); `lucky_save` for floor saves.
 - **Stage default action:** `wait` while down, `leave` while out.
 - **Scripted bots** (read only their own view): `saint` offers to be the base (and later reaches down when it is out), `coward` waits for two rounds and then climbs, `liar` and `shover` push someone else to be the base, `random` picks any legal action.
+
+### 4.6 Chalk wall (rules v4)
+
+Cross-game memory, in two halves. It is the owner's original idea: one contestant decides to leave a warning behind for future ones, if they are able to survive. Constants in `src/rules.js`: `CHALK_MAX_NOTES = 3`, `CHALK_NOTE_LIMIT = 140`.
+
+**Input.** `runGame({ seed, agents, config })` accepts an optional `config.chalk`: an array of earlier winners' notes `{ text: string, byPlace: 1|2|3 }`, chosen by the caller (`bin/` and the LLM runner decide which notes to pass; the engine just carries them). The engine sanitises the list (`sanitizeChalkNotes` in `src/rules.js`): a non-array is empty; each entry must be an object with a string `text` and an integer `byPlace` from 1 to 3, anything else is dropped; control characters are stripped, newlines, tabs and runs of whitespace collapse to one space, zero-width and bidi marks and lone surrogates are removed, the text is trimmed and cut to 140 characters (never splitting a surrogate pair), empties are dropped, and at most the first 3 usable notes are kept. The result is stored on the tape as top-level `chalkShown` (always present; `[]` when none). The notes are public data: identical for every viewer, never tied to a power.
+
+**Views.** Every view in every stage has `chalkWall`: `[{ text, byPlace }]` (an empty array when none), and the `common` intro adds the wall sentence from section 3 only when it is non-empty. Right after `game_start`, if `chalkShown` is non-empty, the engine emits `chalk_read` (`stage: null`, `round: null`, `notes: [{ text, byPlace }]`).
+
+**Epilogue stage `chalk`.** After the last obstacle ends and before `game_end`, every agent who has a place 1, 2 or 3 is asked once, simultaneously, in seat order, and only they (a lone survivor is 1st and is asked alone; when four stood on the ledge the first faller has place `null` and is not asked; dead agents who finished 2nd or 3rd *are* asked, the one place a dead agent acts). `stage: "chalk"`, `phase: "write"`, round 1 of 1, `legalActions: ["write", "skip"]`, default `skip`, `stageState: { place }` (the viewer's own place). The view's `rules` text is: "The game is over and you finished in place N. You may scratch ONE message (at most 140 characters) on the chalk wall for future contestants. You will never meet them and nothing you write changes your result. Put the message in "say". Write whatever you like: a warning, advice, a lie, a taunt. Choose skip to write nothing." (`chalkRules(place)`; it names no power). The note is the response's `say` when the action is `write`, sanitised exactly like input notes. `whisper` and `forge` are ignored: nothing is delivered, no `say`/`whisper`/`ability_use` event is emitted in the epilogue, a forger's forge is not spent, and the action event carries a note saying so. A `write` with an empty message is still a valid action but writes nothing (noted); a `skip` with a `say` writes nothing (noted). Invalid, missing or throwing answers become `skip` with `valid: false`, as in every stage.
+
+**Events, in order.** `stage_start` (`stage: "chalk"`, `alive` = the placed agents, `note`), `round_start`, a `thought` per agent that had one, an `action` per agent, a `chalk_write` `{ name, place, text }` for each non-empty sanitised note (stage `chalk`, round 1, seat order), then `stage_end` (`survivors` = the same placed agents). The tape's top-level `chalkWritten` is `[{ name, place, text }]` with the same content as the `chalk_write` events (`[]` when none). The epilogue never changes places or deaths; `game_end` and `result` are exactly as in rules v3.
+
+**Scripted bots** answer the epilogue from their own view and work with or without a wall: `saint` writes honest-sounding advice, `liar` a lie, `shover` a taunt, `coward` skips, `random` writes or skips at random.
 
 ## 5. Views (what the engine shows each agent)
 
@@ -183,7 +199,7 @@ For every ask, the engine builds a plain-JSON `view` and passes it to `agent.act
   "power": { "id": "glass_eye", "description": "..." } ,
   "powerSpent": false,
   "stage": "bridge",
-  "phase": "waiting" | "crossing" | "pick" | "swap" | "play",
+  "phase": "waiting" | "crossing" | "pick" | "swap" | "play" | "write",
   "round": 3,
   "roundsTotal": 6,
   "alive": ["Ash", "Bex"],
@@ -196,11 +212,12 @@ For every ask, the engine builds a plain-JSON `view` and passes it to `agent.act
   "rules": "plain-language rules for the current stage and phase",
   "legalActions": ["hold", "volunteer", "swap:Bex"],
   "common": "static game intro, same every call",
+  "chalkWall": [{ "text": "Go left.", "byPlace": 1 }],
   "powerBlurbs": [{ "id": "glass_eye", "blurb": "Someone can see through glass." }]
 }
 ```
 
-`publicLog` carries the lines since this agent's last ask, capped at the last 40 lines. `whispersToYou` carries whispers received since the last ask. `stageState` differs per stage: bridge: `{ rowsCrossed, weakPanesRevealed: [{row, weak: "L"}], front: "Ash" }`; crusher: `{ ceiling: 0-5, leverHolder: null }`; pit: `{ flood: 0-4, base: "Ash"|null, down: [names], out: [names], ropeUsed: false, liftsPerRound: 2 }` (`flood` = rounds already resolved; everything in it is public and identical for every viewer); disc: `{ tiles: {"1":"Ash"}, openCount }`; ledge: `{ footing: {"Ash": 3}, landedShoves: {"Ash": 0}, shrinkIn: 1, lastDefence: null }` (`lastDefence` is the viewer's own; `footing` and `landedShoves` list living agents). Include everything an agent legitimately knows, nothing hidden.
+`publicLog` carries the lines since this agent's last ask, capped at the last 40 lines. `whispersToYou` carries whispers received since the last ask. `stageState` differs per stage: bridge: `{ rowsCrossed, weakPanesRevealed: [{row, weak: "L"}], front: "Ash" }`; crusher: `{ ceiling: 0-5, leverHolder: null }`; pit: `{ flood: 0-4, base: "Ash"|null, down: [names], out: [names], ropeUsed: false, liftsPerRound: 2 }` (`flood` = rounds already resolved; everything in it is public and identical for every viewer); disc: `{ tiles: {"1":"Ash"}, openCount }`; ledge: `{ footing: {"Ash": 3}, landedShoves: {"Ash": 0}, shrinkIn: 1, lastDefence: null }` (`lastDefence` is the viewer's own; `footing` and `landedShoves` list living agents); chalk (epilogue, rules v4): `{ place }` (the viewer's own place). `chalkWall` is public and identical for every viewer in every stage. In the epilogue `alive` lists only the survivor, so the placed fallers asked there are not in `alive` (they are in `dead`). Include everything an agent legitimately knows, nothing hidden.
 
 `rules` is written by the engine (single source of truth) in plain words, includes the numbers, and never mentions powers the agent does not hold. The Map holder additionally receives `privateKnowledge` entries with the rules text of all five stages at game start (stage 3 is the pit, stage 4 the disc, stage 5 the ledge). The pit rules come in three role variants (down, base, out); the Map copy carries all three. The pit rules never mention powers, and name the rope's footing price in plain words ("the last obstacle of the game") without naming the ledge.
 
@@ -211,13 +228,13 @@ For every ask, the engine builds a plain-JSON `view` and passes it to `agent.act
 // response: { thought, say, whisper, action, forge }
 ```
 
-`act` may throw or return garbage; the engine catches it and applies the default action (flagged invalid, with the error text in the event `note`). The engine never trusts the response: it normalises strings, checks the action against `legalActions`, enforces power constraints, and truncates text. `runGame({ seed, agents, config })` takes `agents` as an object keyed by seat name; each value is an Agent. The seeded RNG decides power assignment. Within a round the engine calls `Promise.all` over the active agents.
+`act` may throw or return garbage; the engine catches it and applies the default action (flagged invalid, with the error text in the event `note`). The engine never trusts the response: it normalises strings, checks the action against `legalActions`, enforces power constraints, and truncates text. `runGame({ seed, agents, config })` takes `agents` as an object keyed by seat name; each value is an Agent. `config.chalk` (optional, section 4.6) carries earlier winners' notes. The seeded RNG decides power assignment. Within a round the engine calls `Promise.all` over the active agents.
 
 Agents run in the engine's process, so `act` must not block the event loop: a synchronous infinite loop cannot be interrupted by the per-call timeout (a documented limitation; agents are not run in workers). A never-settling promise is timed out and defaulted, and the timeout timer keeps the process alive until it fires. The engine reads each response exactly once into plain data (getters, proxies, cycles and oversized strings are neutralised) before using any of it, and no malformed response or thrown value can abort the game.
 
 **Secrecy note.** The seed is public in the tape and all hidden state (powers, safe panes, lever and trapdoor draws) is derived from it. That is acceptable because agents are language models with no code execution and never see the seed; a future version can mix in a secret salt.
 
-`createScriptedAgents(seed, kinds)` in `src/scripted.js` builds the free bots: `random`, `saint` (volunteers, holds levers, offers to be the pit's base and later throws the rope), `coward` (holds back, never volunteers, climbs once the pit has a base), `liar` (claims powers it lacks, whispers lies, pushes others into the base role), `shover` (always shoves on the ledge, pushes in the crusher and the pit). Scripted bots must read their own `view` only.
+`createScriptedAgents(seed, kinds)` in `src/scripted.js` builds the free bots: `random`, `saint` (volunteers, holds levers, offers to be the pit's base and later throws the rope), `coward` (holds back, never volunteers, climbs once the pit has a base), `liar` (claims powers it lacks, whispers lies, pushes others into the base role), `shover` (always shoves on the ledge, pushes in the crusher and the pit). They also answer the chalk epilogue (section 4.6). Scripted bots must read their own `view` only.
 
 ## 7. Tape format
 
@@ -226,13 +243,15 @@ Every game produces a tape, a plain JSON object:
 ```json
 {
   "version": 1,
-  "rulesVersion": 3,
+  "rulesVersion": 4,
   "id": "20261008-0001",
   "seed": 12345,
   "createdAt": "ISO timestamp",
   "players": [
     { "name": "Ash", "model": "anthropic/claude-haiku-5.5", "power": "glass_eye" }
   ],
+  "chalkShown": [ { "text": "Go left.", "byPlace": 1 } ],
+  "chalkWritten": [ { "name": "Ash", "place": 1, "text": "Hold the lever." } ],
   "events": [ ... ],
   "result": {
     "places": [ { "name": "Ash", "place": 1 }, { "name": "Bex", "place": null, "diedAt": "bridge" } ],
@@ -242,12 +261,13 @@ Every game produces a tape, a plain JSON object:
 }
 ```
 
-`rulesVersion` is a positive integer written by the engine (`RULES_VERSION` in `src/engine.js`, currently 3). Tapes from before rules v2 lack the field and stay valid; stats should treat them as rules v1.
+`rulesVersion` is a positive integer written by the engine (`RULES_VERSION` in `src/engine.js`, currently 4). Tapes from before rules v2 lack the field and stay valid; stats should treat them as rules v1. Tapes from rules v1 to v3 lack `chalkShown` and `chalkWritten` too; both are optional for the validator, and such tapes validate unchanged.
 
 What changed, by rules version:
 
 - **v2:** Wedge jam dive (0.5), no repeated ledge defence.
 - **v3:** (1) the new **Pit** stage between the crusher and the disc, with the base/lift/rope mechanics and the `pit`/`sink` death; (2) the **rope**, whose thrower starts the ledge with 1 less footing (never below 1); (3) the **ledge tie-break**: footing, then landed shoves, then the RNG, replacing the coin flip (with `landedShoves` in the ledge `stageState` and `footing` reveals, and new `lucky_save` reasons); (4) the intro and the rules text frame the contestants as **rivals**; (5) the Map holder now knows five stages. Tapes with a different `rulesVersion` are not comparable stage by stage.
+- **v4:** (1) the **chalk wall**: optional `config.chalk` notes from earlier winners, shown to every agent (`chalkWall` in every view, the `chalk_read` event, `chalkShown` on the tape) with an intro sentence only when non-empty; (2) the **epilogue stage `chalk`**: after the last obstacle the placed agents (1st to 3rd) may write one note of at most 140 characters (`chalk_write` events, `chalkWritten` on the tape); it never changes places or deaths; (3) the **rope costs 2 footing** (`ROPE_COST_FOOTING = 2`, was 1), still never below 1 at the ledge start.
 
 Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null, ... }`, `i` strictly increasing from 0. Event types and required fields:
 
@@ -265,9 +285,11 @@ Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null,
 | `lucky_save` | `name`, `why` (floor saves use a short cartoon reason such as "the glass holds" or, in the pit, "a plank floats by"; the ledge's all-fall save uses `"won the photo finish on footing"`, `"won the photo finish on shoves landed"` or `"a last toe-hold"`) |
 | `death` | `name`, `stage`, `cause` (`glass`, `crusher`, `pit`, `trapdoor`, `ledge`), `style` (`shatter`, `flatten`, `sink`, `chute`, `tumble`), `place`?. The pairs are fixed per stage: bridge `glass`/`shatter`, crusher `crusher`/`flatten`, pit `pit`/`sink`, disc `trapdoor`/`chute`, ledge `ledge`/`tumble`. |
 | `stage_end` | `stage`, `survivors` |
+| `chalk_read` | `notes` (`[{ text, byPlace }]`, 1 to 3 notes). `stage` and `round` are null. Emitted once, right after `game_start`, only when the wall is non-empty (rules v4). |
+| `chalk_write` | `name`, `place` (1 to 3), `text` (1 to 140 characters). `stage: "chalk"`, `round: 1`. One per non-empty sanitised note, in seat order (rules v4). |
 | `game_end` | `places` |
 
-`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, a `rulesVersion` that is present but not a positive integer, a first event index other than 0, non-increasing `i`, unknown event type, an unknown `reveal.what`, a death whose cause and style do not fit its stage, a pit that starts with 3 or fewer alive or leaves fewer than 3, missing or mistyped required fields (including `ability_use.detail`, `lucky_save.why`, `stage_start.note`), a missing or non-finite `usage`, a `game_start` roster that is not the eight `players`, names not in `players` anywhere (alive lists, survivors, `forgedAs`, whisper ends, deaths, places, line, footing and pit reveals), alive lists that disagree with the deaths so far, deaths without a stage, a null place without `diedAt`, places that do not follow from who reached the ledge and the order they fell in, places not forming 1..3 for the survivors, or a power assigned twice.
+`validateTape(tape)` in `src/tape.js` throws with a clear message on: bad version, a `rulesVersion` that is present but not a positive integer, a first event index other than 0, non-increasing `i`, unknown event type, an unknown `reveal.what`, a death whose cause and style do not fit its stage, a pit that starts with 3 or fewer alive or leaves fewer than 3, missing or mistyped required fields (including `ability_use.detail`, `lucky_save.why`, `stage_start.note`), a missing or non-finite `usage`, a `game_start` roster that is not the eight `players`, names not in `players` anywhere (alive lists, survivors, `forgedAs`, whisper ends, deaths, places, line, footing and pit reveals), alive lists that disagree with the deaths so far, deaths without a stage, a null place without `diedAt`, places that do not follow from who reached the ledge and the order they fell in, places not forming 1..3 for the survivors, or a power assigned twice. For the chalk wall (rules v4; absent in older tapes): a `chalk_read` that is not event 1, has a stage or round, has more than 3 notes or a note with text outside 1-140 characters or a `byPlace` outside 1-3, a `chalkShown` that differs from the `chalk_read` notes; in the `chalk` epilogue: an event type other than `stage_start`, `round_start`, `thought`, `action`, `chalk_write` and `stage_end`, an epilogue that is not the last thing before `game_end`, a `stage_start` `alive` or `stage_end` `survivors` that is not exactly the placed agents, a thought or action by an agent who is not placed (the dead may act here, nowhere else), a placed agent without exactly one `write`/`skip` action, an invalid action that is not `skip`, a `chalk_write` by an unplaced agent, with the wrong place, with text over 140 characters or empty, twice by one agent, or without a `write` action; and a `chalkWritten` that differs from the `chalk_write` events.
 
 ## 8. LLM agents
 
@@ -299,7 +321,7 @@ Each event is `{ "i": 0, "type": "...", "stage": "bridge"|null, "round": 3|null,
 
 ## 11. Verification gate
 
-- `npm test` green: engine unit tests per stage, determinism (same seed and same scripted agents give a byte-identical tape), floor rules, power rules, invalid-action defaults, a 300-game scripted fuzz asserting invariants (3 places maximum, places unique, validateTape passes, no player acts after death), and a dedicated pit fuzz (at least 100 of 300 mixed-bot games reach the pit and every pit outcome occurs), adapter tests with a mocked gateway, ledger cap test, stats test.
+- `npm test` green: engine unit tests per stage, determinism (same seed and same scripted agents give a byte-identical tape), floor rules, power rules, invalid-action defaults, a 300-game scripted fuzz asserting invariants (3 places maximum, places unique, validateTape passes, no player acts after death except the placed fallers in the chalk epilogue), a chalk-wall suite (sanitising, views, the epilogue's cast, determinism, validator mutations) with the 300-game fuzz run half with `config.chalk`, and a dedicated pit fuzz (at least 100 of 300 mixed-bot games reach the pit and every pit outcome occurs), adapter tests with a mocked gateway, ledger cap test, stats test.
 - `node bin/validate-tapes.js` green on every shipped tape.
 - Viewer: Playwright check at 390, 768, 1440 px loads a tape, plays through, no console errors, no horizontal overflow.
 - Real tapes: at least 10 multi-model games, total spend recorded in `docs/RUN-LOG.md`.

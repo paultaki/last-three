@@ -28,7 +28,7 @@ const rejects = (mutate, pattern) => {
 
 test('a tape with pit deaths, a rope and pit reveals validates', () => {
   validateTape(tape);
-  assert.equal(tape.rulesVersion, 3);
+  assert.equal(tape.rulesVersion, 4);
   assert.ok(tape.events.some((e) => e.stage === 'pit' && e.type === 'reveal' && e.what === 'pit'));
   assert.ok(tape.result.deaths.some((d) => d.stage === 'pit' && d.cause === 'pit' && d.style === 'sink'));
 });

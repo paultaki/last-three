@@ -4,7 +4,7 @@
 
 import { makeRng } from './rng.js';
 import { POWERS, POWER_IDS, powerById } from './powers.js';
-import { commonText, mapKnowledge } from './rules.js';
+import { commonText, mapKnowledge, sanitizeChalkNotes } from './rules.js';
 
 export const SEATS = ['Ash', 'Bex', 'Cole', 'Dara', 'Eli', 'Fenn', 'Gus', 'Hana'];
 export const TEXT_LIMIT = 280;
@@ -121,11 +121,13 @@ export class Game {
     this.bridgeSafe = null;
     this.ropeCost = new Map(); // name -> footing lost at the start of the ledge for throwing the pit's rope
 
+    this.chalk = sanitizeChalkNotes(config.chalk); // earlier winners' notes, public and identical for every viewer
+    this.chalkWritten = []; // this game's notes, filled by the epilogue
     this.log = [];
     this.cursor = new Map(SEATS.map((s) => [s, 0]));
     this.inbox = new Map(SEATS.map((s) => [s, []]));
     this.power = this.#assignPowers(config.powers);
-    this.common = commonText(SEATS);
+    this.common = commonText(SEATS, this.chalk.length > 0);
   }
 
   #assignPowers(override) {
@@ -173,14 +175,15 @@ export class Game {
     this.log.push(text);
   }
 
-  beginStage(stage, note) {
+  /** `alive` is only overridden by the epilogue, which is about the placed agents rather than the living ones. */
+  beginStage(stage, note, alive = this.aliveList()) {
     this.stage = stage;
     this.round = null;
-    this.emit('stage_start', { alive: this.aliveList(), note });
+    this.emit('stage_start', { alive, note });
   }
 
-  endStage() {
-    this.emit('stage_end', { survivors: this.aliveList() });
+  endStage(survivors = this.aliveList()) {
+    this.emit('stage_end', { survivors });
     this.stage = null;
     this.round = null;
   }
@@ -227,6 +230,7 @@ export class Game {
       rules: spec.rules,
       legalActions: spec.legalActions,
       common: this.common,
+      chalkWall: this.chalk,
       powerBlurbs: POWERS.map(({ id, blurb }) => ({ id, blurb })),
     });
   }
@@ -284,6 +288,13 @@ export class Game {
   }
 
   // ---- speech --------------------------------------------------------------------------
+
+  /** Thoughts only, in seat order: the epilogue has no say, whisper or forge. */
+  think(names, results) {
+    for (const name of names) {
+      if (results[name].thought) this.emit('thought', { name, text: results[name].thought });
+    }
+  }
 
   /**
    * thought, say, whisper, forge for each asker, in seat order, before any action resolves.

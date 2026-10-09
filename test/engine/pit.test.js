@@ -187,7 +187,7 @@ test('rescue frees the base alive; then there is no base and no rope, a new volu
   assert.ok(deaths(g).some((d) => d.name === 'Cole'), 'the second base is eliminated by the flood');
 });
 
-test('the rescuer pays: footing at the start of the ledge drops by 1, stacks with anchor, never goes below 1', async () => {
+test('the rescuer pays: footing at the start of the ledge drops by 2, stacks with anchor, never goes below 1', async () => {
   const g = pitGame({
     alive: ['Ash', 'Bex', 'Cole', 'Dara', 'Eli'],
     powers: { Bex: 'anchor', Cole: 'nothing' },
@@ -200,7 +200,7 @@ test('the rescuer pays: footing at the start of the ledge drops by 1, stacks wit
   assert.deepEqual(g.aliveList(), ['Ash', 'Bex', 'Cole']);
   await runLedge(g);
   const first = reveals(g, 'footing')[0];
-  assert.deepEqual(first.footing, { Ash: 3, Bex: 3, Cole: 3 }, 'anchor 4 - rope 1 = 3; others unchanged');
+  assert.deepEqual(first.footing, { Ash: 3, Bex: 2, Cole: 3 }, 'anchor 4 - rope 2 = 2; others unchanged');
 
   const floor = makeGame({ dead: dead(['Ash', 'Bex', 'Cole']), powers: { Ash: 'feather', Bex: 'nothing' } });
   floor.spent.add('Ash');
@@ -326,7 +326,7 @@ test('the pit rules are plain words with the numbers, never name a power, and th
     const text = pitRules(role);
     assert.match(text, /5 rounds/);
     assert.match(text, /at most 2 climbers/);
-    assert.match(text, /1 less footing/);
+    assert.match(text, /2 less footing/);
     assert.match(text, /never below 1/);
     assert.match(text, /at least 3 contestants/);
     assert.doesNotMatch(text, /\b(glass_eye|wedge|feather|anchor|forger|nothing)\b/i);

@@ -1,8 +1,11 @@
 // Tape format (spec section 7) and its validator. validateTape throws a clear Error on the first problem.
 
 import { POWER_IDS } from './powers.js';
+import { CHALK_MAX_NOTES, CHALK_NOTE_LIMIT } from './rules.js';
 
 export const STAGE_NAMES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+/** Rules v4 epilogue: not an obstacle, so it is not in STAGE_NAMES (nobody dies or places in it). */
+export const EPILOGUE_STAGE = 'chalk';
 const CAUSES = ['glass', 'crusher', 'pit', 'trapdoor', 'ledge'];
 const STYLES = ['shatter', 'flatten', 'sink', 'chute', 'tumble'];
 /** The only (cause, style) a death in each stage may carry. */
@@ -22,6 +25,7 @@ const LEDGE_PLACE_CAP = MAX_PLACES;
 /** Value types for fields that must not just be present but well formed. */
 const FIELD_TYPES = {
   alive: 'array', survivors: 'array', players: 'array', places: 'array',
+  notes: 'array', place: 'number',
   text: 'string', note: 'string', detail: 'string', why: 'string', power: 'string', action: 'string', what: 'string', phase: 'string',
   valid: 'boolean', roundsTotal: 'number',
 };
@@ -41,7 +45,11 @@ const EVENT_SHAPES = {
   death: { fields: ['name', 'cause', 'style'], names: ['name'], stage: true },
   stage_end: { fields: ['survivors'], stage: true },
   game_end: { fields: ['places'] },
+  chalk_read: { fields: ['notes'] },
+  chalk_write: { fields: ['name', 'place', 'text'], names: ['name'], stage: true, round: true },
 };
+/** The only event types the epilogue may contain. */
+const CHALK_EVENT_TYPES = ['stage_start', 'round_start', 'thought', 'action', 'chalk_write', 'stage_end'];
 
 const fail = (message) => {
   throw new Error(message);
@@ -56,6 +64,7 @@ export function validateTape(tape) {
   validateStartPlayers(tape);
   validateResult(tape, names, deaths);
   validateLedgeOutcome(tape, names, deaths);
+  validateChalk(tape, names);
   validateNamedLists(tape.events, names);
   validateUsage(tape.usage);
 }
@@ -119,7 +128,7 @@ function validateEvents(events, names) {
 
 function validateStageRound(event, idx, shape) {
   if (!('stage' in event) || !('round' in event)) fail(`Event ${idx} ${event.type} must carry stage and round keys (null if n/a)`);
-  if (event.stage !== null && !STAGE_NAMES.includes(event.stage)) fail(`Event ${idx} bad stage: ${event.stage}`);
+  if (event.stage !== null && !STAGE_NAMES.includes(event.stage) && event.stage !== EPILOGUE_STAGE) fail(`Event ${idx} bad stage: ${event.stage}`);
   if (event.round !== null && !Number.isInteger(event.round)) fail(`Event ${idx} bad round: ${event.round}`);
   if (shape.stage && event.stage === null) fail(`Event ${idx} ${event.type} needs a stage`);
   if (shape.round && event.round === null) fail(`Event ${idx} ${event.type} needs a round`);
@@ -129,7 +138,8 @@ const ACTOR_FIELDS = { thought: 'name', say: 'name', action: 'name', ability_use
 
 function checkLifecycle(event, idx, dead, deaths) {
   const actor = event[ACTOR_FIELDS[event.type]];
-  if (actor && dead.has(actor)) fail(`Event ${idx} ${event.type}: ${actor} acts after dying`);
+  // The epilogue is the one place the dead may act (placed fallers write a note); validateChalk polices it.
+  if (actor && dead.has(actor) && event.stage !== EPILOGUE_STAGE) fail(`Event ${idx} ${event.type}: ${actor} acts after dying`);
   if (event.type === 'lucky_save' && dead.has(event.name)) fail(`Event ${idx} lucky_save for dead agent ${event.name}`);
   if (event.type !== 'death') return;
   if (!CAUSES.includes(event.cause)) fail(`Event ${idx} death unknown cause: ${event.cause}`);
@@ -230,6 +240,85 @@ function validateLedgeOutcome(tape, names, deathEvents) {
   }
 }
 
+/**
+ * The chalk wall (rules v4). Old tapes have none of it and pass untouched. When present: the notes
+ * shown at the start match chalkShown, the epilogue asks exactly the placed agents after the last
+ * obstacle, every note comes from a placed agent's valid `write`, and chalkWritten matches the events.
+ */
+function validateChalk(tape, names) {
+  const { events, result } = tape;
+  const reads = events.filter((e) => e.type === 'chalk_read');
+  if (reads.length > 1) fail('At most one chalk_read allowed');
+  if (reads.length === 1) {
+    if (events[1] !== reads[0]) fail('chalk_read must come right after game_start');
+    if (reads[0].stage !== null || reads[0].round !== null) fail('chalk_read must have null stage and round');
+    validateShownNotes(reads[0].notes, 'chalk_read notes');
+    if (reads[0].notes.length === 0) fail('chalk_read notes must not be empty');
+  }
+  if (tape.chalkShown !== undefined) {
+    validateShownNotes(tape.chalkShown, 'chalkShown');
+    if (JSON.stringify(tape.chalkShown) !== JSON.stringify(reads[0]?.notes ?? [])) fail('chalkShown does not match the chalk_read event');
+  }
+
+  const placedAt = new Map(result.places.filter((p) => p.place !== null).map((p) => [p.name, p.place]));
+  const epilogue = events.filter((e) => e.stage === EPILOGUE_STAGE);
+  const writes = epilogue.filter((e) => e.type === 'chalk_write');
+  if (epilogue.length) validateEpilogue(events, epilogue, writes, placedAt);
+  if (tape.chalkWritten !== undefined) {
+    if (!Array.isArray(tape.chalkWritten)) fail('chalkWritten must be an array');
+    const plain = ({ name, place, text }) => ({ name, place, text });
+    if (JSON.stringify(tape.chalkWritten.map(plain)) !== JSON.stringify(writes.map(plain))) fail('chalkWritten does not match the chalk_write events');
+  }
+}
+
+function validateShownNotes(notes, where) {
+  if (!Array.isArray(notes) || notes.length > CHALK_MAX_NOTES) fail(`${where} must be an array of at most ${CHALK_MAX_NOTES} notes`);
+  for (const note of notes) {
+    if (!note || typeof note !== 'object') fail(`${where} has a note that is not an object`);
+    if (typeof note.text !== 'string' || !note.text.trim() || note.text.length > CHALK_NOTE_LIMIT) fail(`${where} text must be 1-${CHALK_NOTE_LIMIT} characters`);
+    if (!Number.isInteger(note.byPlace) || note.byPlace < 1 || note.byPlace > MAX_PLACES) fail(`${where} byPlace must be 1-${MAX_PLACES}`);
+  }
+}
+
+function validateEpilogue(events, epilogue, writes, placedAt) {
+  const starts = epilogue.filter((e) => e.type === 'stage_start');
+  const ends = epilogue.filter((e) => e.type === 'stage_end');
+  if (starts.length !== 1 || ends.length !== 1) fail('The chalk epilogue needs exactly one stage_start and one stage_end');
+  const first = events.indexOf(epilogue[0]);
+  if (epilogue[0] !== starts[0]) fail('The chalk epilogue must begin with its stage_start');
+  if (events.slice(first, -1).some((e) => e.stage !== EPILOGUE_STAGE)) fail('The chalk epilogue must come after the last obstacle, just before game_end');
+  if (epilogue.at(-1) !== ends[0]) fail('The chalk epilogue must end with its stage_end');
+  for (const e of epilogue) {
+    if (!CHALK_EVENT_TYPES.includes(e.type)) fail(`Event ${e.i} ${e.type} is not allowed in the chalk epilogue`);
+    if (e.round !== null && e.round !== 1) fail(`Event ${e.i} chalk round must be 1`);
+  }
+  const placedNames = [...placedAt.keys()];
+  for (const [what, list] of [['stage_start alive', starts[0].alive], ['stage_end survivors', ends[0].survivors]]) {
+    if (new Set(list).size !== list.length || list.length !== placedNames.length || placedNames.some((n) => !list.includes(n))) {
+      fail(`Chalk ${what} must be exactly the placed agents`);
+    }
+  }
+  const actions = new Map();
+  for (const e of epilogue) {
+    if (e.type !== 'thought' && e.type !== 'action') continue;
+    if (!placedAt.has(e.name)) fail(`Event ${e.i} ${e.name} is not placed so cannot act in the chalk epilogue`);
+    if (e.type === 'thought') continue;
+    if (actions.has(e.name)) fail(`Event ${e.i} ${e.name} acts twice in the chalk epilogue`);
+    if (e.action !== 'write' && e.action !== 'skip') fail(`Event ${e.i} chalk action must be write or skip, got ${e.action}`);
+    if (e.action === 'write' && e.valid !== true) fail(`Event ${e.i} an invalid chalk action must default to skip`);
+    actions.set(e.name, e);
+  }
+  if (actions.size !== placedNames.length) fail('Every placed agent must have exactly one chalk action');
+  const written = new Set();
+  for (const w of writes) {
+    if (placedAt.get(w.name) !== w.place) fail(`Event ${w.i} chalk_write by ${w.name} has place ${w.place}, expected ${placedAt.get(w.name) ?? 'none (not placed)'}`);
+    if (typeof w.text !== 'string' || !w.text.trim() || w.text.length > CHALK_NOTE_LIMIT) fail(`Event ${w.i} chalk_write text must be 1-${CHALK_NOTE_LIMIT} characters`);
+    if (written.has(w.name)) fail(`Event ${w.i} ${w.name} writes twice`);
+    written.add(w.name);
+    if (actions.get(w.name)?.action !== 'write') fail(`Event ${w.i} chalk_write by ${w.name} without a write action`);
+  }
+}
+
 const ordinal = (n) => `#${n}`;
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
@@ -245,7 +334,7 @@ function validateNamedLists(events, names) {
     if (event.type === 'death') dead.add(event.name);
     if (event.type === 'stage_start' && event.stage === 'pit' && event.alive.length <= PIT_MIN_ALIVE) fail(`${where} the pit only runs with more than ${PIT_MIN_ALIVE} alive`);
     if (event.type === 'stage_end' && event.stage === 'pit' && event.survivors.length < PIT_MIN_ALIVE) fail(`${where} the pit must leave at least ${PIT_MIN_ALIVE} alive`);
-    if (event.type === 'stage_start' || event.type === 'stage_end') {
+    if ((event.type === 'stage_start' || event.type === 'stage_end') && event.stage !== EPILOGUE_STAGE) {
       const field = event.type === 'stage_start' ? 'alive' : 'survivors';
       known(event[field], where);
       const expected = [...names].filter((n) => !dead.has(n));

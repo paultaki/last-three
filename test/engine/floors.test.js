@@ -5,7 +5,8 @@ import { validateTape } from '../../src/tape.js';
 import { fixedAgents, makeOracle, ofType, pitEscape, powersWith, reply } from './helpers.js';
 
 const opposite = (side) => (side === 'L' ? 'R' : 'L');
-const stagesRun = (tape) => ofType(tape.events, 'stage_start').map((e) => e.stage);
+/** The obstacles that ran (the chalk epilogue always follows and is not one). */
+const stagesRun = (tape) => ofType(tape.events, 'stage_start').map((e) => e.stage).filter((stage) => stage !== 'chalk');
 
 /**
  * Plays a whole game. The bridge front steps wrongly while more than `keep` agents are alive and
@@ -38,6 +39,8 @@ test('one survivor after the bridge: that agent is 1st and no further stage star
   assert.ok(tape.result.places.filter((p) => !p.place).every((p) => p.diedAt === 'bridge'));
   assert.equal(tape.events.at(-1).type, 'game_end');
   assert.equal(ofType(tape.events, 'death').length, 7);
+  const chalk = ofType(tape.events, 'stage_start').find((e) => e.stage === 'chalk');
+  assert.deepEqual(chalk.alive, [tape.result.places.find((p) => p.place === 1).name], 'the lone survivor is the only one asked');
 });
 
 test('three alive after the bridge: crusher and disc are skipped, straight to the ledge', async () => {

@@ -2,7 +2,8 @@
 //
 // config (all optional): id, createdAt (fixed defaults keep tapes byte-reproducible; callers that
 // want real timestamps pass one), agentTimeoutMs, and two test hooks: powers (seat -> power id)
-// and ledgeMaxRounds.
+// and ledgeMaxRounds. config.chalk is up to three earlier winners' notes ({text, byPlace}); the
+// engine cleans them, shows them to every agent, and records them on the tape as chalkShown.
 
 import { Game, SEATS } from './game.js';
 import { runBridge } from './stages/bridge.js';
@@ -10,11 +11,12 @@ import { runCrusher } from './stages/crusher.js';
 import { runPit } from './stages/pit.js';
 import { runDisc } from './stages/disc.js';
 import { runLedge } from './stages/ledge.js';
+import { runChalk } from './stages/chalk.js';
 
 export { SEATS };
 
-/** Bumped whenever the rules change in a way that makes old tapes incomparable. v2: Wedge dive, no repeated ledge defence. v3: the Pit and its rope, the landed-shoves ledge tie-break, rivals wording. */
-export const RULES_VERSION = 3;
+/** Bumped whenever the rules change in a way that makes old tapes incomparable. v2: Wedge dive, no repeated ledge defence. v3: the Pit and its rope, the landed-shoves ledge tie-break, rivals wording. v4: the chalk wall (notes from earlier winners, and an epilogue where the top three write one), rope cost 2. */
+export const RULES_VERSION = 4;
 
 const DEFAULT_DATE = '20261008';
 const DEFAULT_CREATED_AT = '2026-10-08T00:00:00.000Z';
@@ -36,6 +38,7 @@ export async function runGame({ seed, agents, config = {} }) {
     power: g.powerOf(name),
   }));
   g.emit('game_start', { players });
+  if (g.chalk.length) g.emit('chalk_read', { notes: structuredClone(g.chalk) });
 
   for (const stage of STAGES) {
     if (g.alive.size <= 1) break; // exactly one left: they are 1st and the game is over
@@ -47,6 +50,7 @@ export async function runGame({ seed, agents, config = {} }) {
   }
   const [winner] = g.alive;
   g.places.set(winner, 1);
+  await runChalk(g); // the epilogue never changes places or deaths
 
   const places = SEATS.map((name) => {
     const place = g.places.get(name) ?? null;
@@ -62,6 +66,8 @@ export async function runGame({ seed, agents, config = {} }) {
     seed,
     createdAt: config.createdAt ?? DEFAULT_CREATED_AT,
     players,
+    chalkShown: structuredClone(g.chalk),
+    chalkWritten: structuredClone(g.chalkWritten),
     events: g.events,
     result: {
       places,

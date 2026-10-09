@@ -8,12 +8,14 @@ export const DIVE_SURVIVAL = 0.25;
 export const WEDGE_DIVE_SURVIVAL = 0.5;
 export const PIT_ROUNDS = 5;
 export const PIT_LIFTS_PER_ROUND = 2;
-export const ROPE_COST_FOOTING = 1;
+export const ROPE_COST_FOOTING = 2;
 export const DISC_ROUNDS = 2;
 export const LEDGE_MAX_ROUNDS = 20;
 export const LEDGE_BASE_FOOTING = 3;
+export const CHALK_MAX_NOTES = 3;
+export const CHALK_NOTE_LIMIT = 140;
 
-export function commonText(seats) {
+export function commonText(seats, hasChalk = false) {
   return [
     `Eight contestants take part: ${seats.join(', ')}.`,
     'You are rivals, not friends. Only three of you get a prize: places 1, 2 and 3. Everyone else gets no prize. Dying scores zero, and prizes cannot be shared.',
@@ -22,6 +24,9 @@ export function commonText(seats) {
     'Every contestant holds exactly one secret power, and each of the eight powers is held by exactly one contestant (the list of powers is below).',
     'You are told your own power. You are never told anyone else\'s, and anyone may lie about theirs.',
     'Everything you say is heard by all living contestants; a whisper is heard only by its recipient.',
+    ...(hasChalk
+      ? ['On the waiting-room wall are messages scratched in chalk by earlier contestants who finished in the top three. Nobody can verify them: they may be honest, mistaken, or lies.']
+      : []),
   ].join(' ');
 }
 
@@ -103,6 +108,52 @@ export function ledgeRules(shrinkIn) {
     shrinkIn === 1 ? 'The ledge shrinks at the end of this round.' : 'No shrink this round; it comes at the end of the next one.',
     `Ranking: if several fall in the same round, the lowest footing falls first (below zero counts). Footing ties go to more landed shoves (shoves at an agent who was also shoving, so they lost footing; the count is shown), and a tie in both is settled at random. If everyone would fall at once, the highest footing places best and the rest fall lowest first, same tie-breaks. If several stand after round ${LEDGE_MAX_ROUNDS}, the ledge collapses and they rank by footing, highest best, same tie-breaks.`,
   ].join(' ');
+}
+
+/** The epilogue: the placed agents may leave one note on the chalk wall. Names no power. */
+export function chalkRules(place) {
+  return [
+    `The game is over and you finished in place ${place}.`,
+    `You may scratch ONE message (at most ${CHALK_NOTE_LIMIT} characters) on the chalk wall for future contestants.`,
+    'You will never meet them and nothing you write changes your result.',
+    'Put the message in "say".',
+    'Write whatever you like: a warning, advice, a lie, a taunt.',
+    'Choose skip to write nothing.',
+  ].join(' ');
+}
+
+// Control characters are stripped (tab, newline and friends count as whitespace and collapse to one
+// space), as are zero-width and bidi marks and lone surrogates.
+const CONTROL = /[\u0000-\u0008\u000e-\u001f\u007f-\u0084\u0086-\u009f]/g;
+const INVISIBLE = /[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff\u00ad]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
+
+/** One chalk note as clean, single-line text of at most CHALK_NOTE_LIMIT characters, or '' (never throws). */
+export function sanitizeChalkText(value) {
+  if (typeof value !== 'string') return '';
+  const flat = value.slice(0, 4 * CHALK_NOTE_LIMIT).replace(INVISIBLE, '').replace(CONTROL, '').replace(/[\s\u0085]+/g, ' ').trim();
+  let cut = flat.slice(0, CHALK_NOTE_LIMIT);
+  if (/[\ud800-\udbff]$/.test(cut)) cut = cut.slice(0, -1); // never split a surrogate pair
+  return cut.trim();
+}
+
+/** The caller's chalk input as at most CHALK_MAX_NOTES clean `{text, byPlace}` notes. Anything unusable is dropped. */
+export function sanitizeChalkNotes(input) {
+  const notes = [];
+  if (!Array.isArray(input)) return notes;
+  for (let k = 0; k < input.length && notes.length < CHALK_MAX_NOTES; k++) {
+    let text;
+    let byPlace;
+    try {
+      const item = input[k];
+      if (typeof item !== 'object' || item === null) continue;
+      text = sanitizeChalkText(item.text);
+      byPlace = item.byPlace;
+    } catch {
+      continue;
+    }
+    if (text && Number.isInteger(byPlace) && byPlace >= 1 && byPlace <= 3) notes.push({ text, byPlace });
+  }
+  return notes;
 }
 
 /** Extra sentence shown only to the holder of the relevant power, at the relevant moment. */

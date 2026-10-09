@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { runGame } from '../../src/engine.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { SEATS } from './helpers.js';
-import { GAMES, checkTape } from './fuzz-helpers.js';
+import { GAMES, chalkFor, checkTape } from './fuzz-helpers.js';
 
 const KINDS = ['random', 'saint', 'coward', 'liar', 'shover'];
 
@@ -11,8 +11,9 @@ test(`pit fuzz: ${GAMES} mixed-bot games keep every invariant, at least 100 reac
   const seen = { pit: 0, volunteer: 0, pushed: 0, rescue: 0, flood: 0, floor: 0, feather: 0, early: 0 };
   for (let seed = 1; seed <= GAMES; seed++) {
     const mix = SEATS.map((_, i) => KINDS[(seed * 7 + i * 3) % KINDS.length]);
-    const tape = await runGame({ seed, agents: createScriptedAgents(seed, mix) });
-    checkTape(tape, `seed ${seed} ${JSON.stringify(mix)}`);
+    const chalk = chalkFor(seed);
+    const tape = await runGame({ seed, agents: createScriptedAgents(seed, mix), config: { chalk } });
+    checkTape(tape, `seed ${seed} ${JSON.stringify(mix)}`, { chalk });
     const pit = tape.events.filter((e) => e.stage === 'pit');
     if (!pit.length) continue;
     seen.pit += 1;

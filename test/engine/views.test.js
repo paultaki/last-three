@@ -6,7 +6,7 @@ import { createScriptedAgents } from '../../src/scripted.js';
 import { SEATS, fixedAgents, idle, makeGame, ofType, powersWith, reply, spy } from './helpers.js';
 
 const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
-const PHASES = ['waiting', 'crossing', 'pick', 'swap', 'play'];
+const PHASES = ['waiting', 'crossing', 'pick', 'swap', 'play', 'write'];
 const isStrings = (a) => Array.isArray(a) && a.every((x) => typeof x === 'string');
 
 /** Run several full scripted games and keep every view that was handed to every agent. */
@@ -29,9 +29,10 @@ test('every view has every field of spec section 5 with the right types', async 
     assert.ok(SEATS.includes(v.you));
     assert.ok(POWER_IDS.includes(v.power.id) && typeof v.power.description === 'string' && v.power.description.length > 0);
     assert.equal(typeof v.powerSpent, 'boolean');
-    assert.ok(STAGES.includes(v.stage) && PHASES.includes(v.phase));
+    assert.ok([...STAGES, 'chalk'].includes(v.stage) && PHASES.includes(v.phase));
+    assert.deepEqual(v.chalkWall, [], 'no wall unless the caller supplied one');
     assert.ok(Number.isInteger(v.round) && v.round >= 1 && Number.isInteger(v.roundsTotal) && v.round <= v.roundsTotal);
-    assert.ok(isStrings(v.alive) && v.alive.includes(v.you));
+    assert.ok(isStrings(v.alive) && (v.alive.includes(v.you) || v.stage === 'chalk'), 'the epilogue also asks the placed dead');
     assert.deepEqual(v.alive, SEATS.filter((s) => v.alive.includes(s)), 'alive is in seat order');
     assert.ok(v.dead.every((d) => SEATS.includes(d.name) && STAGES.includes(d.stage) && typeof d.cause === 'string' && !v.alive.includes(d.name)));
     assert.equal(v.alive.length + v.dead.length, 8, 'everyone is either alive or listed dead');
@@ -71,7 +72,8 @@ test('information hiding: no field reveals another agent\'s power, safe sides, o
     assert.equal(v.power.id, powerOf[v.you]);
     const { power, powerBlurbs, privateKnowledge, rules, ...rest } = v;
     assert.doesNotMatch(JSON.stringify(rest), POWER_WORDS, `${v.you}/${v.stage}: ${JSON.stringify(rest).match(POWER_WORDS)}`);
-    assert.doesNotMatch(rules, /\b(glass_eye|wedge|feather|anchor|forger|nothing)\b/i);
+    // the epilogue's plain words ("write nothing") are not the power called nothing
+    assert.doesNotMatch(rules, v.stage === 'chalk' ? /\b(glass_eye|wedge|feather|anchor|forger)\b/i : /\b(glass_eye|wedge|feather|anchor|forger|nothing)\b/i);
     if (v.you !== 'Gus') assert.ok(!privateKnowledge.some((k) => /safe side/.test(k)));
     if (v.you !== 'Hana') assert.ok(!privateKnowledge.some((k) => /Stage \d rules/.test(k)));
     if (v.stage === 'bridge') assert.doesNotMatch(rules, /crusher|trapdoor|ledge|lever|footing/i);

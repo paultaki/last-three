@@ -124,10 +124,10 @@ test('the ledge rules text and the map holder copy state the no-repeat rule', as
   assert.ok(bex.privateKnowledge.some((k) => /cannot brace two rounds in a row/i.test(k)));
 });
 
-test('tapes carry rulesVersion 3; the validator wants a positive integer when present and tolerates old tapes', async () => {
-  assert.equal(RULES_VERSION, 3);
+test('tapes carry rulesVersion 4; the validator wants a positive integer when present and tolerates old tapes', async () => {
+  assert.equal(RULES_VERSION, 4);
   const tape = await runGame({ seed: 3, agents: createScriptedAgents(3) });
-  assert.equal(tape.rulesVersion, 3);
+  assert.equal(tape.rulesVersion, 4);
   validateTape(tape);
   const old = structuredClone(tape);
   delete old.rulesVersion;

@@ -27,7 +27,8 @@ export function createScriptedAgents(seed, kinds, seats = ['Ash', 'Bex', 'Cole',
 
 function createBot(name, kind, rng) {
   const policy = POLICIES[kind];
-  return { name, model: `scripted/${kind}`, act: (view) => policy(view, rng) };
+  const epilogue = EPILOGUE[kind];
+  return { name, model: `scripted/${kind}`, act: (view) => (view.stage === 'chalk' && epilogue ? epilogue(view, rng) : policy(view, rng)) };
 }
 
 const reply = (action, extra = {}) => ({ thought: '', say: null, whisper: null, forge: null, ...extra, action });
@@ -133,6 +134,31 @@ function shoverBot(view, rng) {
   if (view.stage === 'pit') return reply(pushBase(view, rng) ?? firstLegal(view, 'climb', 'wait', 'leave'), base);
   return reply(randomLegal(view, rng), base);
 }
+
+// The chalk-wall epilogue (rules v4). Each bot reads only its own view and works with or without a wall.
+const writeNote = (text) => reply('write', { say: text, thought: 'One note for whoever comes next.' });
+const place = (view) => view.stageState?.place ?? 3;
+
+const SAINT_ADVICE = [
+  'Honest advice: step up early. Whoever volunteers on the bridge and the crusher is trusted, and that trust pays on the ledge.',
+  'Honest advice: on the ledge never shove a bracing rival, it costs you. Shove only someone who is shoving too.',
+  'Honest advice: the pit rope costs whoever throws it footing on the ledge. Think before you throw it, and thank whoever throws it for you.',
+];
+const LIAR_LIES = [
+  'The left pane is always the safe one on the glass bridge. Go left every time.',
+  'Never volunteer for the pit. The base always gets pulled out first.',
+  'Holding the lever is perfectly safe. The ceiling never hurts the one who holds it.',
+];
+const SHOVER_TAUNTS = ['I shoved my way here. You will too, or you will fall.', 'Better luck next time. The ledge is for pushers.'];
+const RANDOM_NOTES = ['Good luck, you will need it.', 'Do not trust the one who talks most.'];
+
+const EPILOGUE = {
+  saint: (view) => writeNote(SAINT_ADVICE[place(view) % SAINT_ADVICE.length]),
+  liar: (view) => writeNote(LIAR_LIES[place(view) % LIAR_LIES.length]),
+  shover: (view, rng) => writeNote(rng.pick(SHOVER_TAUNTS)),
+  coward: () => reply('skip', { thought: 'Nothing to say.' }),
+  random: (view, rng) => (rng.int(2) === 0 ? writeNote(rng.pick(RANDOM_NOTES)) : reply('skip', { thought: 'No plan. Picking something.' })),
+};
 
 const BROKEN_MODES = [
   () => {
