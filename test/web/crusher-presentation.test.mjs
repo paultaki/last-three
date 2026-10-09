@@ -62,3 +62,33 @@ test("a shove target at the lever reacts instead of freezing in the hold pose", 
   assert.equal(s.crusher.holder, "Hana");
   assert.equal(a.pose, "flinch");
 });
+
+test("crusher slam curves start at the recorded raised height", () => {
+  const high = { ...reveal, crusher: { ...reveal.crusher, ceiling: 3 } };
+  assert.equal(crusherCeiling(high, 0), 4.3);
+  const flatten = {
+    ...high,
+    ev: { type: "death", name: "Hana", style: "flatten" },
+  };
+  assert.equal(crusherCeiling(flatten, 0), 4.3);
+});
+test("successful crusher dives are immediately followed by stage end in supported tapes", () => {
+  const dir = new URL("../../web/tapes/", import.meta.url);
+  let dives = 0;
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+    const events = JSON.parse(fs.readFileSync(new URL(file, dir))).events || [];
+    for (let i = 0; i < events.length; i++) {
+      const e = events[i];
+      if (e.type !== "reveal" || e.what !== "ceiling" || e.data?.dive !== true)
+        continue;
+      dives++;
+      assert.equal(
+        events[i + 1]?.type,
+        "stage_end",
+        `${file}:${i} dive adjacency`,
+      );
+      assert.equal(events[i + 1]?.stage, "crusher");
+    }
+  }
+  assert(dives > 0);
+});

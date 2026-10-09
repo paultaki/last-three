@@ -3,8 +3,8 @@
 ## 2026-10-09 · codex (crusher escape correction)
 - **Did:** corrected Hana's successful crusher escape and survivor positions; built a real doorway and landing, delayed the slab until the escape clears, added side film coverage and restored shove reactions ahead of persistent hold poses.
 - **Why:** the video at about 1:37 left the recorded surviving holder inside the lowered slab.
-- **Next:** corrected full-video export and final review closeout are running. After this targeted fix, audit contact/reaction choreography across the other obstacles, then dialogue timing and sound before narration.
-- **Watch out:** 398 tests, 113 tapes and film/studio browser checks pass. First review found one accepted medium issue, now fixed, and four discarded assumptions documented in web/show/REPLAY-INVARIANTS.md. Multi-victim room collapse is outside this targeted escape proof. Purchased-cast outputs stay local and ignored; no push.
+- **Next:** corrected 1080p video and an 8-second crusher clip are in docs/show/recordings. After this targeted fix, audit contact/reaction choreography across the other obstacles, then dialogue timing and sound before narration.
+- **Watch out:** 400 tests, 113 tapes and film/studio browser checks pass. Two review rounds found three accepted issues, all fixed, with four discarded assumptions documented in web/show/REPLAY-INVARIANTS.md. Final concrete prescriptions used the verbatim-fix exemption. Full MP4 is 1920x1080, 25 fps, 226.32 seconds; crusher and end frames verified. Multi-victim room collapse is outside this targeted escape proof. Purchased-cast outputs stay local and ignored; no push.
 
 ## 2026-10-08 · codex (video-first show)
 - **Did:** reframed the show for Paul's narrated YouTube overview: default 16:9 film view, larger dialogue coverage, named speech/thought/whisper bubbles, reading-paced pagination, a 44-beat curated cut, F/Escape clean frame, visible shove approach, bridge spacing, Pit swimming pose and chalk text spacing. Exported a local silent 1920x1080 MP4, 216.56 seconds, and checked its frames.

@@ -62,13 +62,13 @@ export function crusherCeiling(s, seconds, escaping = false) {
   if (crusherDive(s) || (c.escaped && escaping)) {
     // The holder clears the slab at 1.15s. Only then may it slam down.
     const q = Math.max(0, Math.min(1, (seconds - 1.25) / 0.5));
-    return 2.8 + (0.66 - 2.8) * q * q;
+    return raised + (0.66 - raised) * q * q;
   }
   if (c.escaped) return 0.66;
   if (s.ev?.type === "death" && s.ev.style === "flatten") {
     const q = Math.max(0, Math.min(1, seconds / 1.15));
     const p = q * q * (3 - 2 * q);
-    return 2.8 + (0.66 - 2.8) * p;
+    return raised + (0.66 - raised) * p;
   }
   // A reveal announces the outcome; the following death beat performs impact.
   return c.crushed ? 0.66 : raised;

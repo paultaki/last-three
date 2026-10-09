@@ -33,6 +33,31 @@ none
 
 Missing-context invariants are recorded in web/show/REPLAY-INVARIANTS.md.
 
-Primary verification: 398 tests, 113 tapes, 44-beat film browser check and studio browser checks at 390/768/1440. The clearance test samples the holder route and slab throughout the successful escape and failed-dive flattening. Purchased-cast screenshots and recordings remain local and ignored.
+Primary verification: 400 tests, 113 tapes, 44-beat film browser check and studio browser checks at 390/768/1440. The clearance test samples the holder route and slab throughout the successful escape and failed-dive flattening. Purchased-cast screenshots and recordings remain local and ignored.
 
-Round 2 pending after the fix checkpoint.
+## Round 2
+
+Review: 73bcb0f2-dd7e-4d7b-8945-cc7df85ee112
+
+Verbatim reviewer output and anomalies:
+
+```text
+VERDICT: FINDINGS:2
+
+1. Low — web/show/src/model.js, `crusherCeiling` lines ~53-56 and ~62 (dive / flatten branches start at constant `2.8`). Failure scenario: a dive reveal or flatten death that occurs while `c.ceiling` still makes `raised = max(2.8, 2.05 + c.ceiling*0.75) > 2.8` (e.g. ceiling=3 → 4.3) causes the slab to snap from its current raised height down to 2.8 on the first frame of the event, then hold/slam from there. Why the diff causes it: the previous frame rendered `raised`, but both the `crusherDive(s) || (c.escaped && escaping)` branch and the `death/flatten` branch hard-code the start height as `2.8` instead of `raised`, so continuity is only preserved when the dive happens at the lowest ceiling step. Clearance is still satisfied (bottom ≥2.31 > 2.05), so this is a visible pop rather than a clip. Starting both curves at `raised` fixes it without changing timing.
+
+2. Low — web/show/src/model.js `positions` (crusher branch, `s.crusher.holder === n && !s.crusher.escaped && !crusherDive(s)`) and `presentation` crusher block; web/show/src/sets.js `crusherCeiling`. Failure scenario: any event rendered between the dive reveal and its `stage_end` (caption, ability/feather emission, thought/whisper) makes `crusherDive(s)` false while `escaped` is still false, so the holder teleports back to the hold mark `[-4.3,0,-1.8]` with pose `hold`, the slab pops back up to `raised`, and then at `stage_end` the holder re-walks out and the slab slams a second time. Why the diff causes it: the staging keys off the transient `s.ev` rather than any persisted state (reducer does not persist dive, per invariants), so correctness depends on strict reveal→stage_end adjacency that the tapes happen to satisfy today but no invariant enforces. If adjacency is intentional, it should be asserted in the sampling test (e.g. no crusher event between a `dive=true` reveal and `stage_end`) so a future tape can't reintroduce the standing-through-the-slab defect.
+
+No issues found with the committed correction itself: the crusher block now precedes the flinch override so a shoved holder correctly renders `flinch` (and `death` still wins last); `cameraObstacles` are toggled every frame and restored outside `film && mode==="cinema"`; the dive/`escaped&&escaping` ceiling hold at 2.8 until 1.25s exceeds the 1.15s walk completion; the doorway route (gap x 1.8–4.8 at z −6, route points at x≈2.7–3.9) and exit slots (z ≤ −6.6, behind the wall, unique per `living` index) are consistent with the new geometry; reduced motion settles both actor (`p=1`) and slab (`seconds=2.8`).
+
+--- anomalies ---
+none
+
+```
+
+Accepted both low findings. Applied the exact prescriptions: use raised as the start of both slam curves, and assert successful-dive-to-stage-end adjacency across the supported tapes. The selected film uses ceiling=0, so its curve and export are unchanged by the curve correction. Added a raised-height regression. No third dispatch: verbatim-fix exemption after a green gate; no risky surface.
+
+
+## Export proof
+
+Local ignored outputs: docs/show/recordings/video-first-story.mp4 (1920x1080, 25 fps, 226.32 seconds) and crusher-corrected.mp4 (8 seconds, full-video 97-105 seconds). Browser capture reported no errors. Exported frames verify the escape, closed slab, stage end and final podium.
