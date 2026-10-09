@@ -121,3 +121,11 @@ test("added story indices use the same public visibility gate as the original cu
   const list = directedList(changed, editList(changed, demo, false), false);
   assert(!list.includes(327));
 });
+
+
+test("early placements do not claim a podium finish", () => {
+  const s = stateAt(tape, 516);
+  for (const place of [1, 4, 5, 6, 7, 8, null]) {
+    assert.equal(consequence({...s, ev: {...s.ev, place}}).title, "DARA IS OUT");
+  }
+});

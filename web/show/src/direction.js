@@ -110,7 +110,7 @@ export function consequence(s) {
   const remaining = s.order.filter((n) => s.players[n].alive).length;
   return {
     name: e.name,
-    title: e.place
+    title: e.place === 2 || e.place === 3
       ? `${e.name.toUpperCase()} TAKES ${e.place === 2 ? "SECOND" : "THIRD"}`
       : `${e.name.toUpperCase()} IS OUT`,
     detail: `${remaining} ${remaining === 1 ? "contestant remains" : "contestants remain"}`,

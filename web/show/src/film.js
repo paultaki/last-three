@@ -274,7 +274,7 @@ export class FilmOverlay {
       el.style.top = `${n.y * 100}%`;
       el.style.setProperty("--speaker", n.color);
       // Keep names in the picture area, clear of dialogue/evidence cards.
-      el.hidden = !!this.d && n.x > 0.5 && n.y < 0.55;
+      el.hidden = n.x > 0.5 && ((!!this.d && n.y < 0.55) || !!showEvidence);
     });
     if (!this.d) return;
     const page = pageAt(this.d, ms);

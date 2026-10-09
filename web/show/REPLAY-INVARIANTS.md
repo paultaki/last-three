@@ -18,3 +18,6 @@ The tape and `web/lib/state.js` are authoritative. The 3D layer must not invent 
 - Arena's `ease(t) = t*t*(3-2*t)` is the same smoothstep used by deathProgress and the crusher slab, including flatten timing at 1.15 seconds.
 - Every directed playlist entry passes isStepWorthy with the current Director setting. Private receipts and forged sender disclosures require Director mode.
 - All editorial quote receipts are exact prior source excerpts. Whisper callbacks are labelled as whispers; Cole's right/left contradiction does not assert intent. Reaction gestures are staging, not invented recorded thoughts.
+
+- Valid whisper events require `from` and `to` (src/tape.js EVENT_SHAPES). `name` identifies speakers in say/thought events. The common visibleActor fallback spans different event types; it does not permit a whisper without `from`. Forged-whisper disclosure uses the required real sender field.
+- Names in the right column yield to a visible evidence card, including action callbacks without dialogue. Only placements 2 and 3 get podium labels; other death events say IS OUT.

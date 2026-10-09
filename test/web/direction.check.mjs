@@ -49,6 +49,12 @@ try {
           box.y + box.height <= frame.y + frame.height + 1,
         `evidence bounds ${width}:${i}`,
       );
+      for (const name of await page.locator(".focal-names span:visible").all()) {
+        const n = await name.boundingBox();
+        const overlaps = n.x < box.x + box.width && n.x + n.width > box.x &&
+          n.y < box.y + box.height && n.y + n.height > box.y;
+        assert(!overlaps, `name/evidence overlap ${width}:${i}`);
+      }
       if (await page.locator(".speech-bubble").isVisible()) {
         const bubble = await page.locator(".speech-bubble").boundingBox();
         assert(bubble.y + bubble.height <= box.y, `card overlap ${width}:${i}`);
@@ -108,6 +114,7 @@ try {
       "reading-before-reveal",
       "evidence bounds",
       "no bubble overlap",
+      "no name/evidence overlap",
       "forged identity privacy",
       "private receipt removal",
       "whisper attribution",

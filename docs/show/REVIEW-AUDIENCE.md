@@ -37,3 +37,29 @@ none
 5. Discarded: ease is already t*t*(3-2*t), identical to the new helper. Flatten and slab remain synchronized.
 
 Missing context is documented in web/show/REPLAY-INVARIANTS.md. Codex additionally corrected the ledge recoil translation to move away from the attacker (local forward faces the attacker) and lowered the arms into a forward shove pose, then inspected a fresh rendered action frame. A second review follows the green gate and checkpoint.
+
+## Round 2
+
+Review: 00e1942a-990b-4220-a9a1-944d668f2cf4
+
+```text
+VERDICT: FINDINGS:3
+
+1. **Low — web/show/src/film.js:~255 (`render`, focal-name clearance)**
+   `el.hidden = !!this.d && n.x > 0.5 && n.y < 0.55;` only clears names when a dialogue bubble exists. For action states with a receipt (index 300, 514) the evidence card renders at top 15% in the right column (per the CSS invariant), but `this.d` is null so no clearance applies; a focal name projected at x>0.5, y 0.12–0.55 is drawn over the "EARLIER IN THE RECORDING" card. The inline comment claims names are kept "clear of dialogue/evidence cards", but the condition never consults `this.evidence.hidden`. Scenario: Hana/Dara anchors during 514 overlap the quote text at 1280/390 widths.
+
+2. **Low — web/show/src/direction.js:~104 (`consequence`)**
+   `e.place === 2 ? "SECOND" : "THIRD"` labels every truthy `place` other than 2 as THIRD. If the reducer records `place` for any elimination other than the last two (e.g. 4–8), the consequence title becomes "X TAKES THIRD" for an early death. Should gate on `e.place <= 3` (else fall through to "IS OUT").
+
+3. **Low — web/show/src/direction.js:~61 (forged sender detection)**
+   `if (cut && e.type === "whisper" && e.forgedAs && e.from)` requires `e.from`. The stated projection contract is "visibleActor returns forgedAs before name/from", i.e. whisper events may carry the real author under `name` rather than `from`. For such events the disclosure (`forged`, `listener`, 3800 ms hold, "THE NAME WAS A DISGUISE" card) silently never fires in Director cut, leaving the forged signature shown as if genuine. Use the same fallback as `visibleActor` (`e.from ?? e.name`).
+
+--- anomalies ---
+none
+```
+
+### Adjudication
+
+1. Accepted, low: names now yield the right column whenever evidence is visible, including action callbacks. Added browser bounding-box assertions at all three widths.
+2. Accepted, low: only numeric placements 2 and 3 receive podium wording; every other value uses IS OUT. Regression covers early places.
+3. Discarded: valid whisper events require `from` (src/tape.js EVENT_SHAPES); name is the speaker field for other event types. The shared visibleActor fallback is not a whisper schema. This contract is now explicit in REPLAY-INVARIANTS.md.
