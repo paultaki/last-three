@@ -47,4 +47,4 @@ Tradeoff: reuse the current procedural rigs instead of adding facial animation o
 | Rejected move | 527 | Exact recorded reason, no invented reconciliation of its action/note |
 | Named finish | 541 | Authoritative places, three names, 6.5-second hold, no early labels |
 
-Primary gate: 413 tests, 113 tapes, all existing direction/film/Studio browser checks and the new performance suite at 1920/1280/390. Screenshots and skill-client action frames were inspected. Review and final video evidence are documented separately.
+Primary gate: 414 tests, 113 tapes, all existing direction/film/Studio browser checks and the new performance suite at 1920/1280/390. Screenshots and skill-client action frames were inspected. Critical review is closed with a clean corrective verdict. The 6:08 film and 34-second preview are exported and inspected; see AUDIENCE-DELIVERY-2.md.

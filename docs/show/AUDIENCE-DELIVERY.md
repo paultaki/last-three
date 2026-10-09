@@ -1,5 +1,7 @@
 # Audience direction delivery, 2026-10-09
 
+Historical first-pass evidence. The canonical full-film file has since been refreshed to 368.48 seconds (6:08); see [second-pass delivery](AUDIENCE-DELIVERY-2.md). The original 39-second preview remains available.
+
 Twenty opportunities ranked in AUDIENCE-OPPORTUNITIES.md; the selected nine are implemented. No recorded dialogue, thoughts, game outcomes or legacy 2D edit changed.
 
 ## Local outputs
