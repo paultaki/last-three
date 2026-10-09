@@ -86,6 +86,10 @@ try {
         __show.settle();
       }, i);
       const before = await page.evaluate(() => __show.snapshot());
+      // Compare the rendered scene without browser-composited label edges.
+      await page.locator("#labels").evaluate((el) => {
+        el.style.visibility = "hidden";
+      });
       const frameBefore = await page.locator("#viewport").screenshot();
       await page.evaluate(() => {
         __show.seek(0);
@@ -101,6 +105,9 @@ try {
         `seek determinism ${stage}`,
       );
       const frameAfter = await page.locator("#viewport").screenshot();
+      await page.locator("#labels").evaluate((el) => {
+        el.style.visibility = "";
+      });
       // Chrome can rasterize a tiny label edge differently after a layer rebuild.
       // Keep the structural comparison strict: at most 0.01% pixels, <=32/channel.
       let difference = { pixels: 0, max: 0, total: 1 };

@@ -1,4 +1,5 @@
 import * as T from "three";
+import { crusherCeiling } from "./model.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 export const mats = {
   concrete: new T.MeshStandardMaterial({ color: 0x7d939b, roughness: 0.82 }),
@@ -325,11 +326,17 @@ export function buildSet(key) {
     stripes(g, 12, -3.4, 0.01, 10.3);
   } else if (key === "crusher") {
     box(g, 13, 0.7, 12, 0, -0.38, 0, mats.light);
-    box(g, 13, 5, 0.4, 0, 2.5, -6, mats.concrete);
+    // A real doorway and exit apron, rather than a door painted over a solid wall.
+    box(g, 8.3, 5, 0.4, -2.35, 2.5, -6, mats.concrete);
+    refs.cameraObstacles = [box(g, 1.7, 5, 0.4, 5.65, 2.5, -6, mats.concrete)];
+    box(g, 3, 1.4, 0.4, 3.3, 4.3, -6, mats.concrete);
+    box(g, 5, 0.7, 5, 3.3, -0.38, -7.8, mats.light);
+    stripes(g, 7, 1.1, 0.01, -9.8);
     for (let x of [-5.8, 5.8])
       for (let z of [-4.5, 4.5]) {
-        cyl(g, 0.35, 7, x, 3.2, z, mats.metal, 16);
-        cyl(g, 0.56, 0.6, x, 0.1, z, mats.dark);
+        const post = cyl(g, 0.35, 7, x, 3.2, z, mats.metal, 16);
+        const foot = cyl(g, 0.56, 0.6, x, 0.1, z, mats.dark);
+        if (x > 0) refs.cameraObstacles.push(post, foot);
       }
     refs.ceiling = box(g, 11, 0.85, 9, 0, 5, 0, mats.dark);
     for (let i = 0; i < 12; i++)
@@ -533,7 +540,17 @@ export function buildSet(key) {
   if (key === "crusher") {
     for (let side of [-1, 1])
       for (let j = 0; j < 5; j++) {
-        box(g, 0.24, 0.07, 10, side * 6.2, 0.35 + j * 0.65, 0, mats.metal);
+        const rail = box(
+          g,
+          0.24,
+          0.07,
+          10,
+          side * 6.2,
+          0.35 + j * 0.65,
+          0,
+          mats.metal,
+        );
+        if (side > 0) refs.cameraObstacles.push(rail);
       }
     for (let i = 0; i < 4; i++) {
       box(g, 1.2, 0.07, 0.2, -3.3 + i * 2.2, 0.04, 3.8, mats.amber);
@@ -541,7 +558,7 @@ export function buildSet(key) {
   }
   return { group: g, refs, key };
 }
-export function updateSet(set, s, t) {
+export function updateSet(set, s, t, settled = false, escaping = false) {
   const r = set.refs;
   mats.water.userData.clock.value = t;
   if (r.water) {
@@ -569,7 +586,7 @@ export function updateSet(set, s, t) {
     });
   if (r.wall) r.wall.position.z = 6.3 - (s.round || 0) * 0.3;
   if (r.ceiling) {
-    r.ceiling.position.y = 0.25 + (s.crusher.ceiling / 5) * 5;
+    r.ceiling.position.y = crusherCeiling(s, settled ? 2.8 : t, escaping);
     r.door.position.y = s.crusher.door ? 4.4 : 1.7;
     r.lever.rotation.x = s.crusher.holder || s.crusher.jam ? -0.7 : 0;
   }

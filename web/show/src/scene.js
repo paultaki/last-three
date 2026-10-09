@@ -15,7 +15,12 @@ import {
   mesh,
   textPlate,
 } from "./sets.js";
-import { presentation, COLORS } from "./model.js";
+import {
+  presentation,
+  COLORS,
+  crusherEscapePoint,
+  crusherDive,
+} from "./model.js";
 import { filmShot, dialogue } from "./film.js";
 const X = new T.Vector3(1, 0, 0),
   Y = new T.Vector3(0, 1, 0),
@@ -338,7 +343,29 @@ export class Arena {
       v = this.view;
     const t = this.reduced ? 0 : Math.min(seconds, 2.8),
       p = this.reduced ? 1 : ease(Math.min(1, t / 1.15));
-    updateSet(this.set, s, t);
+    updateSet(
+      this.set,
+      s,
+      t,
+      this.reduced,
+      v.key === "crusher" &&
+        v.actors.some(
+          (a) =>
+            a.visible &&
+            a.pose === "walk" &&
+            a.from[2] >= -4.9 &&
+            a.position[2] < -4.9,
+        ),
+    );
+    if (this.set.refs.cameraObstacles) {
+      const cutaway =
+        this.film &&
+        this.mode === "cinema" &&
+        (crusherDive(s) || s.crusher.escaped);
+      this.set.refs.cameraObstacles.forEach((o) => {
+        o.visible = !cutaway;
+      });
+    }
     // Remove the near wall only in dialogue coverage, like a practical cutaway set.
     if (this.set.refs.wall)
       this.set.refs.wall.visible = !(this.film && this.dialogue);
@@ -362,6 +389,21 @@ export class Arena {
           : v.key === "ledge"
             ? Math.atan2(-a.position[0], -a.position[2])
             : 0.12;
+      if (v.key === "crusher" && a.pose === "hold")
+        c.group.rotation.y = Math.PI;
+      if (v.key === "crusher" && a.pose === "walk" && a.position[2] < -4.9) {
+        const point = crusherEscapePoint(a.from, a.position, p);
+        c.group.position.fromArray(point);
+        const ahead = crusherEscapePoint(
+          a.from,
+          a.position,
+          Math.min(1, p + 0.02),
+        );
+        c.group.rotation.y = Math.atan2(
+          ahead[0] - point[0],
+          ahead[2] - point[2],
+        );
+      }
       if (this.film && this.dialogue && a.active) c.group.rotation.y = 0.28;
       if (this.film && ["shove", "flinch"].includes(a.pose)) {
         const otherName =

@@ -48,6 +48,44 @@ const ring = (i, n, r, y = 0) => [
   y,
   Math.cos((i / Math.max(n, 1)) * Math.PI * 2) * r,
 ];
+export function crusherDive(s) {
+  return (
+    s.stage === "crusher" &&
+    s.ev?.type === "reveal" &&
+    s.ev.what === "ceiling" &&
+    s.ev.data?.dive === true
+  );
+}
+export function crusherCeiling(s, seconds, escaping = false) {
+  const c = s.crusher;
+  const raised = Math.max(2.8, 2.05 + c.ceiling * 0.75);
+  if (crusherDive(s) || (c.escaped && escaping)) {
+    // The holder clears the slab at 1.15s. Only then may it slam down.
+    const q = Math.max(0, Math.min(1, (seconds - 1.25) / 0.5));
+    return 2.8 + (0.66 - 2.8) * q * q;
+  }
+  if (c.escaped) return 0.66;
+  if (s.ev?.type === "death" && s.ev.style === "flatten") {
+    const q = Math.max(0, Math.min(1, seconds / 1.15));
+    const p = q * q * (3 - 2 * q);
+    return 2.8 + (0.66 - 2.8) * p;
+  }
+  // A reveal announces the outcome; the following death beat performs impact.
+  return c.crushed ? 0.66 : raised;
+}
+export function crusherEscapePoint(from, to, progress) {
+  const doorway = [3.3, 0, -5.4];
+  const first = Math.hypot(...doorway.map((n, i) => n - from[i]));
+  const second = Math.hypot(...to.map((n, i) => n - doorway[i]));
+  const split = first / Math.max(0.001, first + second);
+  const left = progress < split ? from : doorway;
+  const right = progress < split ? doorway : to;
+  const p =
+    progress < split
+      ? progress / Math.max(0.001, split)
+      : (progress - split) / Math.max(0.001, 1 - split);
+  return left.map((n, i) => n + (right[i] - n) * p);
+}
 export function positions(s, cut = false) {
   const out = {};
   const living = s.order.filter((n) => s.players[n].alive);
@@ -94,10 +132,10 @@ export function positions(s, cut = false) {
     } else if (key === "crusher") {
       const ix = Math.max(0, living.indexOf(n));
       out[n] =
-        s.crusher.holder === n
+        s.crusher.holder === n && !s.crusher.escaped && !crusherDive(s)
           ? [-4.3, 0, -1.8]
-          : s.crusher.escaped || s.crusher.door
-            ? [3 + (ix % 3) * 1.2, 0, -5.4 - Math.floor(ix / 3) * 1.4]
+          : s.crusher.escaped || s.crusher.door || crusherDive(s)
+            ? [2.1 + (ix % 3) * 1.2, 0, -6.6 - Math.floor(ix / 3) * 1.3]
             : [-2.6 + (ix % 4) * 1.8, 0, 2 - Math.floor(ix / 4) * 2.4];
     } else if (key === "disc") {
       const known = cut || s.disc.tilesPublic;
@@ -170,6 +208,15 @@ export function presentation(s, previous, cut = false) {
           climb: "climb",
           offer_back: "brace",
         }[a.verb] || "idle";
+    if (key === "crusher") {
+      if (pos[name][2] < -4.9 && before[name][2] >= -4.9) pose = "walk";
+      else if (
+        s.crusher.holder === name &&
+        !s.crusher.escaped &&
+        !crusherDive(s)
+      )
+        pose = "hold";
+    }
     if (
       e.type === "action" &&
       e.valid !== false &&

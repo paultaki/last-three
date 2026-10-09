@@ -1,4 +1,11 @@
-import { visibleActor, isStepWorthy, RULES, TITLES, COLORS } from "./model.js";
+import {
+  visibleActor,
+  isStepWorthy,
+  RULES,
+  TITLES,
+  COLORS,
+  crusherDive,
+} from "./model.js";
 
 // Reading beats preserve the recording verbatim, including whitespace.
 export function passages(text, limit = 150) {
@@ -89,6 +96,9 @@ export function editList(tape, demo, cut) {
 
 // Camera composition leaves the right half of dialogue shots for the bubble.
 export function filmShot(view, state, cut, p) {
+  if (view.key === "crusher" && (crusherDive(state) || state.crusher.escaped)) {
+    return { eye: [15, 3, -1.8], target: [0, 1, -4.5] };
+  }
   const speaker = dialogue(state, cut);
   const actor = view.actors.find((a) => a.name === view.actor && a.visible);
   if (speaker && actor) {
@@ -159,6 +169,9 @@ export class FilmOverlay {
       state.ev?.type === "stage_start"
         ? RULES[state.stage]
         : caption?.text || RULES[state.stage];
+    if (crusherDive(state))
+      this.beat.querySelector("p").textContent =
+        `${state.crusher.holder} dives clear. The crusher slams shut.`;
     this.render(0);
   }
   render(ms, anchor) {
