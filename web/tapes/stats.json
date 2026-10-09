@@ -1,25 +1,25 @@
 {
-  "generatedAt": "2026-10-09T00:58:27.517Z",
-  "games": 27,
+  "generatedAt": "2026-10-09T15:59:14.244Z",
+  "games": 33,
   "models": [
     {
-      "model": "zai/glm-5.3-flashx",
+      "model": "openai/gpt-6.1-sol",
       "games": 3,
       "meanPlace": 2.333,
       "wins": 1,
       "top3": 2,
       "deathsByStage": {
-        "bridge": 1,
+        "bridge": 0,
         "crusher": 0,
         "pit": 0,
-        "disc": 0,
+        "disc": 1,
         "ledge": 1
       },
-      "volunteers": 1,
-      "frontOfBridge": 1,
+      "volunteers": 0,
+      "frontOfBridge": 0,
       "holdLever": 0,
-      "pushLever": 2,
-      "shoves": 1,
+      "pushLever": 3,
+      "shoves": 0,
       "lies": {
         "power": 0,
         "side": 0
@@ -50,25 +50,25 @@
     },
     {
       "model": "google/gemini-3.1-pro-preview",
-      "games": 3,
-      "meanPlace": 2.667,
-      "wins": 1,
-      "top3": 2,
+      "games": 9,
+      "meanPlace": 2.444,
+      "wins": 3,
+      "top3": 6,
       "deathsByStage": {
         "bridge": 0,
         "crusher": 0,
         "pit": 0,
-        "disc": 1,
-        "ledge": 1
+        "disc": 3,
+        "ledge": 3
       },
       "volunteers": 0,
       "frontOfBridge": 0,
       "holdLever": 0,
-      "pushLever": 2,
+      "pushLever": 8,
       "shoves": 0,
       "lies": {
         "power": 0,
-        "side": 1
+        "side": 2
       }
     },
     {
@@ -95,26 +95,95 @@
       }
     },
     {
-      "model": "openai/gpt-5.6-luna",
+      "model": "spacexai/grok-4.20-reasoning",
+      "games": 3,
+      "meanPlace": 3,
+      "wins": 0,
+      "top3": 2,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 0,
+        "pit": 0,
+        "disc": 1,
+        "ledge": 2
+      },
+      "volunteers": 1,
+      "frontOfBridge": 1,
+      "holdLever": 0,
+      "pushLever": 3,
+      "shoves": 1,
+      "lies": {
+        "power": 0,
+        "side": 3
+      }
+    },
+    {
+      "model": "spacexai/grok-4.7",
       "games": 3,
       "meanPlace": 3,
       "wins": 1,
       "top3": 1,
       "deathsByStage": {
         "bridge": 0,
-        "crusher": 0,
-        "pit": 0,
-        "disc": 2,
+        "crusher": 1,
+        "pit": 1,
+        "disc": 0,
         "ledge": 0
       },
       "volunteers": 0,
       "frontOfBridge": 0,
       "holdLever": 0,
       "pushLever": 3,
+      "shoves": 0,
+      "lies": {
+        "power": 0,
+        "side": 1
+      }
+    },
+    {
+      "model": "zai/glm-5.3",
+      "games": 3,
+      "meanPlace": 3,
+      "wins": 1,
+      "top3": 1,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 1,
+        "pit": 0,
+        "disc": 1,
+        "ledge": 0
+      },
+      "volunteers": 0,
+      "frontOfBridge": 1,
+      "holdLever": 0,
+      "pushLever": 3,
       "shoves": 1,
       "lies": {
         "power": 0,
         "side": 0
+      }
+    },
+    {
+      "model": "zai/glm-5.3-flashx",
+      "games": 6,
+      "meanPlace": 3,
+      "wins": 1,
+      "top3": 3,
+      "deathsByStage": {
+        "bridge": 1,
+        "crusher": 0,
+        "pit": 0,
+        "disc": 1,
+        "ledge": 3
+      },
+      "volunteers": 1,
+      "frontOfBridge": 1,
+      "holdLever": 2,
+      "pushLever": 2,
+      "shoves": 1,
+      "lies": {
+        "power": 0,
+        "side": 4
       }
     },
     {
@@ -165,45 +234,91 @@
     },
     {
       "model": "alibaba/qwen3.8-max",
-      "games": 3,
+      "games": 6,
       "meanPlace": 3.333,
       "wins": 0,
-      "top3": 1,
+      "top3": 2,
       "deathsByStage": {
         "bridge": 0,
         "crusher": 1,
         "pit": 0,
-        "disc": 1,
-        "ledge": 1
+        "disc": 3,
+        "ledge": 2
       },
       "volunteers": 1,
       "frontOfBridge": 0,
       "holdLever": 0,
       "pushLever": 1,
-      "shoves": 1,
+      "shoves": 2,
       "lies": {
         "power": 0,
         "side": 0
       }
     },
     {
+      "model": "anthropic/claude-sonnet-5.5",
+      "games": 6,
+      "meanPlace": 3.333,
+      "wins": 1,
+      "top3": 2,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 1,
+        "pit": 0,
+        "disc": 3,
+        "ledge": 1
+      },
+      "volunteers": 0,
+      "frontOfBridge": 0,
+      "holdLever": 0,
+      "pushLever": 1,
+      "shoves": 2,
+      "lies": {
+        "power": 0,
+        "side": 1
+      }
+    },
+    {
       "model": "deepseek/deepseek-v4-pro",
-      "games": 3,
+      "games": 6,
       "meanPlace": 3.333,
       "wins": 0,
-      "top3": 1,
+      "top3": 2,
       "deathsByStage": {
         "bridge": 0,
         "crusher": 0,
-        "pit": 1,
-        "disc": 1,
-        "ledge": 1
+        "pit": 2,
+        "disc": 2,
+        "ledge": 2
       },
       "volunteers": 1,
       "frontOfBridge": 1,
       "holdLever": 0,
       "pushLever": 1,
-      "shoves": 1,
+      "shoves": 3,
+      "lies": {
+        "power": 0,
+        "side": 0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "games": 6,
+      "meanPlace": 3.333,
+      "wins": 1,
+      "top3": 2,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 1,
+        "pit": 1,
+        "disc": 2,
+        "ledge": 1
+      },
+      "volunteers": 1,
+      "frontOfBridge": 1,
+      "holdLever": 0,
+      "pushLever": 5,
+      "shoves": 2,
       "lies": {
         "power": 0,
         "side": 0
@@ -279,7 +394,30 @@
       }
     },
     {
-      "model": "anthropic/claude-sonnet-5.5",
+      "model": "alibaba/qwen3.8-max-prime",
+      "games": 3,
+      "meanPlace": 3.667,
+      "wins": 0,
+      "top3": 1,
+      "deathsByStage": {
+        "bridge": 1,
+        "crusher": 0,
+        "pit": 1,
+        "disc": 0,
+        "ledge": 1
+      },
+      "volunteers": 2,
+      "frontOfBridge": 3,
+      "holdLever": 0,
+      "pushLever": 1,
+      "shoves": 1,
+      "lies": {
+        "power": 2,
+        "side": 0
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro-0813",
       "games": 3,
       "meanPlace": 3.667,
       "wins": 0,
@@ -296,6 +434,29 @@
       "holdLever": 0,
       "pushLever": 0,
       "shoves": 1,
+      "lies": {
+        "power": 0,
+        "side": 0
+      }
+    },
+    {
+      "model": "moonshotai/kimi-k3",
+      "games": 3,
+      "meanPlace": 3.667,
+      "wins": 0,
+      "top3": 1,
+      "deathsByStage": {
+        "bridge": 1,
+        "crusher": 0,
+        "pit": 0,
+        "disc": 1,
+        "ledge": 1
+      },
+      "volunteers": 0,
+      "frontOfBridge": 1,
+      "holdLever": 0,
+      "pushLever": 2,
+      "shoves": 2,
       "lies": {
         "power": 0,
         "side": 1
@@ -348,7 +509,7 @@
       }
     },
     {
-      "model": "moonshotai/kimi-k2.6",
+      "model": "anthropic/claude-opus-4.8",
       "games": 3,
       "meanPlace": 4,
       "wins": 0,
@@ -357,16 +518,39 @@
         "bridge": 0,
         "crusher": 0,
         "pit": 0,
-        "disc": 1,
-        "ledge": 2
+        "disc": 3,
+        "ledge": 0
       },
       "volunteers": 0,
       "frontOfBridge": 0,
       "holdLever": 0,
+      "pushLever": 2,
+      "shoves": 0,
+      "lies": {
+        "power": 0,
+        "side": 2
+      }
+    },
+    {
+      "model": "moonshotai/kimi-k2.6",
+      "games": 6,
+      "meanPlace": 4,
+      "wins": 0,
+      "top3": 0,
+      "deathsByStage": {
+        "bridge": 0,
+        "crusher": 0,
+        "pit": 0,
+        "disc": 4,
+        "ledge": 2
+      },
+      "volunteers": 2,
+      "frontOfBridge": 1,
+      "holdLever": 0,
       "pushLever": 1,
       "shoves": 2,
       "lies": {
-        "power": 0,
+        "power": 1,
         "side": 1
       }
     }
@@ -382,6 +566,6 @@
     "1": 24,
     "2": 32,
     "3": 29,
-    "4": 27
+    "4": 33
   }
 }

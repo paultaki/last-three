@@ -19,3 +19,7 @@ Ledger total at 2026-10-08 ~16:30 PDT: **$11.53**. Spending stopped here; furthe
 | 2026-10-09 | Heavyweight roster, rules v4 | 3 kept (+5 discarded) | ~1.4 | Stopped by gateway HTTP 402: credits exhausted |
 
 Ledger total at 2026-10-09 ~01:00 UTC: **$15.09**. The gateway then refused calls (credit balance). Budget available per Paul: $30; blocked on a credit top-up, not on code.
+| 2026-10-09 | Heavyweight roster, rules v4 (Grok seat now 4.20 Reasoning; 4.1 Fast was HTTP 503 at the gateway) | 3 | 2.6 | web/tapes 0028-0030, rules 4; about $0.78 a game |
+| 2026-10-09 | Frontier roster, rules v4 (new `--tier frontier`) | 3 kept (+3 discarded) | 8.5 | web/tapes 0031-0033, about $1.28 a game kept. Discards: one Opus 5.5 game refused by Anthropic's content filter (12/29 calls), one game killed mid-run, two cut by a per-game cap bug (fixed: cap keyed by attempt) |
+
+Session ledger 2026-10-09 (cloud session, fresh `.ledger/`): **$11.11**, of which about $4.60 was probes, discards and the bug. Gateway `total_used` after this session: **$26.49** (balance $39.64 after Paul's top-up).
