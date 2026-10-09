@@ -1,3 +1,4 @@
+import { consequence } from "./direction.js";
 import {
   visibleActor,
   isStepWorthy,
@@ -62,11 +63,23 @@ export function dialogue(s, cut) {
     color: COLORS[s.order.indexOf(name)] || "#edc181",
   };
 }
-export function filmDuration(s, cut) {
+export function filmDuration(s, cut, directing = {}) {
   const d = dialogue(s, cut);
-  if (d) return d.pages.reduce((sum, text) => sum + readingTime(text), 0) + 600;
+  if (d) {
+    const read = d.pages.reduce((sum, text) => sum + readingTime(text), 0);
+    return (
+      read +
+      600 +
+      (directing.receipt
+        ? readingTime(directing.receipt.text)
+        : directing.forged
+          ? 3800
+          : 0)
+    );
+  }
+  if (directing.receipt) return readingTime(directing.receipt.text) + 2400;
   return s.ev?.type === "death"
-    ? 3800
+    ? 5400
     : s.ev?.type === "stage_start"
       ? 4200
       : 2300;
@@ -95,12 +108,17 @@ export function editList(tape, demo, cut) {
 }
 
 // Camera composition leaves the right half of dialogue shots for the bubble.
-export function filmShot(view, state, cut, p) {
+export function filmShot(view, state, cut, p, directing = {}) {
   if (view.key === "crusher" && (crusherDive(state) || state.crusher.escaped)) {
     return { eye: [15, 3, -1.8], target: [0, 1, -4.5] };
   }
   const speaker = dialogue(state, cut);
   const actor = view.actors.find((a) => a.name === view.actor && a.visible);
+  if (speaker && actor && directing.pit) {
+    // Keep the abandoned contestant and the people with the rope in one frame.
+    const shift = Math.max(0, actor.position[0] - 1.7) * 1.1;
+    return { eye: [6.5 + shift, 5.8, 8.4], target: [2.6 + shift, 2.2, -2.5] };
+  }
   if (speaker && actor) {
     const [x, y, z] = actor.position;
     return {
@@ -119,11 +137,19 @@ export function filmShot(view, state, cut, p) {
       : 0;
     const d = Math.max(8, distance * 1.25);
     return {
-      target: [center[0], center[1] + 0.9, center[2]],
-      eye: [center[0] + d * 0.48, center[1] + d * 0.45, center[2] + d],
+      target: [
+        center[0] + (directing.receipt ? 1.8 : 0),
+        center[1] + 0.9,
+        center[2],
+      ],
+      eye: [center[0] + d * 0.48, center[1] + d * 0.35, center[2] + d],
     };
   }
   if (actor && view.death) {
+    if (view.key === "ledge" || view.key === "disc")
+      return { eye: [6, 5, 7], target: [0, 0.3, 0] };
+    if (view.key === "pit")
+      return { eye: [6.5, 5.8, 8.4], target: [2.6, 2.2, -2.5] };
     const [x, y, z] = actor.position;
     const down = ["shatter", "chute", "tumble"].includes(actor.pose)
       ? p * 2.5
@@ -139,14 +165,31 @@ export function filmShot(view, state, cut, p) {
 export class FilmOverlay {
   constructor(host) {
     this.host = host;
+    this.directing = {};
     host.innerHTML =
-      '<div class="film-heading"><span>LAST THREE</span><b></b></div><svg class="speech-leader" aria-hidden="true"><path/><circle r="5"/></svg><article class="speech-bubble" hidden aria-live="polite"><div class="speaker"><strong></strong><span></span></div><p></p><small></small></article><div class="film-beat" hidden><span></span><p></p></div>';
+      '<div class="film-heading"><span>LAST THREE</span><b></b></div><svg class="speech-leader" aria-hidden="true"><path/><circle r="5"/></svg><article class="speech-bubble" hidden aria-live="polite"><div class="speaker"><strong></strong><span></span></div><p></p><small></small></article><aside class="evidence-card" hidden><span></span><p></p><small></small></aside><div class="focal-names"></div><div class="film-stakes" hidden></div><div class="consequence" hidden><span>THE CONSEQUENCE</span><strong></strong><p></p></div><div class="film-beat" hidden><span></span><p></p></div>';
     this.bubble = host.querySelector("article");
     this.leader = host.querySelector("svg");
     this.beat = host.querySelector(".film-beat");
+    this.evidence = host.querySelector(".evidence-card");
+    this.names = host.querySelector(".focal-names");
+    this.stakes = host.querySelector(".film-stakes");
+    this.outcome = host.querySelector(".consequence");
   }
-  setState(state, cut) {
+  setState(state, cut, directing = {}) {
     this.state = state;
+    this.directing = directing;
+    this.result = consequence(state);
+    this.names.replaceChildren();
+    this.evidence.hidden = true;
+    this.outcome.hidden = true;
+    this.host.dataset.scene = state.stage;
+    this.host.dataset.dialogue = !!dialogue(state, cut);
+    this.host.dataset.rule = state.ev?.type === "stage_start";
+    this.stakes.hidden = !directing.pit;
+    this.stakes.textContent = directing.pit
+      ? "ONE ROPE · RESCUE COSTS 2 FOOTING"
+      : "";
     this.d = dialogue(state, cut);
     this.currentPage = -1;
     this.host.querySelector(".film-heading b").textContent =
@@ -157,7 +200,13 @@ export class FilmOverlay {
       this.bubble.dataset.kind = this.d.kind;
       this.bubble.style.setProperty("--speaker", this.d.color);
       this.bubble.querySelector("strong").textContent = this.d.name;
-      this.bubble.querySelector(".speaker span").textContent = this.d.label;
+      this.bubble.querySelector(".speaker span").textContent = directing.forged
+        ? `SIGNED ${directing.forged.signed} · TO ${directing.forged.to}`
+        : this.d.label;
+      this.revealAt = this.d.pages.reduce(
+        (sum, text) => sum + readingTime(text),
+        0,
+      );
     }
     const hiddenPrivate =
       ["thought", "whisper"].includes(state.ev?.type) && !cut;
@@ -172,9 +221,61 @@ export class FilmOverlay {
     if (crusherDive(state))
       this.beat.querySelector("p").textContent =
         `${state.crusher.holder} dives clear. The crusher slams shut.`;
+    if (directing.contrast)
+      this.beat.querySelector("p").textContent = directing.contrast;
     this.render(0);
   }
-  render(ms, anchor) {
+  render(ms, anchor, names = []) {
+    const revealAt = this.d ? this.revealAt : 0;
+    const evidence = this.directing.receipt;
+    const forged = this.directing.forged;
+    const showEvidence = (evidence || forged) && ms >= revealAt;
+    this.evidence.hidden = !showEvidence;
+    this.evidence.dataset.kind = forged
+      ? "forgery"
+      : evidence?.private
+        ? "private"
+        : "callback";
+    if (showEvidence) {
+      this.evidence.querySelector("span").textContent = forged
+        ? "THE NAME WAS A DISGUISE"
+        : evidence.label.toUpperCase();
+      this.evidence.querySelector("p").textContent = evidence
+        ? `“${evidence.text}”`
+        : "";
+      if (forged)
+        this.evidence.querySelector("p").textContent =
+          `${forged.sender} sent this. ${forged.signed} did not.`;
+      this.evidence.querySelector("small").textContent = forged
+        ? `FORGED WHISPER · REAL SENDER: ${forged.sender.toUpperCase()}`
+        : evidence.private
+          ? evidence.kind === "whisper"
+            ? "PRIVATE WHISPER · RECORDED EXCERPT"
+            : "PRIVATE THOUGHT · RECORDED EXCERPT"
+          : "EARLIER IN THE RECORDING";
+    }
+    this.outcome.hidden = !this.result || ms < 2700;
+    if (this.result) {
+      this.beat.hidden = true;
+      this.outcome.querySelector("strong").textContent = this.result.title;
+      this.outcome.querySelector("p").textContent = this.result.detail;
+    }
+    const visibleNames = names.filter(
+      (n) => n.visible && n.x > 0.04 && n.x < 0.94 && n.y > 0.12 && n.y < 0.85,
+    );
+    while (this.names.children.length < visibleNames.length)
+      this.names.append(document.createElement("span"));
+    Array.from(this.names.children).forEach((el, i) => {
+      const n = visibleNames[i];
+      el.hidden = !n;
+      if (!n) return;
+      el.textContent = n.name;
+      el.style.left = `${n.x * 100}%`;
+      el.style.top = `${n.y * 100}%`;
+      el.style.setProperty("--speaker", n.color);
+      // Keep names in the picture area, clear of dialogue/evidence cards.
+      el.hidden = !!this.d && n.x > 0.5 && n.y < 0.55;
+    });
     if (!this.d) return;
     const page = pageAt(this.d, ms);
     if (page !== this.currentPage) {

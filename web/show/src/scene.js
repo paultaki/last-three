@@ -1,3 +1,4 @@
+import { contactBeat, deathProgress } from "./direction.js";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
@@ -295,7 +296,10 @@ export class Arena {
     for (const b of Object.values(c.bones)) b.bone.quaternion.copy(b.base);
     c.group.updateMatrixWorld(true);
     const wave = Math.sin(t * 4 + a.seat) * 0.05,
-      beat = Math.sin(Math.min(1, t / 1.05) * Math.PI);
+      beat =
+        this.film && this.view.key === "ledge" && a.pose === "shove"
+          ? contactBeat(t, this.reduced).strike
+          : Math.sin(Math.min(1, t / 1.05) * Math.PI);
     let armL = -1.26,
       armR = 1.26;
     if (a.pose === "celebrate") {
@@ -305,6 +309,10 @@ export class Arena {
     if (["shove", "rescue", "climb", "hold"].includes(a.pose)) {
       armL = -0.55;
       armR = 0.55;
+    }
+    if (this.film && this.view.key === "ledge" && a.pose === "shove") {
+      armL = -1.4;
+      armR = 1.4;
     }
     if (["brace", "base"].includes(a.pose)) {
       armL = -0.85;
@@ -327,7 +335,11 @@ export class Arena {
     }
     if (
       ["base", "brace"].includes(a.pose) &&
-      !(this.film && this.dialogue && a.active)
+      !(
+        this.film &&
+        ((this.dialogue && a.active) ||
+          (this.view.key === "pit" && this.state.pit.out.length > 0))
+      )
     ) {
       this.rotate(c, "spine_01", X, 0.5);
       this.rotate(c, "thigh_l", X, -0.5);
@@ -342,7 +354,13 @@ export class Arena {
     const s = this.state,
       v = this.view;
     const t = this.reduced ? 0 : Math.min(seconds, 2.8),
-      p = this.reduced ? 1 : ease(Math.min(1, t / 1.15));
+      p =
+        this.film && v.death
+          ? deathProgress(s.ev.style, t, this.reduced)
+          : this.reduced
+            ? 1
+            : ease(Math.min(1, t / 1.15));
+    const contact = contactBeat(t, this.reduced);
     updateSet(
       this.set,
       s,
@@ -419,12 +437,14 @@ export class Arena {
           if (a.pose === "shove")
             c.group.position.addScaledVector(
               direction,
-              Math.max(0, distance - 1.05) * Math.sin(p * Math.PI),
+              Math.max(0, distance - 1.05) *
+                (v.key === "ledge" ? contact.approach : Math.sin(p * Math.PI)),
             );
           else
             c.group.position.addScaledVector(
               direction,
-              -0.22 * Math.sin(p * Math.PI),
+              -0.22 *
+                (v.key === "ledge" ? contact.recoil : Math.sin(p * Math.PI)),
             );
         }
       }
@@ -442,14 +462,51 @@ export class Arena {
         this.rotate(c, "upperarm_r", X, -0.4 - Math.sin(t * 3) * 0.18);
         this.rotate(c, "lowerarm_r", X, -0.7);
       }
+      if (
+        this.film &&
+        !a.active &&
+        !v.death &&
+        this.direction?.listener === a.name &&
+        this.dialogue
+      ) {
+        const speaker = v.actors.find((b) => b.name === this.dialogue.name);
+        if (speaker) {
+          const dx = speaker.position[0] - a.position[0],
+            dz = speaker.position[2] - a.position[2];
+          c.group.rotation.y = Math.atan2(dx, dz);
+          this.rotate(c, "head", X, -0.08);
+        }
+      }
+      if (this.film && v.death && a.visible && !a.active) {
+        const victim = v.actors.find((b) => b.active);
+        if (victim) {
+          c.group.rotation.y = Math.atan2(
+            victim.position[0] - a.position[0],
+            victim.position[2] - a.position[2],
+          );
+          this.rotate(c, "head", X, 0.18 * p);
+          this.rotate(c, "spine_01", X, -0.12 * Math.sin(p * Math.PI));
+          this.rotate(c, "upperarm_r", X, -0.55 * Math.sin(p * Math.PI));
+          this.rotate(c, "lowerarm_r", X, -1.1 * Math.sin(p * Math.PI));
+        }
+      }
       if (!this.reduced) c.puppet.position.y += Math.sin(t * 2 + i) * 0.015;
       if (a.pose === "flinch") {
-        c.puppet.rotation.x = -Math.sin(p * Math.PI) * 0.3;
-        c.puppet.position.z += Math.sin(p * Math.PI) * 0.35;
+        const recoil =
+          this.film && v.key === "ledge"
+            ? contact.recoil
+            : Math.sin(p * Math.PI);
+        c.puppet.rotation.x = -recoil * 0.3;
+        // In ledge coverage local +Z faces the attacker, so recoil goes backwards.
+        c.puppet.position.z +=
+          (this.film && v.key === "ledge" ? -1 : 1) * recoil * 0.35;
       }
       if (a.pose === "dodge") c.puppet.position.x = Math.sin(p * Math.PI) * 0.7;
       if (a.pose === "shove")
-        c.puppet.rotation.x = Math.sin(p * Math.PI) * 0.18;
+        c.puppet.rotation.x =
+          (this.film && v.key === "ledge"
+            ? contact.strike
+            : Math.sin(p * Math.PI)) * 0.18;
       if (a.pose === "climb" && !this.reduced) {
         if (v.key === "pit" && a.from[1] < a.position[1]) {
           const baseName = this.prev?.pit?.base || s.pit.base;
@@ -562,7 +619,7 @@ export class Arena {
       }
     }
     if (this.film && this.mode === "cinema") {
-      const shot = filmShot(v, s, this.cut, p);
+      const shot = filmShot(v, s, this.cut, p, this.direction);
       if (shot) ({ eye, target } = shot);
       else {
         eye = eye.map((n, i) => target[i] + (n - target[i]) * 0.83);
@@ -592,6 +649,32 @@ export class Arena {
       if (vec.z > 1 || Math.abs(vec.x) > 0.97 || Math.abs(vec.y) > 0.95)
         label.hidden = true;
     });
+    const focal = new Set();
+    if (this.film) {
+      if (this.dialogue) {
+        focal.add(this.dialogue.name);
+        if (this.direction?.listener) focal.add(this.direction.listener);
+      } else if (s.ev?.type === "action" && s.ev.valid !== false) {
+        focal.add(v.actor);
+        const target = String(s.ev.action).split(":")[1];
+        if (s.players[target]) focal.add(target);
+      } else if (v.death && p < 0.8) focal.add(v.actor);
+    }
+    this.focalAnchors = v.actors
+      .filter((a) => focal.has(a.name) && a.visible)
+      .map((a) => {
+        const point = this.cast[a.seat].group.position
+          .clone()
+          .add(new T.Vector3(0, 2.25, 0))
+          .project(this.camera);
+        return {
+          name: a.name,
+          color: a.color,
+          x: point.x * 0.5 + 0.5,
+          y: -point.y * 0.5 + 0.5,
+          visible: point.z < 1,
+        };
+      });
     this.speakerAnchor = null;
     if (this.dialogue) {
       const speaker = this.cast[s.order.indexOf(this.dialogue.name)];

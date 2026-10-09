@@ -10,3 +10,11 @@ The tape and `web/lib/state.js` are authoritative. The 3D layer must not invent 
 - `Game.eliminate` resolves feather/lucky saves before emitting deaths. A saved holder has no flatten death beat before stage end, so its escape begins under the raised roof. Multi-victim room-collapse choreography is a separate case from the selected holder-escape sequence.
 - A current recorded shove reaction overrides the persistent lever-holding pose. Death poses override both.
 - Successful crusher dives are immediately followed by crusher stage_end in supported tapes. The regression suite asserts this over every tape; adding intermediate events requires persisting the visual escape state first.
+
+## Audience direction
+
+- During a death beat the 3D action is deliberately uncaptioned until the consequence card appears at 2700 ms. This avoids announcing a result before the fall; it is not a blank video frame. Focal names remain during the initial part of the action.
+- The shove position block in Arena is already enclosed by `this.film && ["shove", "flinch"].includes(a.pose)`. Its contact curve never changes Studio motion.
+- Arena's `ease(t) = t*t*(3-2*t)` is the same smoothstep used by deathProgress and the crusher slab, including flatten timing at 1.15 seconds.
+- Every directed playlist entry passes isStepWorthy with the current Director setting. Private receipts and forged sender disclosures require Director mode.
+- All editorial quote receipts are exact prior source excerpts. Whisper callbacks are labelled as whispers; Cole's right/left contradiction does not assert intent. Reaction gestures are staging, not invented recorded thoughts.

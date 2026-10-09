@@ -924,3 +924,104 @@ body.clean #viewport {
     margin: 0;
   }
 }
+
+/* Film direction: one main utterance, then a source-backed reveal. */
+.evidence-card {
+  position: absolute;
+  left: 53%;
+  top: 57%;
+  width: 41%;
+  padding: 1.25cqw 1.7cqw;
+  border-left: 0.28cqw solid #edc181;
+  background: #101b28f5;
+  color: #f8e8c3;
+  border-radius: 0.3cqw;
+  box-shadow: 0 0.5cqw 2cqw #0005;
+}
+.evidence-card > span {
+  font-size: 0.85cqw;
+  letter-spacing: 0.13em;
+  font-weight: 800;
+}
+.evidence-card p {
+  font-size: 1.65cqw;
+  line-height: 1.3;
+  font-weight: 700;
+  margin: 0.7cqw 0;
+}
+.evidence-card small {
+  font-size: 0.65cqw;
+  letter-spacing: 0.1em;
+  color: #b1bdc9;
+}
+.evidence-card[data-kind="forgery"] {
+  border-color: #ff8f79;
+  background: #2c171ef5;
+  color: #ffd9c9;
+}
+#film-overlay[data-dialogue="false"] .evidence-card {
+  top: 15%;
+  width: 37%;
+  left: 59%;
+}
+.focal-names span {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 0.3cqw 0.6cqw;
+  border-bottom: 0.15cqw solid var(--speaker);
+  background: #08121ce8;
+  color: #fff8ea;
+  font-size: 1.05cqw;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.film-stakes {
+  position: absolute;
+  left: 4%;
+  bottom: 5%;
+  font-size: 0.9cqw;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  background: #08121ce8;
+  padding: 0.6cqw 0.8cqw;
+  border-left: 0.2cqw solid #edc181;
+}
+.consequence {
+  position: absolute;
+  left: 5%;
+  bottom: 8%;
+  max-width: 48%;
+  border-left: 0.3cqw solid #edc181;
+  padding: 1cqw 1.5cqw;
+  background: #08121ceb;
+}
+.consequence span {
+  display: block;
+  font-size: 0.85cqw;
+  letter-spacing: 0.16em;
+  color: #edc181;
+}
+.consequence strong {
+  display: block;
+  font-size: 2.6cqw;
+  line-height: 1.1;
+  margin: 0.6cqw 0;
+}
+.consequence p {
+  font-size: 1.25cqw;
+  color: #d0dce3;
+  margin: 0;
+}
+#film-overlay[data-rule="true"] .film-beat {
+  left: 6%;
+  bottom: 9%;
+  width: 64%;
+  text-align: left;
+}
+#film-overlay[data-rule="true"] .film-beat p {
+  font-size: 2.35cqw;
+  line-height: 1.25;
+}
+#film-overlay[data-rule="true"] .film-beat span {
+  font-size: 1cqw;
+}

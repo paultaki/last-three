@@ -29,22 +29,45 @@ try {
   );
   await page.waitForFunction(() => window.__show?.metrics.ready);
   const leadSeconds = (performance.now() - started) / 1000;
+  await page.evaluate(() => {
+    const started = performance.now();
+    window.__captureBeats = [{ i: __show.index, seconds: 0 }];
+    window.__captureTimer = setInterval(() => {
+      if (window.__captureBeats.at(-1).i !== __show.index)
+        window.__captureBeats.push({
+          i: __show.index,
+          seconds: (performance.now() - started) / 1000,
+        });
+    }, 50);
+  });
   await page.keyboard.press("Space");
   await page.waitForFunction(() => __show.playing);
   await page.waitForFunction(
     () => !__show.playing && __show.index === __show.playlist.at(-1),
     {},
-    { timeout: 300000 },
+    { timeout: 600000 },
   );
   await page.waitForTimeout(1500);
   const metrics = await page.evaluate(() => __show.metrics);
+  const beats = await page.evaluate(() => {
+    clearInterval(window.__captureTimer);
+    return window.__captureBeats;
+  });
   const video = page.video();
   await context.close();
   const source = await video.path();
   fs.writeFileSync(
     output + "film-capture.json",
     JSON.stringify(
-      { source, leadSeconds, width: 1920, height: 1080, errors, metrics },
+      {
+        source,
+        leadSeconds,
+        width: 1920,
+        height: 1080,
+        errors,
+        metrics,
+        beats,
+      },
       null,
       2,
     ),

@@ -1,3 +1,4 @@
+import { direction, directedList } from "./direction.js";
 import { FilmOverlay, filmDuration, editList } from "./film.js";
 import { Arena } from "./scene.js";
 import { Score } from "./audio.js";
@@ -27,6 +28,7 @@ let arena,
   score = new Score(),
   tape,
   state,
+  directing,
   index = 0,
   cut = false,
   playing = false,
@@ -158,10 +160,12 @@ function seek(i, { sound = false } = {}) {
   const previous = stateAt(tape, index - 1);
   elapsed = 0;
   animationMs = 0;
+  directing = direction(tape, state, cut);
   arena.setState(state, previous, cut);
-  overlay.setState(state, cut);
+  arena.direction = directing;
+  overlay.setState(state, cut, directing);
   arena.render(0);
-  overlay.render(0, arena.speakerAnchor);
+  overlay.render(0, arena.speakerAnchor, arena.focalAnchors);
   paint();
   updateURL();
   if (sound) score.event(state);
@@ -198,7 +202,7 @@ async function load(id, start = 0, asStory = false) {
     tape = data;
     story = asStory && data.id === demo?.tape;
     if (story) cut = !!demo.cut;
-    playlist = story ? editList(tape, demo, cut) : [];
+    playlist = story ? directedList(tape, editList(tape, demo, cut), cut) : [];
     if (story && !playlist.length) story = false;
     if (story && !playlist.includes(Number(start))) start = playlist[0];
     lines = timeline(tape);
@@ -254,7 +258,9 @@ function advance(ms) {
   animationMs = Math.min(2800, animationMs + ms * speed);
   if (playing) {
     elapsed += ms * speed;
-    const hold = film ? filmDuration(state, cut) : duration(tape.events[index]);
+    const hold = film
+      ? filmDuration(state, cut, directing)
+      : duration(tape.events[index]);
     if (elapsed >= hold) {
       const next = nextIndex(1);
       if (next <= index) {
@@ -264,7 +270,7 @@ function advance(ms) {
     }
   }
   arena.render(animationMs / 1000);
-  overlay.render(elapsed, arena.speakerAnchor);
+  overlay.render(elapsed, arena.speakerAnchor, arena.focalAnchors);
 }
 function loop(now) {
   requestAnimationFrame(loop);
@@ -350,7 +356,7 @@ async function init() {
   $("director").onclick = () => {
     cut = !cut;
     if (story) {
-      playlist = editList(tape, demo, cut);
+      playlist = directedList(tape, editList(tape, demo, cut), cut);
       if (!playlist.includes(index))
         seek(playlist.find((i) => i > index) ?? playlist.at(-1));
     }
@@ -426,6 +432,13 @@ async function init() {
   window.__show = {
     seek,
     load,
+    preview: (ms) => {
+      playing = false;
+      elapsed = Math.max(0, Number(ms) || 0);
+      animationMs = Math.min(2800, elapsed);
+      arena.render(animationMs / 1000);
+      overlay.render(elapsed, arena.speakerAnchor, arena.focalAnchors);
+    },
     settle: () => {
       animationMs = 2800;
       arena.render(2.8);
@@ -476,6 +489,7 @@ async function init() {
       stage: state?.stage,
       dialogue: overlay.d,
       page: overlay.currentPage,
+      direction: directing,
       actors: arena.view?.actors,
       coordinates: "world units; x right, y up, z toward front",
     });
