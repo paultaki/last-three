@@ -42,6 +42,7 @@ export function gesturePose(kind, seconds, reduced = false) {
   return (poses[kind] || poses.message).map((x) => x * settle);
 }
 export function contextBeat(s, cut) {
+  if (!s) return null;
   const e = s.ev || {};
   if (!isStepWorthy(e, cut)) return null;
   if (e.type === "ability_use" && e.power === "anchor" && s.stage === "crusher")

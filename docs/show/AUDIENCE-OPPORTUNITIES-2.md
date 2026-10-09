@@ -8,7 +8,7 @@ Based on the delivered 5:19 film, its exported proof frames, and tape 20261009-0
 | 2 | Put neutral LEFT / RIGHT lane markings on the bridge | Viewers can judge Cole's contradictory step spatially | Implemented |
 | 3 | Give pleas, refusals, praise and taunts distinct body performances | The same arm wave cannot carry every conversation | Implemented |
 | 4 | Separate internal thought and secret-message performances from public speaking | Characters should not appear to announce their private thoughts | Implemented |
-| 5 | Give publicly used powers an explanatory beat and matching physical performance | Ash's resistance and Fenn's survival currently look unexplained | Implemented |
+| 5 | Give recorded power uses an explanatory beat and matching physical performance | Ash's resistance and Fenn's survival currently look unexplained | Implemented |
 | 6 | Translate zero-footing reveals into a visible danger beat | A list of numbers is easy to miss before someone falls | Implemented |
 | 7 | Make rejected actions explicit, with the recorded rule reason | The late invalid action otherwise looks like a successful choice | Implemented |
 | 8 | Name all three finalists at their podiums and hold the finish | Tiny podium numbers do not establish who placed where | Implemented |
@@ -29,7 +29,22 @@ Based on the delivered 5:19 film, its exported proof frames, and tape 20261009-0
 
 1. Add a small presentation-only performance/context module. All danger, invalid-action and power facts come from the current recorded event. Private performance is disabled outside Director mode.
 2. Use existing bones for four public gesture types and quiet private poses. Keep Studio motion unchanged. Neutral bridge markings never encode future safety. Camera cutaways only affect film close coverage.
-3. Add temporary context cards for public power use, danger and rejected actions. Hold enough time to read. Keep earlier evidence cards and dialogue timing intact. Finale labels use authoritative recorded placements.
+3. Add temporary context cards for visible power use, danger and rejected actions. Hold enough time to read. Keep earlier evidence cards and dialogue timing intact. Finale labels use authoritative recorded placements.
 4. Verify the eight improvements with unit tests, rendered browser proofs, previous film/Studio gates and one critical integrated review checkpoint, followed by a local video export.
 
 Tradeoff: reuse the current procedural rigs instead of adding facial animation or paid voices. This keeps load cost stable and leaves the silent film useful for Paul's narration. Public gestures are authored visual performances, not evidence of an unrecorded emotion.
+
+## Verification map
+
+| Improvement | Proof in the selected tape | Checks |
+|---|---|---|
+| Bridge cutaway | 201, 226, 269 | Conversation frames clear of bridge gantry; Studio retains it |
+| Lane orientation | 201, 300 | Neutral row/LEFT/RIGHT labels only on visible panes |
+| Public performance | 201 praise, 436 plea, 445 refusal, 499 taunt | Matching tape/actor; distinct finite poses |
+| Private performance | 200 thought, 269 forged message, 509 whisper | Quiet poses and distinct leader patterns; hidden outside Director mode |
+| Power explanation | 348/349 resistance, 489 feather | Reading time, visibility gate, persistent lift during later disc deaths |
+| Danger result | 515 and 528 | Current recorded zero footing only; no future death lookup |
+| Rejected move | 527 | Exact recorded reason, no invented reconciliation of its action/note |
+| Named finish | 541 | Authoritative places, three names, 6.5-second hold, no early labels |
+
+Primary gate: 413 tests, 113 tapes, all existing direction/film/Studio browser checks and the new performance suite at 1920/1280/390. Screenshots and skill-client action frames were inspected. Review and final video evidence are documented separately.

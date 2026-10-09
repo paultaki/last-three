@@ -99,3 +99,8 @@ test("finalists and finish hold appear only after authoritative game end", () =>
   );
   assert.equal(filmDuration(at(541), true), 6500);
 });
+
+test("diagnostic context is safe before a tape has loaded", () => {
+  assert.equal(contextBeat(undefined, false), null);
+  assert.equal(contextBeat(null, true), null);
+});

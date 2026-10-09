@@ -17,6 +17,20 @@ try {
     "http://127.0.0.1:8843/last-three/show/?cast=city&tape=20261009-0025&edit=story&clean=1",
   );
   await page.waitForFunction(() => window.__show?.metrics.ready);
+  await page.evaluate(async () => {
+    const { FilmOverlay } = await import("/last-three/show/src/film.js");
+    const host = document.createElement("div"),
+      overlay = new FilmOverlay(host);
+    __show.seek(541);
+    const s = structuredClone(__show.state);
+    s.ev.places = s.ev.places.filter((p) => p.place !== 1);
+    overlay.setState(s, true);
+    if (
+      !host.querySelector(".film-finish").hidden ||
+      host.querySelector(".film-finish strong").textContent
+    )
+      throw new Error("runner-up announced as winner");
+  });
   const preview = async (i, ms = 1800) =>
     page.evaluate(
       ({ i, ms }) => {

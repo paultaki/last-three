@@ -201,8 +201,8 @@ export class FilmOverlay {
     this.context.querySelector("span").textContent = context?.label || "";
     this.context.querySelector("strong").textContent = context?.title || "";
     this.context.querySelector("p").textContent = context?.detail || "";
-    this.finish.hidden = !podium.length;
-    this.finish.querySelector("strong").textContent = podium.length
+    this.finish.hidden = podium[0]?.place !== 1;
+    this.finish.querySelector("strong").textContent = podium[0]?.place === 1
       ? `${podium[0].name} wins.`
       : "";
     this.names.replaceChildren();

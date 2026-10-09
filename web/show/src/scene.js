@@ -486,7 +486,7 @@ export class Arena {
       }
       if (this.film && v.key === "disc" && this.discSaves?.includes(a.name)) {
         c.puppet.position.y +=
-          a.active && s.ev?.type === "ability_use"
+          a.active && s.ev?.type === "ability_use" && s.ev.power === "feather"
             ? powerLift(s, this.cut, t, this.reduced)
             : 0.55;
       }

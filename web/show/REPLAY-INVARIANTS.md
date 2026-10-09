@@ -21,3 +21,6 @@ The tape and `web/lib/state.js` are authoritative. The 3D layer must not invent 
 
 - Valid whisper events require `from` and `to` (src/tape.js EVENT_SHAPES). `name` identifies speakers in say/thought events. The common visibleActor fallback spans different event types; it does not permit a whisper without `from`. Forged-whisper disclosure uses the required real sender field.
 - Names in the right column yield to a visible evidence card, including action callbacks without dialogue. Only placements 2 and 3 get podium labels; other death events say IS OUT.
+
+- Presentation actors already carry `place` from reducer players (model.js presentation). The game_end reducer writes authoritative event placements to those players. Finalist name/ordinal rendering uses that same projected result; it is not an absent actor field. Browser proof asserts all three exact ordinals/names. Missing place 1 never permits a runner-up winner headline.
+- Context diagnostics may run before initial load and return null then. Disc save lift stays at its held height on later non-feather ability events; only the actual feather-use event animates the lift.
