@@ -1,0 +1,723 @@
+:root {
+  color-scheme: dark;
+  --bg: #09121a;
+  --line: #263540;
+  --ink: #edece5;
+  --muted: #8e9ca7;
+  --gold: #edc181;
+  --cyan: #89ddd8;
+  font-family: Arial, Helvetica, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+button,
+select,
+input {
+  font: inherit;
+}
+button,
+a,
+select,
+input,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+select {
+  color: inherit;
+  background: #121f29;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 9px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+button:hover,
+select:hover {
+  border-color: var(--gold);
+  background: #1d2c36;
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button[aria-pressed="true"] {
+  color: var(--gold);
+  border-color: #9a774e;
+}
+.mast {
+  height: 76px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 3.5vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+.brand-mark {
+  background: var(--gold);
+  color: #0d1721;
+  letter-spacing: -4px;
+  padding: 8px 12px 8px 8px;
+  font-size: 25px;
+  transform: skew(-8deg);
+}
+.edition {
+  font: 9px monospace;
+  letter-spacing: 2px;
+  border-left: 1px solid var(--line);
+  margin-left: 5px;
+  padding-left: 18px;
+  color: var(--muted);
+}
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font: 11px monospace;
+}
+.signal {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.signal:before {
+  content: "";
+  display: inline-block;
+  background: var(--cyan);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+main {
+  max-width: 1800px;
+  margin: auto;
+  padding: 30px 3.5vw 25px;
+}
+.episode-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  gap: 20px;
+}
+.eyebrow {
+  font: 10px monospace;
+  letter-spacing: 2px;
+  color: var(--gold);
+}
+h1 {
+  margin: 8px 0 0;
+  font-size: 30px;
+  letter-spacing: -1px;
+  font-weight: 700;
+}
+h1 em {
+  font-weight: 400;
+  color: var(--muted);
+  font-style: normal;
+}
+.tape-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font: 9px monospace;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.tape-control select {
+  max-width: 270px;
+  width: 270px;
+  color: var(--ink);
+}
+.broadcast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 242px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0e1923;
+}
+.theatre {
+  min-width: 0;
+}
+.scene-head {
+  height: 102px;
+  padding: 21px 25px 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(110deg, #12222d, #101b25);
+}
+h2 {
+  font-size: 25px;
+  letter-spacing: -0.6px;
+  margin: 7px 0 0;
+  font-weight: 850;
+}
+.scene-head p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 7px 0 0;
+}
+.scene-tools {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.scene-tools button,
+.scene-tools select {
+  font-size: 10px;
+  padding: 7px;
+}
+#viewport {
+  height: 480px;
+  position: relative;
+  overflow: hidden;
+  background: #0a131e;
+}
+#canvas,
+#labels {
+  position: absolute;
+  inset: 0;
+}
+#labels {
+  pointer-events: none;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.cast-label {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font: 9px monospace;
+  letter-spacing: 0.5px;
+  color: #f0f3ef;
+  background: #07131cd9;
+  padding: 4px 7px;
+  border-left: 2px solid var(--seat);
+  white-space: nowrap;
+  border-radius: 2px;
+}
+.cast-label.speaking {
+  background: var(--seat);
+  color: #07131c;
+  font-weight: 700;
+}
+.corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #86a7b255;
+  pointer-events: none;
+}
+.tl {
+  left: 18px;
+  top: 18px;
+  border-left: 1px solid;
+  border-top: 1px solid;
+}
+.br {
+  right: 18px;
+  bottom: 18px;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+}
+.arena-stamp {
+  position: absolute;
+  bottom: 14px;
+  left: 20px;
+  font: 8px monospace;
+  letter-spacing: 1.4px;
+  color: #71818c;
+}
+#loading {
+  position: absolute;
+  inset: 0;
+  background: #0a131eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font: 12px monospace;
+  color: var(--muted);
+}
+#loading[hidden] {
+  display: none;
+}
+.loader-mark {
+  font-size: 45px;
+  color: var(--gold);
+  letter-spacing: -7px;
+  padding-right: 7px;
+}
+.caption-box {
+  padding: 14px 25px 16px;
+  min-height: 103px;
+  border-top: 1px solid var(--line);
+  background: #111e28;
+}
+.caption-meta {
+  display: flex;
+  justify-content: space-between;
+  font: 9px monospace;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+}
+#event-counter {
+  color: var(--muted);
+}
+#caption {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 9px 0 0;
+  min-height: 24px;
+}
+.transport {
+  padding: 13px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+.transport button {
+  min-height: 35px;
+}
+.transport .play {
+  background: var(--gold);
+  color: #101924;
+  width: 46px;
+  border-color: var(--gold);
+}
+input[type="range"] {
+  min-width: 20px;
+  flex: 1;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+#chapters {
+  display: flex;
+  border-top: 1px solid var(--line);
+  padding: 0 16px;
+  overflow-x: auto;
+  gap: 3px;
+}
+#chapters button {
+  flex: 1;
+  padding: 13px 4px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font: 9px monospace;
+  white-space: nowrap;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+#chapters button.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.side {
+  border-left: 1px solid var(--line);
+  padding: 23px 18px;
+  background: #111c26;
+  display: flex;
+  flex-direction: column;
+}
+.cast-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+.cast-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+#alive {
+  font: 10px monospace;
+  color: var(--cyan);
+}
+#roster {
+  margin-top: 20px;
+}
+.contestant {
+  display: grid;
+  grid-template-columns: 25px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.seat-dot {
+  font: 11px monospace;
+  border-left: 3px solid var(--seat);
+  padding-left: 6px;
+  color: var(--seat);
+}
+.contestant strong {
+  display: block;
+  font-size: 13px;
+}
+.model-name {
+  font: 9px monospace;
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+  max-width: 147px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.power {
+  font: 9px monospace;
+  color: var(--gold);
+  display: block;
+  margin-top: 5px;
+}
+.contestant.dead {
+  opacity: 0.38;
+}
+.contestant.dead strong {
+  text-decoration: line-through;
+}
+.fate {
+  font: 9px monospace;
+  color: var(--muted);
+}
+.stakes {
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+  padding-top: 18px;
+}
+.stakes .eyebrow {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.stakes p {
+  font-size: 27px;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  margin: 12px 0 18px;
+}
+.stakes > div {
+  display: flex;
+  justify-content: space-between;
+  font: 9px monospace;
+  color: var(--muted);
+}
+.stakes b {
+  display: block;
+  color: var(--gold);
+  font-weight: 400;
+  margin-top: 4px;
+  font-size: 8px;
+}
+#director {
+  margin-top: 22px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  font-size: 11px;
+}
+.director-note {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 10px 2px 0;
+}
+.cast-status {
+  font: 8px monospace;
+  color: #778895;
+  margin: 12px 2px 0;
+}
+.below {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 242px;
+  gap: 24px;
+  margin-top: 22px;
+}
+details {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+}
+summary {
+  padding: 14px 17px;
+  font-size: 12px;
+  cursor: pointer;
+}
+summary span {
+  font: 10px monospace;
+  color: var(--muted);
+  float: right;
+}
+#transcript {
+  margin: 0;
+  max-height: 400px;
+  overflow: auto;
+  padding: 4px 20px 20px 45px;
+  color: var(--muted);
+}
+#transcript li {
+  padding: 5px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+#transcript button {
+  background: none;
+  border: 0;
+  text-align: left;
+  padding: 3px;
+  color: inherit;
+  line-height: 1.5;
+}
+#transcript .current {
+  color: var(--gold);
+}
+.footnote {
+  font: 10px/1.8 monospace;
+  color: var(--muted);
+  margin: 0;
+}
+.footnote span {
+  font-size: 8px;
+  color: #657785;
+}
+#notice {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #12202b;
+  padding: 12px 20px;
+  font: 12px monospace;
+  border-radius: 4px;
+  display: none;
+  z-index: 4;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+[hidden] {
+  display: none !important;
+}
+@media (min-width: 1550px) {
+  #viewport {
+    height: 570px;
+  }
+}
+@media (max-width: 1100px) {
+  .signal,
+  .edition {
+    display: none;
+  }
+  .broadcast {
+    grid-template-columns: minmax(0, 1fr) 205px;
+  }
+  .side {
+    padding: 20px 13px;
+  }
+  .scene-tools {
+    flex-direction: column;
+  }
+  .scene-head {
+    padding: 17px 18px;
+  }
+  .scene-head p {
+    max-width: 360px;
+  }
+  .model-name {
+    max-width: 120px;
+  }
+  h2 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .mast {
+    height: 62px;
+    padding: 0 16px;
+  }
+  .brand {
+    font-size: 14px;
+    gap: 9px;
+  }
+  .brand-mark {
+    font-size: 20px;
+    padding: 6px 10px 6px 6px;
+  }
+  .top-actions {
+    gap: 10px;
+  }
+  .top-actions a {
+    display: none;
+  }
+  .top-actions button {
+    font-size: 10px;
+    padding: 8px;
+  }
+  main {
+    padding: 21px 12px;
+  }
+  .episode-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 17px;
+    margin-bottom: 17px;
+  }
+  h1 {
+    font-size: 27px;
+  }
+  .tape-control {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 8px;
+  }
+  .tape-control select {
+    width: 190px;
+    font-size: 10px;
+  }
+  .broadcast {
+    display: flex;
+    flex-direction: column;
+  }
+  .scene-head {
+    height: 115px;
+    padding: 16px 15px;
+  }
+  .scene-head p {
+    font-size: 10px;
+    line-height: 1.5;
+    max-width: 215px;
+  }
+  h2 {
+    font-size: 21px;
+  }
+  .scene-head .eyebrow {
+    font-size: 8px;
+  }
+  .scene-tools {
+    gap: 5px;
+    flex-shrink: 0;
+  }
+  .scene-tools button,
+  .scene-tools select {
+    font-size: 8px;
+    width: 98px;
+  }
+  #viewport {
+    height: 390px;
+  }
+  .caption-box {
+    padding: 14px 15px;
+    min-height: 115px;
+  }
+  #caption {
+    font-size: 14px;
+  }
+  .transport {
+    padding: 12px 10px;
+    gap: 6px;
+  }
+  .transport button,
+  .transport select {
+    padding: 7px;
+    font-size: 10px;
+  }
+  #sound {
+    width: 58px;
+  }
+  .cast-label {
+    font-size: 8px;
+    padding: 3px 5px;
+  }
+  #chapters {
+    padding: 0 5px;
+  }
+  #chapters button {
+    font-size: 8px;
+  }
+  .side {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 18px;
+  }
+  .cast-heading {
+    margin-bottom: 15px;
+  }
+  #roster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+    margin-top: 0;
+  }
+  .contestant {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .model-name {
+    max-width: 118px;
+    font-size: 8px;
+  }
+  .stakes {
+    display: none;
+  }
+  #director {
+    margin-top: 0;
+  }
+  .below {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  summary span {
+    font-size: 8px;
+  }
+  .footnote {
+    text-align: center;
+  }
+  .arena-stamp {
+    font-size: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}

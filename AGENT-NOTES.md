@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · codex (3D show checkpoint)
+- **Did:** built web/show with all five obstacles, lobby, chalk epilogue, podium, local rigged Synty cast, deterministic tape projection, transport, captions, director mode, synthesized audio and responsive quality presets; fixed five foundation review findings and documented two rejected assumptions.
+- **Why:** Paul's selected City Characters now perform the existing recorded gauntlet in a separate 3D broadcast viewer, preserving engine and legacy viewer behavior.
+- **Next:** final integrated review, visual capture and delivery. Public publication of the purchased cast remains pending licence clarification.
+- **Watch out:** cast GLBs and their screenshots are deliberately ignored; open the local show with ?cast=city. The concurrent legacy-viewer change moved its demo to web/demo.json; the actual repository npm run check now passes. No production push made for the 3D show.
+
 ## 2026-10-08 · claude-code (the 90-second cut)
 - **Did:** scored all 112 tapes for drama, had two reviewers read the top ten, and picked `20261009-0025` (heavyweight models, rules v4) as the demo. Added a curated "Watch the 90-second cut" mode to the 2D viewer: `web/demo.json` lists 18 event ranges and a one-line chapter caption for each (about 105 s at 1x, Director's cut on). The landing page now opens that tape. 8 new checks in `test/web/viewer.check.mjs`.
 - **Why:** Paul wants the most dramatic, cruel, surprising game as the public demo. In 0025 the seer is flattered into leading the bridge, the whole room refuses to throw Bex the rope, the two who refused fall through the trapdoors, and the player with no power shoves her ally off the ledge to win.

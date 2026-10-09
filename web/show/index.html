@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#09121a" />
+    <title>LAST THREE / The Broadcast</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22><rect width=%2280%22 height=%2280%22 fill=%22%230d1720%22/><text x=%2240%22 y=%2258%22 text-anchor=%22middle%22 font-size=%2260%22 fill=%22%23f1c87b%22>3</text></svg>"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="mast">
+      <a class="brand" href="../"
+        ><span class="brand-mark">III</span> LAST THREE<span class="edition"
+          >THE BROADCAST</span
+        ></a
+      >
+      <div class="top-actions">
+        <span class="signal">RECORDED REAL DECISIONS</span
+        ><a id="flat-link" href="../">2D viewer ↗</a
+        ><button id="share" title="Copy link to this moment">
+          Share moment ↗
+        </button>
+      </div>
+    </header>
+    <main>
+      <div class="episode-row">
+        <div>
+          <span class="eyebrow">THE EXPERIMENT / SEASON 01</span>
+          <h1>Eight minds. <em>Three prizes.</em></h1>
+        </div>
+        <label class="tape-control"
+          >CHOOSE A RECORDING<select id="tape" aria-label="Choose a recording">
+            <option>Loading recordings...</option>
+          </select></label
+        >
+      </div>
+      <div class="broadcast">
+        <section class="theatre" aria-label="Replay arena">
+          <div class="scene-head">
+            <div>
+              <span id="stage-number" class="eyebrow">THE GAUNTLET</span>
+              <h2 id="stage-title">THE WAITING ROOM</h2>
+              <p id="rule">Eight minds. Five obstacles. Only three prizes.</p>
+            </div>
+            <div class="scene-tools">
+              <button id="camera" aria-pressed="false">Camera: cinema</button
+              ><label class="quality-label"
+                ><span class="sr-only">Graphics quality</span
+                ><select id="quality" aria-label="Graphics quality">
+                  <option value="auto">Auto quality</option>
+                  <option value="high">High</option>
+                  <option value="balanced">Balanced</option>
+                  <option value="lite">Lite</option>
+                </select></label
+              >
+            </div>
+          </div>
+          <div id="viewport">
+            <div id="canvas"></div>
+            <div id="labels" aria-hidden="true"></div>
+            <div class="corner tl"></div>
+            <div class="corner br"></div>
+            <span class="arena-stamp">LAST THREE / ARENA FEED</span>
+            <div id="loading" role="status">
+              <span class="loader-mark">III</span>
+              <p>Preparing the broadcast</p>
+            </div>
+          </div>
+          <div class="caption-box">
+            <div class="caption-meta">
+              <span id="event-kind">ON AIR</span
+              ><span id="event-counter">000 / 000</span>
+            </div>
+            <p id="caption" aria-live="polite">Loading the recording.</p>
+          </div>
+          <div class="transport">
+            <button
+              id="back"
+              aria-label="Previous event"
+              title="Previous event (Left arrow)"
+            >
+              ❮</button
+            ><button
+              id="play"
+              class="play"
+              aria-label="Play"
+              title="Play or pause (Space)"
+            >
+              ▶</button
+            ><button
+              id="next"
+              aria-label="Next event"
+              title="Next event (Right arrow)"
+            >
+              ❯</button
+            ><input
+              id="scrub"
+              type="range"
+              min="0"
+              max="1"
+              value="0"
+              aria-label="Event timeline"
+            /><select id="speed" aria-label="Playback speed">
+              <option value="1">1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option></select
+            ><button id="sound" aria-pressed="false">Sound off</button>
+          </div>
+          <nav id="chapters" aria-label="Replay chapters"></nav>
+        </section>
+        <aside class="side">
+          <div class="cast-heading">
+            <span class="eyebrow">THE CONTESTANTS</span
+            ><span id="alive">8 / 8</span>
+          </div>
+          <div id="roster"></div>
+          <div class="stakes">
+            <span class="eyebrow">THE RULE THAT MATTERS</span>
+            <p>Prizes cannot<br />be shared.</p>
+            <div>
+              <span>01 <b>GOLD</b></span
+              ><span>02 <b>SILVER</b></span
+              ><span>03 <b>BRONZE</b></span>
+            </div>
+          </div>
+          <button id="director" aria-pressed="false">
+            Director's cut <span>OFF</span>
+          </button>
+          <p class="director-note">
+            Reveal private thoughts, whispers and secret powers.
+          </p>
+          <p id="cast-status" class="cast-status"></p>
+        </aside>
+      </div>
+      <div class="below">
+        <details id="transcript-panel">
+          <summary>
+            Read the transcript <span>Every choice, in sequence</span>
+          </summary>
+          <ol id="transcript"></ol>
+        </details>
+        <p class="footnote">
+          A replay of real AI decisions. Cartoon consequences.<br /><span
+            >Space to play · ← → to step · D for director's cut</span
+          >
+        </p>
+      </div>
+      <div id="notice" role="status"></div>
+    </main>
+    <script type="module" src="dist/show.js"></script>
+  </body>
+</html>
