@@ -3,8 +3,8 @@
 ## 2026-10-09 · codex (audience direction)
 - **Did:** ranked 20 opportunities and implemented the nine selected in docs/show/AUDIENCE-OPPORTUNITIES.md: forged sender reveal, public/private motive receipts, restored story continuity, betrayal callback, Cole contradiction, pit confrontation framing, focal names, staged shove contact/recoil and delayed consequences with witness attention.
 - **Why:** the demo needs viewers to understand who is using whom and feel the consequences without a roster HUD or invented dialogue.
-- **Next:** final export and follow-up review are running. Eleven unselected opportunities remain ranked in the plan; voice and sound are a later pass.
-- **Watch out:** 407 tests, 113 tapes, 55 film beats and film/studio/direction browser checks pass. Two first-review safeguards fixed, three assumptions discarded with invariants; follow-up review pending. Private source excerpts and real forged sender require Director mode. The legacy 2D cut and authoritative tapes are unchanged. No public upload.
+- **Next:** local delivery complete: 5:19 full 1080p film and 39-second three-moment preview in docs/show/recordings; details in AUDIENCE-DELIVERY.md. Eleven unselected opportunities remain ranked; voice and sound are a later pass.
+- **Watch out:** 408 tests, 113 tapes, 55 film beats and film/studio/direction browser checks pass. Four low review findings fixed, four assumptions discarded with invariants; final corrective review clean. Private source excerpts and real forged sender require Director mode. The legacy 2D cut and authoritative tapes are unchanged. No public upload.
 
 ## 2026-10-09 · codex (crusher escape correction)
 - **Did:** corrected Hana's successful crusher escape and survivor positions; built a real doorway and landing, delayed the slab until the escape clears, added side film coverage and restored shove reactions ahead of persistent hold poses.

@@ -63,3 +63,155 @@ none
 1. Accepted, low: names now yield the right column whenever evidence is visible, including action callbacks. Added browser bounding-box assertions at all three widths.
 2. Accepted, low: only numeric placements 2 and 3 receive podium wording; every other value uses IS OUT. Regression covers early places.
 3. Discarded: valid whisper events require `from` (src/tape.js EVENT_SHAPES); name is the speaker field for other event types. The shared visibleActor fallback is not a whisper schema. This contract is now explicit in REPLAY-INVARIANTS.md.
+
+## Round 3
+
+Review: 521fff83-f567-4ca7-9b7f-db838a4d7d3b
+
+```text
+VERDICT: CLEAN
+
+Reviewed both hunks in the HEAD checkpoint (no staged/unstaged delta).
+
+**direction.js:112** — `consequence` now emits podium titles only for `e.place === 2 || e.place === 3`; any other truthy/undefined `place` falls through to `IS OUT`. This closes the prior bug where any non-2 truthy place rendered "TAKES THIRD". Strict equality is consistent with the stated numeric-place invariant; no tape/reducer mutation involved.
+
+**film.js:277** — `el.hidden = n.x > 0.5 && ((!!this.d && n.y < 0.55) || !!showEvidence);`
+- With no dialogue and no evidence, the expression reduces to `false` → original visibility preserved.
+- With dialogue and no evidence, it reduces to the prior `n.x > 0.5 && n.y < 0.55` → bubble clearance unchanged.
+- With evidence visible (dialogue card at top 57% or action card at top 15%), the whole right column is hidden, matching the stated intent that focal names yield to evidence. Left-column names are never affected.
+- The earlier `el.hidden = !n; if (!n) return;` guard still runs first, so unused spans stay hidden and the override only applies to populated entries.
+
+Non-blocking observations (not findings): `showEvidence` is referenced but its definition is outside the diff; the round-3 context asserts it is the existing evidence-visibility flag computed before the name loop, and the rendered privacy/bounds tests are stated green. No timing, seek-determinism, privacy-gate, or data-contract surface is touched by this delta.
+
+--- anomalies ---
+none
+```
+
+Adjudication: clean on the final corrective delta; no findings discarded. Across this series, four low findings were accepted and fixed, four assumptions rejected with written invariants, no pending findings.
+
+## Reviewer reliability snapshot
+
+Seven days (all projects, Claude Fable):
+```json
+{
+  "reviewer": "claude-fable-5",
+  "window_days": 7,
+  "rows": 403,
+  "dispatches": 381,
+  "closed_reviews": 295,
+  "found_reviews": 175,
+  "clean_reviews": 120,
+  "verbatim_fix_rows_excluded": 0,
+  "stopped_reviews_excluded": 83,
+  "preflight_rejected": 22,
+  "pending": 3,
+  "stale_pending": 3,
+  "real_bugs": 371,
+  "catch_rate": 0.5932,
+  "bugs_per_closed_review": 1.2576,
+  "discarded_rows": 295,
+  "discarded_findings": 103,
+  "precision": 0.7827,
+  "precision_status": "ready",
+  "operations": {
+    "finished_dispatches": 378,
+    "finished_attempts": 400,
+    "end_to_end_verdict_rate": 0.7375,
+    "verdict_rate": 0.7804,
+    "actionable_finding_dispatch_rate": 0.463,
+    "stopped_rate": 0.2196,
+    "timeout_reviews": 74,
+    "timeout_rate": 0.1958,
+    "loop_reviews": 0,
+    "failure_counts": {
+      "courier_error": 3,
+      "nonzero_exit": 6,
+      "timeout": 74
+    },
+    "preflight_failure_counts": {
+      "brief_validation": 8,
+      "packet_too_large": 14
+    },
+    "timed_rows": 377,
+    "duration_ms_median": 93232,
+    "duration_ms_p95": 180333
+  },
+  "series": {
+    "coverage_rows": 381,
+    "coverage_rate": 1.0,
+    "series_count": 246,
+    "retry_dispatches": 135,
+    "series_with_retry": 102,
+    "double_timeout_series": 0
+  },
+  "execution_modes": {
+    "pipelined": 49,
+    "serial": 332
+  }
+}
+```
+
+Lifetime (all projects, Claude Fable):
+```json
+{
+  "reviewer": "claude-fable-5",
+  "window_days": null,
+  "rows": 1178,
+  "dispatches": 1013,
+  "closed_reviews": 769,
+  "found_reviews": 468,
+  "clean_reviews": 301,
+  "verbatim_fix_rows_excluded": 0,
+  "stopped_reviews_excluded": 233,
+  "preflight_rejected": 165,
+  "pending": 11,
+  "stale_pending": 11,
+  "real_bugs": 1020,
+  "catch_rate": 0.6086,
+  "bugs_per_closed_review": 1.3264,
+  "discarded_rows": 769,
+  "discarded_findings": 326,
+  "precision": 0.7578,
+  "precision_status": "ready",
+  "operations": {
+    "finished_dispatches": 1002,
+    "finished_attempts": 1167,
+    "end_to_end_verdict_rate": 0.659,
+    "verdict_rate": 0.7675,
+    "actionable_finding_dispatch_rate": 0.4671,
+    "stopped_rate": 0.2325,
+    "timeout_reviews": 150,
+    "timeout_rate": 0.1497,
+    "loop_reviews": 0,
+    "failure_counts": {
+      "authentication": 1,
+      "courier_error": 8,
+      "incomplete_packet": 1,
+      "interrupted": 1,
+      "nonzero_exit": 55,
+      "other": 5,
+      "packet_too_large": 12,
+      "timeout": 150
+    },
+    "preflight_failure_counts": {
+      "brief_validation": 121,
+      "packet_too_large": 44
+    },
+    "timed_rows": 982,
+    "duration_ms_median": 86836,
+    "duration_ms_p95": 180345
+  },
+  "series": {
+    "coverage_rows": 1013,
+    "coverage_rate": 1.0,
+    "series_count": 639,
+    "retry_dispatches": 374,
+    "series_with_retry": 271,
+    "double_timeout_series": 0
+  },
+  "execution_modes": {
+    "pipelined": 146,
+    "serial": 867
+  }
+}
+```
