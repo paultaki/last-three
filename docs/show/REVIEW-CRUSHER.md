@@ -61,3 +61,136 @@ Accepted both low findings. Applied the exact prescriptions: use raised as the s
 ## Export proof
 
 Local ignored outputs: docs/show/recordings/video-first-story.mp4 (1920x1080, 25 fps, 226.32 seconds) and crusher-corrected.mp4 (8 seconds, full-video 97-105 seconds). Browser capture reported no errors. Exported frames verify the escape, closed slab, stage end and final podium.
+
+## Reviewer lane reliability
+
+These are lane-wide metrics, not project findings.
+
+### Seven days
+
+```json
+{
+  "reviewer": "claude-fable-5",
+  "window_days": 7,
+  "rows": 403,
+  "dispatches": 381,
+  "closed_reviews": 294,
+  "found_reviews": 174,
+  "clean_reviews": 120,
+  "verbatim_fix_rows_excluded": 0,
+  "stopped_reviews_excluded": 83,
+  "preflight_rejected": 22,
+  "pending": 4,
+  "stale_pending": 3,
+  "real_bugs": 365,
+  "catch_rate": 0.5918,
+  "bugs_per_closed_review": 1.2415,
+  "discarded_rows": 294,
+  "discarded_findings": 97,
+  "precision": 0.79,
+  "precision_status": "ready",
+  "operations": {
+    "finished_dispatches": 377,
+    "finished_attempts": 399,
+    "end_to_end_verdict_rate": 0.7368,
+    "verdict_rate": 0.7798,
+    "actionable_finding_dispatch_rate": 0.4615,
+    "stopped_rate": 0.2202,
+    "timeout_reviews": 74,
+    "timeout_rate": 0.1963,
+    "loop_reviews": 0,
+    "failure_counts": {
+      "courier_error": 3,
+      "nonzero_exit": 6,
+      "timeout": 74
+    },
+    "preflight_failure_counts": {
+      "brief_validation": 8,
+      "packet_too_large": 14
+    },
+    "timed_rows": 377,
+    "duration_ms_median": 92469,
+    "duration_ms_p95": 180333
+  },
+  "series": {
+    "coverage_rows": 381,
+    "coverage_rate": 1.0,
+    "series_count": 248,
+    "retry_dispatches": 133,
+    "series_with_retry": 102,
+    "double_timeout_series": 0
+  },
+  "execution_modes": {
+    "pipelined": 47,
+    "serial": 334
+  }
+}
+
+```
+
+### Lifetime
+
+```json
+{
+  "reviewer": "claude-fable-5",
+  "window_days": null,
+  "rows": 1173,
+  "dispatches": 1008,
+  "closed_reviews": 763,
+  "found_reviews": 464,
+  "clean_reviews": 299,
+  "verbatim_fix_rows_excluded": 0,
+  "stopped_reviews_excluded": 233,
+  "preflight_rejected": 165,
+  "pending": 12,
+  "stale_pending": 11,
+  "real_bugs": 1010,
+  "catch_rate": 0.6081,
+  "bugs_per_closed_review": 1.3237,
+  "discarded_rows": 763,
+  "discarded_findings": 319,
+  "precision": 0.76,
+  "precision_status": "ready",
+  "operations": {
+    "finished_dispatches": 996,
+    "finished_attempts": 1161,
+    "end_to_end_verdict_rate": 0.6572,
+    "verdict_rate": 0.7661,
+    "actionable_finding_dispatch_rate": 0.4659,
+    "stopped_rate": 0.2339,
+    "timeout_reviews": 150,
+    "timeout_rate": 0.1506,
+    "loop_reviews": 0,
+    "failure_counts": {
+      "authentication": 1,
+      "courier_error": 8,
+      "incomplete_packet": 1,
+      "interrupted": 1,
+      "nonzero_exit": 55,
+      "other": 5,
+      "packet_too_large": 12,
+      "timeout": 150
+    },
+    "preflight_failure_counts": {
+      "brief_validation": 121,
+      "packet_too_large": 44
+    },
+    "timed_rows": 977,
+    "duration_ms_median": 86836,
+    "duration_ms_p95": 180345
+  },
+  "series": {
+    "coverage_rows": 1008,
+    "coverage_rate": 1.0,
+    "series_count": 638,
+    "retry_dispatches": 370,
+    "series_with_retry": 269,
+    "double_timeout_series": 0
+  },
+  "execution_modes": {
+    "pipelined": 144,
+    "serial": 864
+  }
+}
+
+```
