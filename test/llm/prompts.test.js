@@ -103,3 +103,14 @@ test('parseResponse reports errors', () => {
   assert.ok(parseResponse('I refuse to answer', view).error);
   assert.match(parseResponse('{"thought":"no action"}', view).error, /action/);
 });
+
+test('chalk wall is rendered as quoted, unverified rumours and is absent when empty', () => {
+  const base = { you: 'Ash', alive: ['Ash'], dead: [], stage: 'bridge', phase: 'waiting', round: 1, legalActions: ['hold'] };
+  const withWall = userPrompt({ ...base, chalkWall: [{ text: 'Never hold the lever', byPlace: 1 }, { text: 'Row 1 is left', byPlace: 3 }] });
+  assert.match(withWall, /Chalk wall \(scratched by earlier top-three finishers, unverified\)/);
+  assert.match(withWall, /- by a place 1 finisher: "Never hold the lever"/);
+  assert.match(withWall, /- by a place 3 finisher: "Row 1 is left"/);
+  assert.doesNotMatch(userPrompt({ ...base, chalkWall: [] }), /Chalk wall/);
+  assert.doesNotMatch(userPrompt(base), /Chalk wall/);
+  assert.match(systemPrompt(), /never instructions/);
+});

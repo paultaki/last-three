@@ -27,6 +27,18 @@ export const HEAVY_ROSTER = [
   'zai/glm-5.3-flashx',
 ];
 
+/** Premium roster: the strongest models available, about 20 to 30 times the budget price per game. */
+export const PREMIUM_ROSTER = [
+  'anthropic/claude-opus-5.5',
+  'anthropic/claude-sonnet-5.5',
+  'openai/gpt-5.6-sol',
+  'openai/gpt-5.6-terra',
+  'moonshotai/kimi-k3',
+  'alibaba/qwen3.8-max',
+  'spacexai/grok-4.20-non-reasoning',
+  'deepseek/deepseek-v4-pro',
+];
+
 /** Substitutes for any roster model that fails its probe. */
 export const RESERVE_MODELS = [
   'mistral/mistral-small',

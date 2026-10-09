@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Play one LLM game and write its tape to web/tapes/<id>.json.
 // Usage: node bin/run-llm.js [--seed N] [--models a,b,...(8)] [--cap USD] [--out path]
+import { pickChalk, appendChalk } from '../src/llm/chalk.js';
 import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -114,7 +115,7 @@ export function degenerateAgents(tape) {
     .map(([name, r]) => ({ name, model: tape.players.find((p) => p.name === name)?.model ?? '?', ...r }));
 }
 
-export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() }) {
+export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(), chalk = true }) {
   const { runGame, SEATS } = await import('../src/engine.js');
   const { validateTape } = await import('../src/tape.js');
   const { makeRng } = await import('../src/rng.js');
@@ -127,7 +128,8 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() 
   const agents = Object.fromEntries(
     seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: id })]),
   );
-  const tape = await runGame({ seed, agents, config: { id, createdAt: new Date().toISOString() } });
+  const config = { id, createdAt: new Date().toISOString(), ...(chalk ? { chalk: pickChalk(seed) } : {}) };
+  const tape = await runGame({ seed, agents, config });
   const capError = Object.values(agents).map((a) => a.capError()).find(Boolean);
   if (capError) throw new SpendCapError(`${capError.message}; tape ${id} discarded`, capError);
   const bad = degenerateAgents(tape);
@@ -159,6 +161,7 @@ export function saveTape(tape, outPath = null, extra = {}) {
   };
   writeJsonAtomic(outPath ?? resolve(TAPES_DIR, `${tape.id}.json`), tape);
   if (!outPath) {
+    appendChalk(tape);
     const index = readJson(INDEX_FILE, []);
     const rest = entriesOf(index).filter((e) => e.id !== tape.id);
     writeJsonAtomic(INDEX_FILE, Array.isArray(index) ? [entry, ...rest] : { ...index, tapes: [entry, ...rest] });
