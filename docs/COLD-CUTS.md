@@ -20,3 +20,26 @@ Narration draft for the opening (recorded with ElevenLabs, voice "Verdict", 41 s
 > Eight AI agents. Five obstacles. Three prizes that cannot be shared. Each one holds a secret power, and each is free to lie about it. The Glass Eye sees the safe panes on the bridge. The Wedge can jam the crusher's lever. The Map knows every rule that lies ahead. The Feather survives one fall. The Swap trades places in the line. The Anchor cannot be moved. The Forger writes in another player's name. And one of them has nothing at all. Everything you are about to see is real. Every word was spoken by a language model. And every thought in the grey bubbles was something it believed nobody would ever read.
 
 Notes for the 3D show: thoughts are in every tape as `thought` events (5,572 under rules v4), whispers carry `from` and `to`, and a `reveal` event follows every action round with the engine's result. Scenes 3, 4, 5 and 6 are the same beat (the rope) told four ways; pick two for a tight cut.
+
+## Trailer intro (16 clips, about 81 s of narration)
+
+Each line is its own ElevenLabs clip (voice "Verdict") so the picture can change exactly when the line does. Pictures are toy-block vignettes in the viewer's style.
+
+| # | Line | Picture |
+|---|---|---|
+| 0 | Eight AI agents. Five obstacles. Three prizes that cannot be shared. | title card |
+| 1 | The glass bridge. Eight rows, two panes each. One holds. One doesn't. And the wall behind you keeps moving. | flyover of the bridge, the wall closing in, the front walker steps row 1, 2, 3 and falls through |
+| 2 | The crusher. The door only stays open while someone holds the lever. The holder dives last. Three in four never make it. | ceiling descends, three walk out the door, the holder dives, the slab slams |
+| 3 | The pit. To climb out, someone has to be the step. The step stays behind. There is one rope, and it costs whoever throws it. | the step crouched at the bottom, two climb over and out, water rises, the rope comes late with "-2 footing" |
+| 4 | The trapdoors. Pick a tile. For every player above three, one door opens. | five tiles in a ring, tile 3 opens, one drops |
+| 5 | The final ledge. Shove, brace, or dodge. The platform shrinks until one is left standing. | platform shrinks, a shove, one goes over the edge |
+| 6 | Each one holds a secret power. And each is free to lie about it. | title card |
+| 7 | The Glass Eye sees which pane holds. | goggles, a scan sweeps the bridge and the safe panes glow |
+| 8 | The Wedge can jam the lever, and walk away. | wedge slides into the lever, holder walks out, door stays open |
+| 9 | The Map knows every rule before anyone else. | a scroll unrolls showing the five obstacles |
+| 10 | The Feather survives one fall. | pane breaks, the figure drops, a feather floats, the figure pops back up with arms raised |
+| 11 | The Swap trades places in the line. | two figures cross in the line |
+| 12 | The Anchor cannot be pushed. | a push bounces off |
+| 13 | The Forger writes in another player's name. | a bubble signed "Bex" gets re-signed "Ash" |
+| 14 | And one of them has nothing at all. | a figure throws its hands up |
+| 15 | Everything you are about to see is real. Every word was spoken by a language model. And every thought in the clouds was something it believed nobody would ever read. | title card |
