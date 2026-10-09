@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · claude-code (the 90-second cut)
+- **Did:** scored all 112 tapes for drama, had two reviewers read the top ten, and picked `20261009-0025` (heavyweight models, rules v4) as the demo. Added a curated "Watch the 90-second cut" mode to the 2D viewer: `web/demo.json` lists 18 event ranges and a one-line chapter caption for each (about 105 s at 1x, Director's cut on). The landing page now opens that tape. 8 new checks in `test/web/viewer.check.mjs`.
+- **Why:** Paul wants the most dramatic, cruel, surprising game as the public demo. In 0025 the seer is flattered into leading the bridge, the whole room refuses to throw Bex the rope, the two who refused fall through the trapdoors, and the player with no power shoves her ally off the ledge to win.
+- **Next:** the bridge is the weak part of every game (about 60% of events are "I hold" loops, repeated lines), so a rules v5 idea is to make stalling cost something. Needs AI Gateway credits to test. The 3D show can read `web/demo.json` for its own cut.
+- **Watch out:** `web/demo.json` lives outside `web/tapes/` on purpose (the tape validator treats every file in `web/tapes/` as a tape). Cole's death in 0025 (event 300) is an agent slip or a bluff: his private note says row 7 safe is R, he says R, then he steps L; the cut captions only state what happened.
+
 ## 2026-10-08 · codex (3D show planning)
 - **Did:** organized 665 Synty City Characters files in the shared Blender library with hash verification, indexed 19 rigs, and documented The Broadcast art direction, asset register and staged build plan.
 - **Why:** Paul selected this cast and requested a premium 3D map with reviews only at critical checkpoints.

@@ -1700,6 +1700,102 @@ for (const width of [390, 1440]) {
   await closePage(page);
 }
 
+// ------------------------------------------------------------------ the curated 90-second cut (web/demo.json)
+const demoPath = path.join(webDir, 'demo.json');
+if (fs.existsSync(demoPath)) {
+  const demo = JSON.parse(fs.readFileSync(demoPath, 'utf8'));
+  const demoTape = JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', `${demo.tape}.json`), 'utf8'));
+  const inSegments = (i) => demo.segments.some((s) => i >= s.from && i <= s.to);
+
+  await check('reel: demo.json is well formed and points inside its tape', async () => {
+    assert(demo.segments.length > 0, 'has segments');
+    let prevTo = -1;
+    for (const s of demo.segments) {
+      assert(Number.isInteger(s.from) && Number.isInteger(s.to) && s.from <= s.to, `segment ${s.from}-${s.to} is ordered`);
+      assert(s.from > prevTo, `segment ${s.from}-${s.to} follows the previous one`);
+      assert(s.to < demoTape.events.length, `segment ${s.from}-${s.to} exists in the tape`);
+      assert(typeof s.title === 'string' && s.title.length > 0 && s.title.length <= 140, `segment ${s.from}-${s.to} has a short title`);
+      prevTo = s.to;
+    }
+    assert(demo.segments[0].from === 0, 'starts at the first event');
+    assert(demo.segments[demo.segments.length - 1].to === demoTape.events.length - 1, 'ends at the last event');
+    assert(demoTape.events[demoTape.events.length - 1].type === 'game_end', 'the tape ends with game_end');
+  });
+
+  for (const width of [390, 1440]) {
+    const page = await openPage(width, { url: '/' });
+    await check(`reel ${width}px: the landing page opens the demo tape and offers the cut`, async () => {
+      assert((await page.locator('#tape-picker').inputValue()) === demo.tape, 'the demo tape is selected without a tape in the address');
+      const btn = page.locator('#btn-reel');
+      assert(await btn.isVisible(), 'the cut button is visible');
+      assert(/90-second cut/.test(await btn.innerText()), 'the button names the cut');
+      assert(await page.locator('#reel-title').isHidden(), 'no chapter caption before it starts');
+      noIssues(page);
+    });
+    await check(`reel ${width}px: playing the cut stays inside its segments, ends on the result, and the captions change`, async () => {
+      await page.selectOption('#speed', '4');
+      await page.locator('#btn-reel').click();
+      assert((await page.locator('#btn-cut').getAttribute('aria-pressed')) === 'true', "Director's cut switches on");
+      assert(await page.locator('#reel-title').isVisible(), 'a chapter caption shows');
+      const seen = new Set();
+      const titles = new Set();
+      const t0 = Date.now();
+      while (Date.now() - t0 < 60000) {
+        const st = await page.evaluate(() => ({ i: window.__viewer.app.idx, playing: window.__viewer.app.playing, title: document.getElementById('reel-title').textContent }));
+        seen.add(st.i);
+        titles.add(st.title);
+        if (!st.playing && st.i === demoTape.events.length - 1) break;
+        await page.waitForTimeout(60);
+      }
+      const end = await page.evaluate(() => window.__viewer.app.idx);
+      assert(end === demoTape.events.length - 1, `the cut reached the last event (got ${end})`);
+      const stray = [...seen].filter((i) => !inSegments(i));
+      assert(stray.length === 0, `played events outside the cut: ${stray.slice(0, 8).join(', ')}`);
+      assert(seen.size < 90, `the cut is short (saw ${seen.size} events)`);
+      assert(titles.size >= 6, `the caption changes through the story (${titles.size} distinct)`);
+      assert(Date.now() - t0 < 45000, 'the cut at 4x runs well under a minute');
+      noIssues(page);
+    });
+    await check(`reel ${width}px: Next and Back stay inside the cut; the toggle returns to the full game; share keeps the cut`, async () => {
+      await page.evaluate(() => window.__viewer.goto(0, { animate: false }));
+      for (let k = 0; k < 40; k++) {
+        await page.locator('#btn-fwd').click();
+        const i = await page.evaluate(() => window.__viewer.app.idx);
+        assert(inSegments(i), `Next landed outside the cut at ${i}`);
+      }
+      for (let k = 0; k < 10; k++) {
+        await page.locator('#btn-back').click();
+        const i = await page.evaluate(() => window.__viewer.app.idx);
+        assert(inSegments(i), `Back landed outside the cut at ${i}`);
+      }
+      assert(new URL(await page.evaluate(() => location.href)).searchParams.get('reel') === '1', 'the address carries reel=1');
+      assert(/full game/.test(await page.locator('#btn-reel').innerText()), 'while the cut plays the button offers the full game');
+      await page.locator('#btn-reel').click();
+      assert(/90-second cut/.test(await page.locator('#btn-reel').innerText()), 'after leaving, the button offers the cut again');
+      assert(await page.locator('#reel-title').isHidden(), 'the chapter caption hides');
+      const before = await page.evaluate(() => window.__viewer.app.idx);
+      await page.locator('#btn-fwd').click();
+      const after = await page.evaluate(() => window.__viewer.app.idx);
+      assert(after > before, 'stepping still moves forward in the full game');
+      assert(new URL(await page.evaluate(() => location.href)).searchParams.get('reel') === null, 'reel leaves the address');
+      noIssues(page);
+    });
+    await closePage(page);
+  }
+
+  await check('reel: a deep link with reel=1 opens the cut paused; other tapes never show the cut button', async () => {
+    const page = await openPage(1440, { url: `/?tape=${demo.tape}&reel=1` });
+    assert(await page.locator('#reel-title').isVisible(), 'caption visible from the link');
+    assert((await page.evaluate(() => window.__viewer.app.playing)) === false, 'not auto-playing from a link');
+    await closePage(page);
+    const other = await openPage(1440, { url: '/?tape=sample&reel=1' });
+    assert(await other.locator('#btn-reel').isHidden(), 'no cut button on another tape');
+    assert(await other.locator('#reel-title').isHidden(), 'no caption on another tape');
+    assert((await other.evaluate(() => window.__viewer.app.reelOn)) === false, 'reel stays off on another tape');
+    await closePage(other);
+  });
+}
+
 // full-page references
 for (const width of [390, 1440]) {
   const page = await openPage(width, { url: `/?tape=sample&i=${IDX.end}` });

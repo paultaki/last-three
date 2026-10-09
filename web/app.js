@@ -31,6 +31,8 @@ const els = {
   chapters: $('chapters'),
   highlights: $('highlights'),
   cut: $('btn-cut'),
+  reelBtn: $('btn-reel'),
+  reelTitle: $('reel-title'),
   share: $('btn-share'),
   shareStatus: $('share-status'),
   results: $('results'),
@@ -48,6 +50,8 @@ const app = {
   playing: false,
   speed: 1,
   cut: false,
+  reel: null, // curated highlight cut of one tape: { tape, name, cut, segments: [{ from, to, title }] }
+  reelOn: false,
   timer: 0,
   chapterList: [],
   chapterButtons: [],
@@ -135,6 +139,7 @@ async function loadTape(id, startAt = 0) {
     showError('');
     app.tape = tape;
     app.tapeId = safe;
+    if (app.reel && safe !== app.reel.tape) app.reelOn = false;
     app.idx = 0;
     els.player.hidden = false;
     els.empty.hidden = true;
@@ -165,6 +170,7 @@ async function loadTape(id, startAt = 0) {
     highlightsUi.setTape(tape);
     highlightsUi.render(app.cut);
     goto(startAt, { animate: false });
+    syncReelUi();
   } catch (err) {
     showError(`Could not load tape "${safe}": ${err.message}`);
     els.now.textContent = 'This tape could not be loaded.';
@@ -217,6 +223,7 @@ function goto(i, { animate = false } = {}) {
   if (resultsTitle) resultsTitle.id = 'results-h';
   const cap = app.cut ? state.captionCut : state.caption;
   els.now.textContent = cap ? cap.text : idx === 0 && !state.started ? 'Press Play to start the show.' : 'Press Play to start the show.';
+  if (app.reelOn && !els.reelTitle.hidden) els.reelTitle.textContent = reelTitleAt(idx);
   els.scrub.value = String(idx);
   els.scrub.setAttribute('aria-valuetext', `Event ${idx + 1} of ${last + 1}`);
   els.scrubLabel.textContent = `Event ${idx + 1} of ${last + 1}`;
@@ -238,6 +245,8 @@ function shareUrl() {
   url.searchParams.set('i', String(app.idx));
   if (app.cut) url.searchParams.set('cut', '1');
   else url.searchParams.delete('cut');
+  if (app.reelOn) url.searchParams.set('reel', '1');
+  else url.searchParams.delete('reel');
   return url;
 }
 
@@ -250,12 +259,48 @@ function syncUrl() {
 }
 
 // ------------------------------------------------------------------ playback
+const inReel = (j) => app.reel.segments.some((s) => j >= s.from && j <= s.to);
+
 function nextWorthy(from, dir) {
   const events = app.tape.events;
   const last = events.length - 1;
+  const ok = (k) => isStepWorthy(events[k], app.cut) && (!app.reelOn || inReel(k));
   let j = from + dir;
-  while (j > 0 && j < last && !isStepWorthy(events[j], app.cut)) j += dir;
+  while (j > 0 && j < last && !ok(j)) j += dir;
   return Math.max(0, Math.min(last, j));
+}
+
+// The chapter caption of the reel segment that contains (or last precedes) event i.
+function reelTitleAt(i) {
+  let hit = null;
+  for (const s of app.reel.segments) if (s.from <= i) hit = s;
+  return hit ? hit.title : '';
+}
+
+function syncReelUi() {
+  const available = !!app.reel && app.tapeId === app.reel.tape;
+  els.reelBtn.hidden = !available;
+  els.reelBtn.textContent = app.reelOn ? 'Watch the full game' : app.reel ? `Watch the ${app.reel.name.replace(/^The /, '')}` : '';
+  els.reelTitle.hidden = !(available && app.reelOn);
+  if (!els.reelTitle.hidden) els.reelTitle.textContent = reelTitleAt(app.idx);
+}
+
+function setReel(on) {
+  app.reelOn = !!on && !!app.reel && app.tapeId === app.reel.tape;
+  if (app.reelOn && app.reel.cut && !app.cut) setCut(true);
+  syncReelUi();
+}
+
+async function toggleReel() {
+  if (app.reelOn) {
+    setReel(false);
+    return;
+  }
+  pause();
+  if (app.tapeId !== app.reel.tape) await loadTape(app.reel.tape, 0);
+  setReel(true);
+  goto(0, { animate: false });
+  play();
 }
 
 // How long an event stays on screen at 1x. Lines are paced by reading time; mechanics are quick.
@@ -384,6 +429,7 @@ els.scrub.addEventListener('input', () => {
   goto(Number(els.scrub.value), { animate: false });
 });
 els.cut.addEventListener('click', () => setCut(!app.cut));
+els.reelBtn.addEventListener('click', toggleReel);
 els.picker.addEventListener('change', () => loadTape(els.picker.value, 0));
 els.share.addEventListener('click', async () => {
   const url = shareUrl().toString();
@@ -437,8 +483,15 @@ async function boot() {
     app.index = [];
   }
   statsPromise.then((s) => statsPanel.setData(s));
+  try {
+    const demo = await getJson('demo.json');
+    const ok = demo && safeId(demo.tape) && Array.isArray(demo.segments) && demo.segments.every((x) => Number.isInteger(x.from) && Number.isInteger(x.to) && typeof x.title === 'string');
+    app.reel = ok ? demo : null;
+  } catch {
+    app.reel = null; // no curated cut published: the viewer behaves as before
+  }
 
-  const wanted = params.get('tape') || (app.index[0] && app.index[0].id) || null;
+  const wanted = params.get('tape') || (app.reel && app.reel.tape) || (app.index[0] && app.index[0].id) || null;
   if (!wanted) {
     els.picker.replaceChildren(new Option('No tapes yet', ''));
     els.picker.disabled = true;
@@ -449,6 +502,10 @@ async function boot() {
   }
   const start = Number.parseInt(params.get('i') || '0', 10);
   await loadTape(wanted, Number.isFinite(start) ? start : 0);
+  if (params.get('reel') === '1') {
+    setReel(true);
+    goto(app.idx, { animate: false });
+  }
   window.__viewer = { app, goto, stateAt: (i) => stateAt(app.tape, i), setCut, arena };
 }
 

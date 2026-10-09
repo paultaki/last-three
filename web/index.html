@@ -37,6 +37,7 @@
       <label for="tape-picker">Tape</label>
       <select id="tape-picker" disabled><option>Loading tapes...</option></select>
       <p id="tape-meta" class="tape-meta"></p>
+      <button type="button" id="btn-reel" class="btn btn-primary reel-btn" hidden>Watch the 90-second cut</button>
     </div>
 
     <p id="load-error" class="load-error" role="alert" hidden></p>
@@ -55,6 +56,7 @@
           <div id="arena" class="arena" role="img" aria-label="Arena"></div>
         </div>
 
+        <p id="reel-title" class="reel-title" hidden></p>
         <p id="now" class="now" role="status" aria-live="polite" aria-atomic="true">Loading the show...</p>
 
         <div class="controls" role="group" aria-label="Playback controls">
