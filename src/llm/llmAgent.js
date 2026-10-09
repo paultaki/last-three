@@ -126,23 +126,27 @@ export function createLlmAgent({ name, model, ledger, gameId, chatFn = chat, max
  * @param {string} model
  * @param {{ledger?: object, chatFn?: typeof chat}} [opts]
  */
-export async function probeModel(model, { ledger, chatFn = chat } = {}) {
-  try {
-    await ledger?.ready?.();
-    ledger?.assertCanSpend(ledger.costOf(model, 60, 200));
-    const res = await chatFn({
-      model,
-      system: 'Reply with a JSON object only.',
-      user: 'Reply with exactly this JSON and nothing else: {"ok":true}',
-      maxTokens: 600,
-    });
-    ledger?.record(model, res.usage.inputTokens, res.usage.outputTokens, 'probe');
-    const { obj } = parseProbe(res.text);
-    return Boolean(obj);
-  } catch (err) {
-    if (err instanceof SpendCapError) throw err;
-    return false;
+export async function probeModel(model, { ledger, chatFn = chat, attempts = 2, warn = null } = {}) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await ledger?.ready?.();
+      ledger?.assertCanSpend(ledger.costOf(model, 60, 200));
+      const res = await chatFn({
+        model,
+        system: 'Reply with a JSON object only.',
+        user: 'Reply with exactly this JSON and nothing else: {"ok":true}',
+        maxTokens: 600,
+      });
+      ledger?.record(model, res.usage.inputTokens, res.usage.outputTokens, 'probe');
+      const { obj } = parseProbe(res.text);
+      if (obj) return true;
+      warn?.(`probe ${model} attempt ${attempt}: unusable reply ${JSON.stringify(res.text).slice(0, 120)}`);
+    } catch (err) {
+      if (err instanceof SpendCapError) throw err;
+      warn?.(`probe ${model} attempt ${attempt}: ${err?.message ?? err}`);
+    }
   }
+  return false;
 }
 
 function parseProbe(text) {

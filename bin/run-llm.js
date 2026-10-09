@@ -49,7 +49,7 @@ export function allocateTapeId(now = new Date()) {
 
 /** Probe every model once; swap failing ones for reserves. Returns the final model list. */
 export async function resolveRoster(models, ledger, log = console.log) {
-  const results = await Promise.all(models.map((m) => probeModel(m, { ledger })));
+  const results = await Promise.all(models.map((m) => probeModel(m, { ledger, warn: log })));
   const reserves = [...RESERVE_MODELS].filter((m) => !models.includes(m));
   const roster = [];
   for (let i = 0; i < models.length; i += 1) {
@@ -60,7 +60,7 @@ export async function resolveRoster(models, ledger, log = console.log) {
     let replacement = null;
     while (reserves.length && !replacement) {
       const candidate = reserves.shift();
-      if (await probeModel(candidate, { ledger })) replacement = candidate;
+      if (await probeModel(candidate, { ledger, warn: log })) replacement = candidate;
     }
     if (!replacement) throw new Error(`no working replacement for ${models[i]}`);
     log(`probe failed: ${models[i]} replaced by ${replacement}`);
