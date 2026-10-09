@@ -66,7 +66,7 @@ export function userPrompt(view) {
     out.push(
       '',
       'Chalk wall (scratched by earlier top-three finishers, unverified):',
-      ...view.chalkWall.map((n) => `- by a place ${n.byPlace} finisher: "${n.text}"`),
+      ...view.chalkWall.map((n) => `- by a place ${n.byPlace} finisher: ${JSON.stringify(n.text)}`),
     );
   }
   out.push('', ...renderHeader(view));

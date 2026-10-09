@@ -48,3 +48,22 @@ test('pickChalk is deterministic, at most 3, one per game, drawn from recent not
   assert.notDeepEqual(pickChalk(8, store), first);
   assert.deepEqual(pickChalk(7, []), []);
 });
+
+test('dirty notes never leave the store: over-length, invisible characters, bad places are cleaned or dropped', async () => {
+  const { writeFileSync } = await import('node:fs');
+  const path = tmp();
+  const dirty = `Beware.\u061C\u202E ${'Z'.repeat(200)}`;
+  writeFileSync(path, JSON.stringify([
+    { id: 'a', gameId: 'g1', text: dirty, byPlace: 2, model: 'm/a' },
+    { id: 'b', gameId: 'g2', text: 'no place', byPlace: 9, model: 'm/b' },
+    { id: 'c', gameId: 'g3', text: 42, byPlace: 1, model: 'm/c' },
+  ]));
+  const store = loadChalk(path);
+  assert.equal(store.length, 1);
+  assert.ok(store[0].text.length <= 140);
+  assert.doesNotMatch(store[0].text, /[\u061C\u202E]/);
+  appendChalk(tape('g4', [{ name: 'Ash', place: 1, text: 'line one\nline two\u061C' }, { name: 'Bex', place: 7, text: 'bad place' }]), path);
+  const after = loadChalk(path);
+  assert.equal(after.length, 2);
+  assert.equal(after[1].text, 'line one line two');
+});

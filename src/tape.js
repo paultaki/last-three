@@ -1,7 +1,7 @@
 // Tape format (spec section 7) and its validator. validateTape throws a clear Error on the first problem.
 
 import { POWER_IDS } from './powers.js';
-import { CHALK_MAX_NOTES, CHALK_NOTE_LIMIT } from './rules.js';
+import { CHALK_MAX_NOTES, CHALK_NOTE_LIMIT, ROPE_COST_FOOTING, isCleanChalkText } from './rules.js';
 
 export const STAGE_NAMES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
 /** Rules v4 epilogue: not an obstacle, so it is not in STAGE_NAMES (nobody dies or places in it). */
@@ -18,6 +18,9 @@ const DEATH_BY_STAGE = {
 };
 const REVEAL_WHATS = ['weak_pane', 'tiles', 'ceiling', 'footing', 'line', 'trapdoors', 'pit', 'rope'];
 const PIT_MIN_ALIVE = 3;
+/** Rules v3 (the pit's first version) charged the rope's thrower 1 footing; those tapes keep that. */
+const ROPE_COST_V3 = 1;
+const STANDARD_KEYS = ['i', 'type', 'stage', 'round'];
 const MAX_PLACES = 3;
 const PLAYER_COUNT = 8;
 const LEDGE_PLACE_CAP = MAX_PLACES;
@@ -66,6 +69,7 @@ export function validateTape(tape) {
   validateLedgeOutcome(tape, names, deaths);
   validateChalk(tape, names);
   validateNamedLists(tape.events, names);
+  validateRope(tape);
   validateUsage(tape.usage);
 }
 
@@ -134,9 +138,10 @@ function validateStageRound(event, idx, shape) {
   if (shape.round && event.round === null) fail(`Event ${idx} ${event.type} needs a round`);
 }
 
-const ACTOR_FIELDS = { thought: 'name', say: 'name', action: 'name', ability_use: 'name', whisper: 'from' };
+const ACTOR_FIELDS = { thought: 'name', say: 'name', action: 'name', ability_use: 'name', whisper: 'from', chalk_write: 'name' };
 
 function checkLifecycle(event, idx, dead, deaths) {
+  if (event.type === 'chalk_write' && event.stage !== EPILOGUE_STAGE) fail(`Event ${idx} chalk_write must be in the ${EPILOGUE_STAGE} epilogue, got stage ${event.stage}`);
   const actor = event[ACTOR_FIELDS[event.type]];
   // The epilogue is the one place the dead may act (placed fallers write a note); validateChalk polices it.
   if (actor && dead.has(actor) && event.stage !== EPILOGUE_STAGE) fail(`Event ${idx} ${event.type}: ${actor} acts after dying`);
@@ -252,6 +257,7 @@ function validateChalk(tape, names) {
   if (reads.length === 1) {
     if (events[1] !== reads[0]) fail('chalk_read must come right after game_start');
     if (reads[0].stage !== null || reads[0].round !== null) fail('chalk_read must have null stage and round');
+    exactKeys(reads[0], [...STANDARD_KEYS, 'notes'], 'chalk_read');
     validateShownNotes(reads[0].notes, 'chalk_read notes');
     if (reads[0].notes.length === 0) fail('chalk_read notes must not be empty');
   }
@@ -263,10 +269,14 @@ function validateChalk(tape, names) {
   const placedAt = new Map(result.places.filter((p) => p.place !== null).map((p) => [p.name, p.place]));
   const epilogue = events.filter((e) => e.stage === EPILOGUE_STAGE);
   const writes = epilogue.filter((e) => e.type === 'chalk_write');
-  if (epilogue.length) validateEpilogue(events, epilogue, writes, placedAt);
+  if (epilogue.length) validateEpilogue(events, epilogue, writes, placedAt, [...names]);
   if (tape.chalkWritten !== undefined) {
     if (!Array.isArray(tape.chalkWritten)) fail('chalkWritten must be an array');
     const plain = ({ name, place, text }) => ({ name, place, text });
+    for (const entry of tape.chalkWritten) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) fail('chalkWritten entries must be objects');
+      exactKeys(entry, ['name', 'place', 'text'], 'chalkWritten entry');
+    }
     if (JSON.stringify(tape.chalkWritten.map(plain)) !== JSON.stringify(writes.map(plain))) fail('chalkWritten does not match the chalk_write events');
   }
 }
@@ -274,13 +284,15 @@ function validateChalk(tape, names) {
 function validateShownNotes(notes, where) {
   if (!Array.isArray(notes) || notes.length > CHALK_MAX_NOTES) fail(`${where} must be an array of at most ${CHALK_MAX_NOTES} notes`);
   for (const note of notes) {
-    if (!note || typeof note !== 'object') fail(`${where} has a note that is not an object`);
+    if (!note || typeof note !== 'object' || Array.isArray(note)) fail(`${where} has a note that is not an object`);
+    exactKeys(note, ['text', 'byPlace'], `${where} note`);
     if (typeof note.text !== 'string' || !note.text.trim() || note.text.length > CHALK_NOTE_LIMIT) fail(`${where} text must be 1-${CHALK_NOTE_LIMIT} characters`);
+    if (!isCleanChalkText(note.text)) fail(`${where} text is not clean: sanitising would change it`);
     if (!Number.isInteger(note.byPlace) || note.byPlace < 1 || note.byPlace > MAX_PLACES) fail(`${where} byPlace must be 1-${MAX_PLACES}`);
   }
 }
 
-function validateEpilogue(events, epilogue, writes, placedAt) {
+function validateEpilogue(events, epilogue, writes, placedAt, seatOrder) {
   const starts = epilogue.filter((e) => e.type === 'stage_start');
   const ends = epilogue.filter((e) => e.type === 'stage_end');
   if (starts.length !== 1 || ends.length !== 1) fail('The chalk epilogue needs exactly one stage_start and one stage_end');
@@ -292,11 +304,12 @@ function validateEpilogue(events, epilogue, writes, placedAt) {
     if (!CHALK_EVENT_TYPES.includes(e.type)) fail(`Event ${e.i} ${e.type} is not allowed in the chalk epilogue`);
     if (e.round !== null && e.round !== 1) fail(`Event ${e.i} chalk round must be 1`);
   }
-  const placedNames = [...placedAt.keys()];
+  const placedNames = seatOrder.filter((n) => placedAt.has(n));
   for (const [what, list] of [['stage_start alive', starts[0].alive], ['stage_end survivors', ends[0].survivors]]) {
     if (new Set(list).size !== list.length || list.length !== placedNames.length || placedNames.some((n) => !list.includes(n))) {
       fail(`Chalk ${what} must be exactly the placed agents`);
     }
+    if (list.some((n, k) => n !== placedNames[k])) fail(`Chalk ${what} must list the placed agents in seat order`);
   }
   const actions = new Map();
   for (const e of epilogue) {
@@ -310,9 +323,14 @@ function validateEpilogue(events, epilogue, writes, placedAt) {
   }
   if (actions.size !== placedNames.length) fail('Every placed agent must have exactly one chalk action');
   const written = new Set();
+  let lastSeat = -1;
   for (const w of writes) {
+    exactKeys(w, [...STANDARD_KEYS, 'name', 'place', 'text'], `Event ${w.i} chalk_write`);
+    if (seatOrder.indexOf(w.name) < lastSeat) fail(`Event ${w.i} chalk_write by ${w.name} is out of seat order`);
+    lastSeat = seatOrder.indexOf(w.name);
     if (placedAt.get(w.name) !== w.place) fail(`Event ${w.i} chalk_write by ${w.name} has place ${w.place}, expected ${placedAt.get(w.name) ?? 'none (not placed)'}`);
     if (typeof w.text !== 'string' || !w.text.trim() || w.text.length > CHALK_NOTE_LIMIT) fail(`Event ${w.i} chalk_write text must be 1-${CHALK_NOTE_LIMIT} characters`);
+    if (!isCleanChalkText(w.text)) fail(`Event ${w.i} chalk_write text is not clean: sanitising would change it`);
     if (written.has(w.name)) fail(`Event ${w.i} ${w.name} writes twice`);
     written.add(w.name);
     if (actions.get(w.name)?.action !== 'write') fail(`Event ${w.i} chalk_write by ${w.name} without a write action`);
@@ -320,6 +338,13 @@ function validateEpilogue(events, epilogue, writes, placedAt) {
 }
 
 const ordinal = (n) => `#${n}`;
+
+/** `value` has exactly the keys `keys`, no more and no fewer (nothing smuggled in). */
+function exactKeys(value, keys, where) {
+  const got = Object.keys(value).sort();
+  const want = [...keys].sort();
+  if (got.length !== want.length || got.some((k, n) => k !== want[n])) fail(`${where} must have exactly the keys ${keys.join(', ')}, got ${got.join(', ')}`);
+}
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
@@ -353,6 +378,54 @@ function validateNamedLists(events, names) {
     }
     if (event.type === 'game_end') known(event.places.map((p) => p?.name), where);
   });
+}
+
+/**
+ * The pit's one rope (spec 4.5). A `rope` reveal is only real when an agent who was already out at the
+ * start of that pit round chose a valid reach_down, the base at that time is the one hauled out, the
+ * price is the rules' price, and the round's `pit` reveal says the same. At most one rope per tape.
+ */
+function validateRope(tape) {
+  const { events } = tape;
+  const ropes = events.filter((e) => e.type === 'reveal' && e.what === 'rope');
+  const pits = events.filter((e) => e.type === 'reveal' && e.what === 'pit');
+  const rescue = (pit) => [pit.data?.roped, pit.data?.rescued].some((v) => v !== undefined && v !== null);
+  if (ropes.length > 1) fail('At most one rope reveal allowed: the pit has one rope');
+  if (ropes.length === 0) {
+    const stray = pits.find(rescue);
+    if (stray) fail(`Event ${stray.i} pit reveal names a rescue but there is no rope reveal`);
+    return;
+  }
+  const rope = ropes[0];
+  const at = `Event ${rope.i} rope`;
+  const data = rope.data;
+  if (!data || typeof data !== 'object' || Array.isArray(data)) fail(`${at} reveal needs a data object`);
+  exactKeys(data, ['by', 'saved', 'cost'], `${at} data`);
+  if (rope.stage !== 'pit' || !Number.isInteger(rope.round)) fail(`${at} reveal must be in a pit round`);
+  const wantCost = tape.rulesVersion === 3 ? ROPE_COST_V3 : ROPE_COST_FOOTING;
+  if (data.cost !== wantCost) fail(`${at} cost must be ${wantCost} footing, got ${data.cost}`);
+  if (data.by === data.saved) fail(`${at} reveal: nobody ropes themselves out`);
+
+  const ropeAt = events.indexOf(rope);
+  const act = events.slice(0, ropeAt).find((e) => e.type === 'action' && e.stage === 'pit' && e.round === rope.round && e.name === data.by && e.action === 'reach_down' && e.valid === true);
+  if (!act) fail(`${at} reveal needs a valid reach_down action by ${data.by} in the same pit round`);
+
+  const before = pits.find((p) => p.stage === 'pit' && p.round === rope.round - 1);
+  if (!before) fail(`${at} reveal in round ${rope.round}: nobody can be out of the pit yet`);
+  const prior = before.data ?? {};
+  if (prior.ropeUsed !== false) fail(`${at} reveal: the rope was already used`);
+  if (prior.base !== data.saved) fail(`${at} reveal: ${data.saved} was not the base when the round began`);
+  if (!asArray(prior.out).includes(data.by)) fail(`${at} reveal: ${data.by} was not already out of the pit when the round began`);
+  if (!asArray(prior.down).includes(data.saved)) fail(`${at} reveal: ${data.saved} was not down in the pit`);
+
+  const after = pits.find((p) => events.indexOf(p) > ropeAt);
+  if (!after || after.stage !== 'pit' || after.round !== rope.round) fail(`${at} reveal must be followed by the same round's pit reveal`);
+  if (after.data?.roped !== data.by || after.data?.rescued !== data.saved) fail(`${at} reveal: the pit reveal must say roped ${data.by} and rescued ${data.saved}`);
+  if (after.data.ropeUsed !== true || after.data.base !== null || asArray(after.data.down).includes(data.saved) || !asArray(after.data.out).includes(data.saved)) {
+    fail(`${at} reveal: the pit reveal does not show ${data.saved} out of the pit with no base and the rope used`);
+  }
+  const stray = pits.find((p) => p !== after && rescue(p));
+  if (stray) fail(`Event ${stray.i} pit reveal names a rescue but is not the rope's round`);
 }
 
 const stripDeath = ({ name, stage, cause, style }) => ({ name, stage, cause, style });

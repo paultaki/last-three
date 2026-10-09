@@ -122,10 +122,14 @@ export function chalkRules(place) {
   ].join(' ');
 }
 
+// The one chalk charset (the engine, the validator and the chalk store all go through sanitizeChalkText).
 // Control characters are stripped (tab, newline and friends count as whitespace and collapse to one
-// space), as are zero-width and bidi marks and lone surrogates.
+// space), as are invisible and bidi characters: soft hyphen, the Arabic letter mark U+061C, the
+// Mongolian vowel separator U+180E, zero-width and direction marks U+200B-U+200F, embeddings and
+// overrides U+202A-U+202E, word joiner to isolates U+2060-U+2069, the deprecated format controls
+// U+206A-U+206F, the BOM, and lone surrogates.
 const CONTROL = /[\u0000-\u0008\u000e-\u001f\u007f-\u0084\u0086-\u009f]/g;
-const INVISIBLE = /[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff\u00ad]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
+const INVISIBLE = /[\u00ad\u061c\u180e\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]|[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g;
 
 /** One chalk note as clean, single-line text of at most CHALK_NOTE_LIMIT characters, or '' (never throws). */
 export function sanitizeChalkText(value) {
@@ -134,6 +138,11 @@ export function sanitizeChalkText(value) {
   let cut = flat.slice(0, CHALK_NOTE_LIMIT);
   if (/[\ud800-\udbff]$/.test(cut)) cut = cut.slice(0, -1); // never split a surrogate pair
   return cut.trim();
+}
+
+/** True when `value` is already exactly what sanitizeChalkText would produce, and not empty (what a stored note must be). */
+export function isCleanChalkText(value) {
+  return typeof value === 'string' && value !== '' && sanitizeChalkText(value) === value;
 }
 
 /** The caller's chalk input as at most CHALK_MAX_NOTES clean `{text, byPlace}` notes. Anything unusable is dropped. */

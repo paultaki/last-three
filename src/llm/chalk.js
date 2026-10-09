@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeRng } from '../rng.js';
+import { sanitizeChalkNotes } from '../rules.js';
 
 const ROOT = resolve(fileURLToPath(new URL('../../', import.meta.url)));
 const DEFAULT_PATH = resolve(ROOT, 'data/chalk.json');
@@ -15,7 +16,12 @@ export function loadChalk(path = DEFAULT_PATH) {
   if (!existsSync(path)) return [];
   try {
     const data = JSON.parse(readFileSync(path, 'utf8'));
-    return Array.isArray(data) ? data.filter((n) => typeof n?.text === 'string' && n.text.trim()) : [];
+    if (!Array.isArray(data)) return [];
+    // Same sanitiser as the engine: a hand-edited or corrupt store can never feed a dirty note to an agent.
+    return data.flatMap((row) => {
+      const [clean] = sanitizeChalkNotes([{ text: row?.text, byPlace: row?.byPlace }]);
+      return clean ? [{ ...row, text: clean.text, byPlace: clean.byPlace }] : [];
+    });
   } catch {
     return [];
   }
@@ -46,7 +52,9 @@ export function appendChalk(tape, path = DEFAULT_PATH) {
   const modelOf = (name) => tape.players.find((p) => p.name === name)?.model ?? null;
   const store = loadChalk(path);
   for (const note of written) {
-    store.push({ id: `${tape.id}-${note.place}`, gameId: tape.id, text: note.text, byPlace: note.place, model: modelOf(note.name) });
+    const [clean] = sanitizeChalkNotes([{ text: note?.text, byPlace: note?.place }]);
+    if (!clean) continue;
+    store.push({ id: `${tape.id}-${clean.byPlace}`, gameId: tape.id, text: clean.text, byPlace: clean.byPlace, model: modelOf(note.name) });
   }
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(`${path}.tmp`, `${JSON.stringify(store.slice(-MAX_STORE), null, 2)}\n`);
