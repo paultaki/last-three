@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { degenerateAgents } from '../../bin/run-llm.js';
+import { degenerateAgents, attemptKey } from '../../bin/run-llm.js';
 
 const action = (name, note) => ({ type: 'action', name, action: 'hold', valid: !note, ...(note ? { note } : {}) });
 
@@ -24,4 +24,11 @@ test('a few errors, or too few actions to judge, are fine', () => {
 test('invalid-but-not-errored actions do not count', () => {
   const events = Array.from({ length: 12 }, () => action('Ash', 'brace not allowed twice in a row'));
   assert.deepEqual(degenerateAgents(tape(events)), []);
+});
+
+test('attemptKey: the same tape id gets a distinct ledger key per attempt, so a discarded game does not count against the next', () => {
+  const a = attemptKey('20261009-0031', 1_000_000);
+  const b = attemptKey('20261009-0031', 1_000_001);
+  assert.notEqual(a, b);
+  assert.ok(a.startsWith('20261009-0031@'));
 });

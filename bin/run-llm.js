@@ -115,7 +115,17 @@ export function degenerateAgents(tape) {
     .map(([name, r]) => ({ name, model: tape.players.find((p) => p.name === name)?.model ?? '?', ...r }));
 }
 
+/**
+ * Ledger key for one attempt at a game. A discarded game writes no tape, so its id is handed out
+ * again; keying the ledger's per-game bucket by attempt keeps the discarded spend from counting
+ * against the next game (which would trip the per-game cap early).
+ */
+export function attemptKey(id, now = Date.now()) {
+  return `${id}@${now.toString(36)}`;
+}
+
 export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(), chalk = true }) {
+  const ledgerKey = attemptKey(id);
   const { runGame, SEATS } = await import('../src/engine.js');
   const { validateTape } = await import('../src/tape.js');
   const { makeRng } = await import('../src/rng.js');
@@ -126,7 +136,7 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(),
   };
   const seated = seatModels(seed, models, seats, shuffle);
   const agents = Object.fromEntries(
-    seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: id })]),
+    seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: ledgerKey })]),
   );
   const config = { id, createdAt: new Date().toISOString(), ...(chalk ? { chalk: pickChalk(seed) } : {}) };
   const tape = await runGame({ seed, agents, config });
