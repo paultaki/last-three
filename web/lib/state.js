@@ -4,6 +4,8 @@
 import { describeEvent } from './text.js';
 
 export const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+export const EPILOGUE = 'chalk'; // rules v4: not an obstacle, so it is not in STAGES
+const CHALK_MAX = 3;
 const PIT_ROUNDS_DEFAULT = 5;
 const MAX_SPEECH = 8;
 
@@ -79,8 +81,27 @@ export function derive(tape) {
   return d;
 }
 
+// ---------------------------------------------------------------- chalk wall (rules v4)
+// Notes are public data. Anything unusable is dropped and nothing here throws.
+const cleanText = (v) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
+const placeOf = (v) => (Number.isInteger(v) && v >= 1 && v <= 3 ? v : null);
+export function cleanNotes(list) {
+  const out = [];
+  for (const n of Array.isArray(list) ? list : []) {
+    const text = n && typeof n === 'object' ? cleanText(n.text) : '';
+    if (text && out.length < CHALK_MAX) out.push({ text, byPlace: placeOf(n.byPlace) });
+  }
+  return out;
+}
+const newChalk = (shown = []) => ({ shown, read: false, epilogue: false, done: false, writers: [], places: {}, written: [], skipped: [], last: null });
+const chalkOf = (s) => s.chalk || newChalk();
+
 // ---------------------------------------------------------------- initial state
 function initial(tape) {
+  // the wall hangs there before anyone reads it: it comes from the chalk_read event right after game_start
+  const evs = Array.isArray(tape && tape.events) ? tape.events : [];
+  const read = evs.slice(0, 4).find((e) => e && e.type === 'chalk_read');
+  const shown = read ? cleanNotes(read.notes) : [];
   const order = (tape.players || []).map((p) => p.name);
   const players = {};
   for (const p of tape.players || []) {
@@ -116,6 +137,7 @@ function initial(tape) {
     ropeCost: {},
     disc: null,
     ledge: null,
+    chalk: shown.length ? newChalk(shown) : null,
   };
 }
 
@@ -232,6 +254,34 @@ export function reduce(s, ev, idx, derivedInfo) {
       else if (stage === 'pit') next.pit = newPit(alive);
       else if (stage === 'disc') next.disc = newDisc(alive);
       else if (stage === 'ledge') next.ledge = newLedge(alive, s.players, s.ropeCost, s.spent);
+      else if (stage === EPILOGUE) {
+        const writers = alive.filter((n) => typeof n === 'string' && s.players[n]);
+        // who finished where: dead fallers carry their place; the one still standing is first
+        const places = {};
+        for (const n of writers) places[n] = Number.isInteger(s.players[n].place) ? s.players[n].place : s.players[n].alive ? 1 : null;
+        next.chalk = { ...chalkOf(s), epilogue: true, done: false, writers, places };
+      }
+      break;
+    }
+
+    case 'chalk_read': {
+      const shown = cleanNotes(ev.notes);
+      if (shown.length) next.chalk = { ...chalkOf(s), shown, read: true };
+      break;
+    }
+
+    case 'chalk_write': {
+      const text = cleanText(ev.text);
+      if (!text || typeof ev.name !== 'string') break;
+      const place = placeOf(ev.place);
+      const c = chalkOf(s);
+      next.chalk = {
+        ...c,
+        written: [...c.written, { name: ev.name, place, text, i: idx }],
+        places: place ? { ...c.places, [ev.name]: place } : c.places,
+        last: ev.name,
+      };
+      next.speech = []; // the thoughts were for the round; the wall is what is on screen now
       break;
     }
 
@@ -304,6 +354,11 @@ export function reduce(s, ev, idx, derivedInfo) {
       if (!name) break;
       const { verb, arg } = parseAction(ev.action);
       next.acts = { ...s.acts, [name]: { verb, arg, raw: String(ev.action), valid: ev.valid !== false, auto: !!ev.auto, note: ev.note || null, i: idx } };
+      if (s.stage === EPILOGUE) {
+        const c = chalkOf(s);
+        if ((ev.valid === false || verb !== 'write') && !c.skipped.includes(name)) next.chalk = { ...c, skipped: [...c.skipped, name] };
+        break;
+      }
       if (ev.valid === false) break; // invalid actions are shown but have no stage effect
       if (s.stage === 'bridge' && s.bridge) applyBridgeAction(next, s, name, verb, arg, ev, idx, d);
       else if (s.stage === 'crusher' && s.crusher) applyCrusherAction(next, s, name, verb, arg);
@@ -358,7 +413,12 @@ export function reduce(s, ev, idx, derivedInfo) {
       next.flash = null;
       next.speech = [];
       next.acts = {};
-      if ((ev.stage || s.stage) === 'bridge' && s.bridge) {
+      if ((ev.stage || s.stage) === EPILOGUE) {
+        const c = chalkOf(s);
+        // someone who chose to write but wrote nothing counts as a skip
+        const silent = c.writers.filter((n) => !c.written.some((w) => w.name === n) && !c.skipped.includes(n));
+        next.chalk = { ...c, done: true, last: null, skipped: [...c.skipped, ...silent] };
+      } else if ((ev.stage || s.stage) === 'bridge' && s.bridge) {
         next.bridge = { ...s.bridge, finished: true, line: survivors.slice(), stepping: {} };
       } else if ((ev.stage || s.stage) === 'crusher' && s.crusher) {
         next.crusher = { ...s.crusher, escaped: true, door: true };
@@ -614,7 +674,7 @@ export function chapters(tape) {
   const out = [];
   const events = Array.isArray(tape && tape.events) ? tape.events : [];
   events.forEach((ev, idx) => {
-    if (ev && ev.type === 'stage_start' && STAGES.includes(ev.stage)) out.push({ id: ev.stage, i: idx });
+    if (ev && ev.type === 'stage_start' && (STAGES.includes(ev.stage) || ev.stage === EPILOGUE)) out.push({ id: ev.stage, i: idx });
     else if (ev && ev.type === 'game_end') out.push({ id: 'results', i: idx });
   });
   if (events.length && (!out.length || out[0].i > 0)) out.unshift({ id: 'start', i: 0 });

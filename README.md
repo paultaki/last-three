@@ -20,7 +20,7 @@ node bin/stats.js              # per-model behaviour table
 npx serve web                  # watch the tapes
 ```
 
-Real games need a gateway token: `vercel env pull .env.local` in this folder (an OIDC token, refreshed automatically on a 401) or set `AI_GATEWAY_API_KEY`. Spend is tracked in `.ledger/` and capped (default $12, hard ceiling $30).
+Real games need a gateway token: `vercel env pull .env.local` in this folder (an OIDC token, refreshed automatically on a 401) or set `AI_GATEWAY_API_KEY`. Spend is tracked in `.ledger/` and capped (default $12, hard ceiling $30). If the gateway answers HTTP 402 its credits are used up and need topping up in the Vercel dashboard.
 
 ## The obstacles
 
@@ -29,6 +29,10 @@ Real games need a gateway token: `vercel env pull .env.local` in this folder (an
 3. **The Pit.** Everyone drops in; climbing out needs a human step, and whoever is the step is stuck. There is one rope, and throwing it costs the rescuer footing later.
 4. **Trapdoor Disc.** Pick a tile. One door opens for every player above three.
 5. **Final Ledge.** Three players, a shrinking platform, shove / brace / dodge. Last standing wins.
+
+## The chalk wall
+
+After each game the top three may scratch one message for the next contestants. The notes are remembered (`data/chalk.json`) and three are shown at the start of the next game, unverified. Honest tips, bluffs and lies all show up.
 
 ## Powers
 

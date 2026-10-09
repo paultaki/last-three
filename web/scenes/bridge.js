@@ -1,5 +1,7 @@
 // The Glass Bridge: waiting room with a wall, then eight rows of two glass panes.
 import { h, place, actLabel } from './common.js';
+import { Board } from './chalkboard.js';
+import { wallNotes } from './lobby.js';
 
 const ROWS = 8;
 
@@ -29,6 +31,9 @@ const PORT = {
   goalSlot: (k) => ({ x: [22, 50, 78][k % 3], y: [48, 80][Math.floor(k / 3) % 2] }),
   wallTop: (p) => 100 - 3.6 * p,
 };
+
+// While the line waits, the chalk wall hangs over the empty glass (landscape) or the far end (portrait).
+const BOARD = { land: { x: 36, y: 8.5, w: 33, h: 83 }, port: { x: 3, y: 1.5, w: 94, h: 48.5 } };
 
 const sideWord = (s) => (s === 'L' ? 'left' : 'right');
 
@@ -72,8 +77,9 @@ export default {
     const wall = h('div', 'wall');
     wall.append(h('span', 'wall-face', 'WALL'));
     root.prepend(start, goal, span);
-    root.append(...nums, wall);
-    return { root, panes, wall, start, goal, nums };
+    const board = new Board();
+    root.append(...nums, board.el, wall);
+    return { root, panes, wall, start, goal, nums, board, destroy: () => board.destroy() };
   },
 
   update(hd, state, env, ctx) {
@@ -110,6 +116,13 @@ export default {
       const right = g.wallRight(p);
       hd.wall.style.cssText = `left:${g.start.x + 0.4}%;top:${g.start.y}%;height:${g.start.h}%;width:${right - g.start.x - 0.4}%`;
     }
+
+    // the chalk wall, only while everyone is still in the waiting room
+    const notes = wallNotes(state.chalk);
+    const showWall = notes.length > 0 && !crossing && !b.finished;
+    const boardRect = showWall ? (env.portrait ? BOARD.port : BOARD.land) : null;
+    hd.board.setRect(boardRect);
+    hd.board.set(showWall ? notes : []);
 
     // figures
     const line = b.line;
@@ -157,6 +170,7 @@ export default {
     const keepOut = env.portrait ? [{ x: g.span.x - 6, y: g.span.y, w: 6, h: g.span.h }] : [{ x: g.span.x, y: g.span.y, w: g.span.w, h: 5 }];
     // while crossing, the panes carry the story: keep speech off them where there is room
     if (crossing && !b.finished) keepOut.push({ x: g.span.x, y: g.span.y, w: g.span.w, h: g.span.h, wt: 4 });
+    if (boardRect) keepOut.push({ ...boardRect, wt: 6 });
     return { pos, keep: keepOut, hud: { left: 'The Glass Bridge', right, sub } };
   },
 };

@@ -153,7 +153,7 @@ async function loadTape(id, startAt = 0) {
     const entry = app.index.find((e) => e.id === safe);
     const models = new Set(tape.players.map((p) => shortModel(p.model)));
     const when = tape.createdAt ? new Date(tape.createdAt).toISOString().slice(0, 10) : '';
-    els.meta.textContent = `${tape.events.length} events, ${models.size} different models${when ? `, recorded ${when}` : ''}${entry && entry.usd != null ? `, $${Number(entry.usd).toFixed(2)}` : ''}`;
+    els.meta.textContent = `${tape.events.length} events, ${models.size} different models${when ? `, recorded ${when}` : ''}${Array.isArray(tape.chalkShown) && tape.chalkShown.length ? ', with chalk wall' : ''}${entry && entry.usd != null ? `, $${Number(entry.usd).toFixed(2)}` : ''}`;
     if (entry && entry.tier) {
       const badge = document.createElement('span');
       badge.className = 'tier-badge';
@@ -266,7 +266,12 @@ function dwell(ev) {
   if (!ev) return 400;
   const len = String(ev.text || '').length;
   switch (ev.type) {
+    case 'chalk_read': {
+      const chars = Array.isArray(ev.notes) ? ev.notes.reduce((n, x) => n + String((x && x.text) || '').length, 0) : 0;
+      return Math.min(6500, 1800 + 22 * chars); // time to read the wall before the show starts
+    }
     case 'say':
+    case 'chalk_write':
       return Math.min(8500, Math.max(MIN_READ, READ_MS * len));
     case 'thought':
     case 'whisper':

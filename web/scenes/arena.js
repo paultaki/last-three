@@ -11,11 +11,14 @@ import pit from './pit.js';
 import disc from './disc.js';
 import ledge from './ledge.js';
 import podium from './podium.js';
+import chalk from './chalk.js';
 
-const SCENES = { lobby, bridge, crusher, pit, disc, ledge, podium };
+const SCENES = { lobby, bridge, crusher, pit, disc, ledge, podium, chalk };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAX_BUBBLES = 3;
 const MAX_BUBBLES_NARROW = 2; // a phone screen has no room for a third without covering faces
+
+const onStage = (id) => id === 'podium' || id === 'chalk';
 
 export class Arena {
   constructor(root, hud) {
@@ -81,6 +84,7 @@ export class Arena {
 
   sceneFor(state) {
     if (state.ended) return 'podium';
+    if (state.stage === 'chalk') return 'chalk';
     return SCENES[state.stage] ? state.stage : 'lobby';
   }
 
@@ -103,7 +107,7 @@ export class Arena {
       this.envKey = key;
     }
     this.root.dataset.scene = sceneId;
-    const layout = SCENES[sceneId].update(this.handle, state, env, { cut: this.cut });
+    const layout = SCENES[sceneId].update(this.handle, state, env, { cut: this.cut, animate, speed, reduced: this.root.classList.contains('reduced') });
     const pos = layout.pos || {};
     if (layout.dropIn && animate && changed) {
       // new arrivals fall in from above the arena
@@ -129,7 +133,7 @@ export class Arena {
       const player = state.players[name];
       if (!player) continue;
       const L = pos[name];
-      const onPodium = sceneId === 'podium' && !!L;
+      const onPodium = onStage(sceneId) && !!L;
       if (!player.alive && !onPodium) {
         this.killFigure(name, fig, player, prev, animate, speed, env, anchors);
         continue;
@@ -160,7 +164,7 @@ export class Arena {
       else delete fig.el.dataset.fate;
       fig.setPips(L.pips != null && player.alive ? L.pips : null, 4);
       fig.setNum(L.num != null && player.alive ? L.num : null);
-      fig.setAct(player.alive || sceneId === 'podium' ? L.act : '');
+      fig.setAct(player.alive || onStage(sceneId) ? L.act : '');
       fig.setNote(player.alive ? L.note : '');
     }
 
@@ -173,6 +177,7 @@ export class Arena {
 
   mountScene(id, env, fade) {
     const scene = SCENES[id];
+    if (this.handle && this.handle.destroy) this.handle.destroy();
     this.sceneLayer.replaceChildren();
     this.handle = scene.mount(env);
     this.handle.root.classList.add('layer-fill');

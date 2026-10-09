@@ -9,9 +9,10 @@ export const STAGE_TITLES = {
   pit: 'The Pit',
   disc: 'The Trapdoor Disc',
   ledge: 'The Final Ledge',
+  chalk: 'The Chalk Wall',
 };
 
-export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', pit: 'Pit', disc: 'Disc', ledge: 'Ledge', results: 'Results', start: 'Start' };
+export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', pit: 'Pit', disc: 'Disc', ledge: 'Ledge', chalk: 'Chalk', results: 'Results', start: 'Start' };
 
 export const POWER_NAMES = {
   glass_eye: 'Glass Eye',
@@ -68,6 +69,9 @@ export function ordinal(n) {
   return n == null ? '' : `${n}th`;
 }
 
+// Who left a note on the wall in an earlier game: only the place is known, never the player.
+export const chalkBy = (place) => (place ? `by a ${ordinal(place)}-place finisher` : 'by an earlier finisher');
+
 const hash = (str) => {
   let h = 0;
   for (let k = 0; k < str.length; k++) h = (h * 31 + str.charCodeAt(k)) >>> 0;
@@ -122,6 +126,7 @@ export function roundLabel(stage, phase, round, total) {
   if (stage === 'pit') return `The water rises (round ${round} of ${total || 5})`;
   if (stage === 'disc') return phase === 'swap' ? 'Round 2: swap tiles or wait' : 'Round 1: pick a tile';
   if (stage === 'ledge') return `Ledge, round ${round}`;
+  if (stage === 'chalk') return 'Epilogue: a message for the next contestants';
   return round != null ? `Round ${round}` : '';
 }
 
@@ -143,6 +148,10 @@ function actionText(ev, state) {
       return ev.auto
         ? { pub: `${name} steps onto the safe ${side(arg)} pane` }
         : { pub: `${name} steps onto the ${side(arg)} pane` };
+    case 'write':
+      return { pub: null, cut: `${name} reaches for the chalk` }; // the chalk_write line says what was written
+    case 'skip':
+      return { pub: `${name} leaves the wall blank` };
     case 'hold_lever':
       return { pub: `${name} grabs the lever` };
     case 'push_lever':
@@ -290,7 +299,16 @@ export function describeEvent(ev, next, prev) {
       const style = ev.style || 'shatter';
       return { pub: deathCaption(ev.name, style, ev.i || 0, typeof ev.place === 'number' ? ev.place : null), kind: 'death', name: ev.name, style };
     }
+    case 'chalk_read': {
+      const notes = Array.isArray(ev.notes) ? ev.notes.filter((n) => n && typeof n.text === 'string' && n.text.trim()) : [];
+      if (!notes.length) return null;
+      const parts = notes.map((n) => `\u201c${n.text.trim()}\u201d (${Number.isInteger(n.byPlace) ? `${ordinal(n.byPlace)} place` : 'earlier finisher'})`);
+      return { pub: `What the wall says: ${parts.join(', ')}.`, kind: 'chalk' };
+    }
+    case 'chalk_write':
+      return typeof ev.text === 'string' && ev.text.trim() ? { pub: `${ev.name} scratches a message for the next contestants: \u201c${ev.text.trim()}\u201d`, kind: 'chalk', name: ev.name } : null;
     case 'stage_end': {
+      if (ev.stage === 'chalk') return { pub: 'The wall is done.', kind: 'stage' };
       const title = STAGE_TITLES[ev.stage] || ev.stage;
       const n = Array.isArray(ev.survivors) ? ev.survivors.length : null;
       return { pub: n == null ? `${title} cleared.` : `${title} cleared. ${n} left.`, kind: 'stage' };

@@ -69,6 +69,10 @@ export function actLabel(act, cut, stage) {
       return 'throws rope';
     case 'wait':
       return stage === 'pit' ? 'waits' : '';
+    case 'write':
+      return 'writes';
+    case 'skip':
+      return 'skips';
     default:
       return '';
   }

@@ -127,6 +127,17 @@ try {
 }
 
 // Rules v3 tapes from the real engine, one per scenario (volunteer base, pushed base, rope, sink, ...).
+const { buildChalkTapes, NOTES } = await import(pathToFileURL(path.join(here, 'chalk-fixtures.mjs')).href);
+const chalkTapes = await buildChalkTapes();
+// A real engine tape (rules v4) with earlier notes supplied through config.chalk, if the engine supports it.
+try {
+  const { runGame } = await import(pathToFileURL(path.join(root, 'src', 'engine.js')).href);
+  const { createScriptedAgents } = await import(pathToFileURL(path.join(root, 'src', 'scripted.js')).href);
+  const real = await runGame({ seed: 54, agents: createScriptedAgents(54), config: { id: 'chalk-real', createdAt: '2026-10-08T00:00:00Z', chalk: [{ text: NOTES.mid, byPlace: 1 }, { text: NOTES.html, byPlace: 2 }, { text: NOTES.natural, byPlace: 3 }] } });
+  if (Array.isArray(real.chalkShown) && real.chalkShown.length) chalkTapes.real = { ...real, id: 'chalk-real' };
+} catch (err) {
+  console.log(`note: no real chalk tape (${String(err.message).split('\n')[0]})`);
+}
 const { buildPitTapes } = await import(pathToFileURL(path.join(here, 'pit-fixtures.mjs')).href);
 const pitTapes = await buildPitTapes();
 const pitNames = Object.keys(pitTapes).filter((n) => n !== 'noPit');
@@ -179,8 +190,11 @@ function serve() {
       const all = fs.existsSync(path.join(webDir, 'tapes', 'index.json')) ? JSON.parse(fs.readFileSync(path.join(webDir, 'tapes', 'index.json'), 'utf8')) : [];
       const heavy = realIndex.length ? [{ ...realIndex[0], id: HEAVY_ID, tier: 'heavy' }] : [];
       const pits = Object.entries(pitTapes).map(([name, t]) => ({ id: `pit-${name}`, seed: t.seed, rules: t.rulesVersion }));
-      return send(200, 'application/json', JSON.stringify([...all, ...heavy, ...pits]));
+      const chalks = Object.entries(chalkTapes).map(([name, t]) => ({ id: `chalk-${name}`, seed: t.seed, rules: t.rulesVersion }));
+      return send(200, 'application/json', JSON.stringify([...all, ...heavy, ...pits, ...chalks]));
     }
+    const chalkTape = /^\/tapes\/chalk-([A-Za-z0-9]+)\.json$/.exec(url.pathname);
+    if (chalkTape && chalkTapes[chalkTape[1]]) return send(200, 'application/json', JSON.stringify(chalkTapes[chalkTape[1]]));
     const pit = /^\/tapes\/pit-([A-Za-z0-9]+)\.json$/.exec(url.pathname);
     if (pit && pit[1] === 'volcano') return send(200, 'application/json', JSON.stringify(volcanoTape));
     if (pit && pitTapes[pit[1]]) return send(200, 'application/json', JSON.stringify(pitTapes[pit[1]]));
@@ -199,7 +213,9 @@ function serve() {
 
 // ------------------------------------------------------------------ tiny test harness
 const results = [];
+const ONLY = process.env.ONLY ? new RegExp(process.env.ONLY) : null; // e.g. ONLY=chalk for a quick pass
 async function check(name, fn) {
+  if (ONLY && !ONLY.test(name)) return;
   try {
     await fn();
     results.push({ name, ok: true });
@@ -1122,15 +1138,15 @@ for (const name of pitNames) {
       await page.waitForFunction(() => window.__viewer);
       const labels = await page.locator('#highlights button').allInnerTexts();
       assert(labels.some((t) => re.test(t)), `${name}: ${labels.join(' | ')}`);
-      assert(labels.every((t) => !pitLeakWords.test(t)), `leak in ${labels.join(' | ')}`);
+      assert(labels.every((t) => /^The wall already says|left a message/.test(t) || !pitLeakWords.test(t)), `leak in ${labels.join(' | ')}`);
     }
   });
   await check('picker and badge: rules v3 tapes say so, older tapes do not', async () => {
     await page.goto(`${base}/?tape=pit-volunteer&i=0`);
     await page.waitForFunction(() => window.__viewer);
     const opt = await page.locator('#tape-picker option[value="pit-volunteer"]').innerText();
-    assert(/\bv3\b/.test(opt) && opt.length < 70, `label: ${opt}`);
-    assert(/rules v3/.test(await page.locator('#tape-meta .rules-badge').innerText()), 'meta badge');
+    assert(/\bv4\b/.test(opt) && opt.length < 70, `label: ${opt}`);
+    assert(/rules v4/.test(await page.locator('#tape-meta .rules-badge').innerText()), 'meta badge');
     assert((await page.locator('#tape-meta .tier-badge').count()) === 0, 'no tier badge on a tape without a tier');
     if (realIndex.length) {
       const old = realIndex.find((e) => !(Number(e.rules) >= 3));
@@ -1246,10 +1262,11 @@ for (const entry of realRun) {
 
   await check(`${entry.id}: highlights are 1 to 8, in order, and never leak with the cut off`, () => {
     const list = highlights(tape);
-    assert(list.length >= 1 && list.length <= 8, `highlight count ${list.length}`);
+    const isNote = (h) => /^The wall already says|left a message/.test(h.pub); // quotes public chalk, which may say anything
+    assert(list.length >= 1 && list.filter((h) => !isNote(h)).length <= 8 && list.filter(isNote).length <= 4, `highlight count ${list.length}`);
     assert(list.every((h, k) => (k === 0 || h.i >= list[k - 1].i) && events[h.i]), 'in order, valid indexes');
     for (const h of list) {
-      assert(!POWER_WORDS.test(h.pub), `leak with the cut off: "${h.pub}"`);
+      assert(isNote(h) || !POWER_WORDS.test(h.pub), `leak with the cut off: "${h.pub}"`);
       assert(h.pub.length < 60, `label too long: "${h.pub}"`);
     }
     for (const e of events) if (e.type === 'say' && e.forgedAs) assert(list.some((h) => h.i === e.i && /faked a message/.test(h.pub) && /forged a message as/.test(h.cut)), 'forged message highlight');
@@ -1328,8 +1345,9 @@ for (const entry of realRun) {
   await check(`${entry.id}: highlight buttons jump, and the cut changes their wording`, async () => {
     await go(page, 0, false);
     const labels = await page.locator('#highlights button').allInnerTexts();
-    assert(labels.length >= 1 && labels.length <= 8, `buttons ${labels.length}`);
-    assert(labels.every((t) => !POWER_WORDS.test(t)), `leak: ${labels.join(' | ')}`);
+    const isNote = (t) => /^The wall already says|left a message/.test(t);
+    assert(labels.length >= 1 && labels.filter((t) => !isNote(t)).length <= 8 && labels.filter(isNote).length <= 4, `buttons ${labels.length}`);
+    assert(labels.every((t) => isNote(t) || !POWER_WORDS.test(t)), `leak: ${labels.join(' | ')}`);
     const want = highlights(tape)[labels.length - 1].i;
     await page.locator('#highlights button').last().click();
     assert((await page.evaluate(() => window.__viewer.app.idx)) === want, 'jumps to the highlight');
@@ -1381,6 +1399,303 @@ if (realIndex.length) {
     await page.click('#btn-play');
     assert(lingered >= t.len * 40, `line of ${t.len} chars lingered ${lingered} ms at 1x equivalent`);
     void started;
+  });
+  await closePage(page);
+}
+
+// ------------------------------------------------------------------ the chalk wall (rules v4)
+console.log('\n== the chalk wall ==');
+const CHALK_FIXTURES = Object.keys(chalkTapes).filter((k) => k !== 'old');
+const cev = (tape, pred) => tape.events.find(pred);
+const writeIdx = (tape) => tape.events.filter((e) => e.type === 'chalk_write').map((e) => e.i);
+const cIdx = (tape) => ({
+  lobby: 0,
+  read: tape.events.findIndex((e) => e.type === 'chalk_read'),
+  waiting: tape.events.findIndex((e) => e.type === 'round_start' && e.phase === 'waiting' && e.round === 2) + 3,
+  crossing: tape.events.findIndex((e) => e.type === 'round_start' && e.phase === 'crossing' && e.round === 2) + 2,
+  epiStart: tape.events.findIndex((e) => e.type === 'stage_start' && e.stage === 'chalk'),
+  thoughts: tape.events.findIndex((e) => e.type === 'thought' && e.stage === 'chalk') + 1,
+  actions: tape.events.findIndex((e) => e.type === 'action' && e.stage === 'chalk') + 1,
+  firstWrite: writeIdx(tape)[0] ?? -1,
+  lastWrite: writeIdx(tape).at(-1) ?? -1,
+  epiEnd: tape.events.findIndex((e) => e.type === 'stage_end' && e.stage === 'chalk'),
+  end: tape.events.length - 1,
+});
+
+// In-page audit of the chalk board(s): nothing clipped, nothing but text inside, no figure standing on the writing, bubbles clear of figures.
+const auditChalk = () => {
+  const ALLOWED_TAGS = new Set(['DIV', 'FIGURE', 'P', 'SPAN', 'FIGCAPTION', 'I']);
+  const problems = [];
+  const arena = document.getElementById('arena').getBoundingClientRect();
+  const boards = [...document.querySelectorAll('#arena .chalk-board')].filter((b) => !b.hidden);
+  const hit = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+  const figs = [...document.querySelectorAll('.fig:not(.gone):not(.off)')].map((f) => ({ name: f.dataset.name, r: f.querySelector('.fig-in').getBoundingClientRect() }));
+  for (const b of boards) {
+    const r = b.getBoundingClientRect();
+    if (r.left < arena.left - 2 || r.right > arena.right + 2 || r.top < arena.top - 2 || r.bottom > arena.bottom + 2) problems.push('board outside the arena');
+    const box = b.querySelector('.chalk-notes');
+    if (box.scrollHeight > box.clientHeight + 6) problems.push(`board text clipped (${box.scrollHeight} > ${box.clientHeight})`);
+    for (const el of b.querySelectorAll('*')) if (!ALLOWED_TAGS.has(el.tagName)) problems.push(`markup inside the board: ${el.tagName}`);
+    for (const t of b.querySelectorAll('.chalk-text, .chalk-by')) {
+      const cs = getComputedStyle(t);
+      if (parseFloat(cs.fontSize) < 14) problems.push(`chalk text under 14px: ${cs.fontSize}`);
+      const tr = t.getBoundingClientRect();
+      if (tr.right > r.right + 1 || tr.left < r.left - 1) problems.push('chalk text sticks out sideways');
+      for (const f of figs) {
+        if (!t.textContent.trim()) continue;
+        const o = hit(tr, f.r);
+        if (o > 0 && o / (tr.width * tr.height) > 0.12) problems.push(`${f.name} stands on the writing`);
+      }
+    }
+    for (const bub of document.querySelectorAll('#arena .bubble')) {
+      if (bub.hidden || bub.classList.contains('fade')) continue;
+      const br = bub.getBoundingClientRect();
+      for (const f of figs) if (hit(br, f.r) / (f.r.width * f.r.height) > 0.3) problems.push(`bubble covers ${f.name}`);
+    }
+  }
+  if (document.getElementById('arena').dataset.scene === 'chalk') {
+    for (const c of document.querySelectorAll('.fig:not(.gone):not(.off) .act')) {
+      if (c.hidden) continue;
+      const r = c.getBoundingClientRect();
+      if (r.left < arena.left - 1 || r.right > arena.right + 1 || r.bottom > arena.bottom + 1) problems.push(`chip clipped: ${c.textContent}`);
+    }
+  }
+  return problems;
+};
+
+const boardInfo = (page) =>
+  page.evaluate(() => {
+    const b = [...document.querySelectorAll('#arena .chalk-board')].find((x) => !x.hidden);
+    if (!b) return null;
+    return { notes: [...b.querySelectorAll('.chalk-note')].map((n) => ({ text: n.querySelector('.chalk-text').textContent, by: n.querySelector('.chalk-by').textContent, typing: n.classList.contains('typing'), current: n.classList.contains('current') })), blank: b.classList.contains('blank') };
+  });
+
+const chalkShot = async (page, name) => {
+  if (!SHOTS) return;
+  await shot(page, name);
+};
+
+for (const key of CHALK_FIXTURES) {
+  const tape = chalkTapes[key];
+  const n = tape.events.length;
+  const I = cIdx(tape);
+  const shown = tape.chalkShown || [];
+  const written = tape.chalkWritten || [];
+  for (const width of WIDTHS) {
+    const page = await openPage(width, { url: `/?tape=chalk-${key}&i=0` });
+    for (const cut of [false, true]) {
+      await check(`chalk ${key} ${width}px${cut ? ' cut' : ''}: stepping through all ${n} events never throws, board unclipped, nothing covered`, async () => {
+        const out = await page.evaluate(
+          ([audit, base, withCut, lo, hi]) => {
+            const a1 = new Function(`return (${audit})`)();
+            const a2 = new Function(`return (${base})`)();
+            const v = window.__viewer;
+            v.setCut(withCut);
+            const bad = new Map();
+            const total = v.app.tape.events.length;
+            for (let i = 0; i < total; i++) {
+              try {
+                v.goto(i, { animate: false });
+                if (i < 40 || (i >= lo && i <= hi) || i % 11 === 0) for (const p of [...a1(), ...a2()]) bad.set(`${p} @${i}`, 1);
+              } catch (err) {
+                bad.set(`threw @${i}: ${err.message}`, 1);
+              }
+            }
+            return [...bad.keys()].slice(0, 8);
+          },
+          [auditChalk.toString(), auditPage.toString(), cut, I.epiStart - 1, I.end]
+        );
+        assert(out.length === 0, out.join(' | '));
+      });
+    }
+
+    await check(`chalk ${key} ${width}px: lobby and waiting room show exactly the earlier notes, tagged by place, as plain text`, async () => {
+      for (const at of [I.lobby, I.read > 0 ? I.read : 1, I.waiting]) {
+        await go(page, at);
+        const info = await boardInfo(page);
+        if (!shown.length) {
+          assert(info === null, `no board without earlier notes (at ${at})`);
+          continue;
+        }
+        assert(info && info.notes.length === shown.length, `${shown.length} notes at ${at}, saw ${info && info.notes.length}`);
+        info.notes.forEach((note, k) => {
+          const want = shown[k].text;
+          const shownText = note.text;
+          assert(shownText === want || (shownText.endsWith('…') && want.startsWith(shownText.slice(0, 8))), `note ${k} text: "${shownText}"`);
+          assert(note.by === `— by a ${['', '1st', '2nd', '3rd'][shown[k].byPlace]}-place finisher`, `tag: ${note.by}`);
+        });
+      }
+      if (shown.length) {
+        await go(page, I.crossing);
+        assert((await boardInfo(page)) === null, 'the board is gone once the line is on the glass');
+        await go(page, I.lobby);
+        const transcript = await page.locator('#transcript').innerText();
+        void transcript;
+        await go(page, I.read > 0 ? I.read : 1);
+        assert(/What the wall says:/.test(await page.locator('#transcript').innerText()), 'transcript has the what-the-wall-says line');
+        assert(/What the wall says/.test(await page.locator('#now').innerText()), 'caption has it too');
+      }
+      assert((await page.evaluate(() => document.querySelectorAll('#arena .chalk-board img, #arena .chalk-board b, #arena .chalk-board script, #results img, #transcript img, #highlights img').length)) === 0, 'no markup from note text');
+      const o = await overflow(page);
+      assert(o.sw <= o.iw, `horizontal overflow ${o.sw} > ${o.iw}`);
+    });
+
+    if (tape.chalkWritten) {
+      await check(`chalk ${key} ${width}px: the epilogue shows the podium, the notes, the author and the skips`, async () => {
+        await go(page, I.epiStart);
+        assert((await page.locator('#arena').getAttribute('data-scene')) === 'chalk', 'chalk scene');
+        const placedCount = await page.evaluate((i) => window.__viewer.stateAt(i).chalk.writers.length, I.epiStart);
+        assert((await page.locator('.fig:not(.gone):not(.off)').count()) === placedCount, `only the ${placedCount} finishers stand on the podium`);
+        assert((await boardInfo(page)).blank, 'blank wall at the start');
+        await go(page, I.actions);
+        const poses = await page.evaluate(() => ({ shrug: [...document.querySelectorAll('.fig.shrug')].map((f) => f.dataset.name), chips: [...document.querySelectorAll('.fig:not(.off) .act:not([hidden])')].map((c) => c.textContent) }));
+        const skippers = await page.evaluate(([i]) => window.__viewer.stateAt(i).chalk.skipped, [I.actions]);
+        assert(poses.shrug.length === skippers.length, `skippers shrug: ${poses.shrug} vs ${skippers}`);
+        for (let k = 0; k < writeIdx(tape).length; k++) {
+          await go(page, writeIdx(tape)[k]);
+          const info = await boardInfo(page);
+          assert(info.notes.length === k + 1, `${k + 1} notes on the wall`);
+          const author = written[k];
+          assert(info.notes.at(-1).by.includes(author.name), `signed by ${author.name}: ${info.notes.at(-1).by}`);
+          assert(info.notes.filter((x) => x.current).length === 1, 'exactly one author highlighted');
+          const writing = await page.evaluate(() => [...document.querySelectorAll('.fig.write')].map((f) => f.dataset.name));
+          assert(writing.length === 1 && writing[0] === author.name, `author steps up: ${writing}`);
+          assert(/scratches a message for the next contestants/.test(await page.locator('#now').innerText()), 'caption');
+        }
+        if (!written.length) {
+          await go(page, I.epiEnd);
+          assert((await boardInfo(page)).blank && /NOBODY/.test(await page.locator('#arena .chalk-board').getAttribute('data-hint')), 'blank wall says so');
+        } else {
+          await go(page, I.epiEnd);
+          assert((await boardInfo(page)).notes.length === written.length && (await boardInfo(page)).notes.every((x) => !x.current), 'all notes stay, nobody highlighted once done');
+        }
+        const o = await overflow(page);
+        assert(o.sw <= o.iw, 'horizontal overflow');
+      });
+
+      await check(`chalk ${key} ${width}px: writers' thoughts only show in Director's cut, notes in the results card`, async () => {
+        await go(page, I.thoughts, false);
+        assert((await page.locator('#arena .bubble.thought').count()) === 0, 'no thought bubbles with the cut off');
+        assert(!/thinks:/.test(await page.locator('#transcript').innerText()), 'no thoughts in the transcript');
+        await go(page, I.thoughts, true);
+        assert((await page.locator('#arena .bubble.thought').count()) >= 1, 'thought bubbles in the cut');
+        await go(page, I.end, false);
+        const card = await page.locator('#results').innerText();
+        assert(/The chalk wall/.test(card), 'results card has the chalk wall');
+        for (const w of written) {
+          assert(card.includes(w.text) || card.includes(w.text.slice(0, 30)), `results card has ${w.name}'s note`);
+          assert(new RegExp(`${w.name}, ${['', '1st', '2nd', '3rd'][w.place]} place`).test(card), `${w.name} and the place`);
+        }
+        if (!written.length) assert(/Nobody left a message/.test(card), 'says nobody wrote');
+        for (const s of shown) assert(card.includes(s.text.slice(0, 30)), 'earlier note in the card');
+        assert(/rules v4/.test(await page.locator('#tape-meta').innerText()) && (!shown.length || /with chalk wall/.test(await page.locator('#tape-meta').innerText())), 'meta line');
+        assert(/v4/.test(await page.locator(`#tape-picker option[value="chalk-${key}"]`).innerText()), 'picker badge v4');
+        assert((await page.locator('#chapters button', { hasText: 'Chalk' }).count()) === 1, 'Chalk scrubber marker');
+        const hl = await page.locator('#highlights button').allInnerTexts();
+        assert(shown.length === 0 || hl.some((t) => /^The wall already says/.test(t)), 'wall highlight');
+        assert(hl.filter((t) => /left a message/.test(t)).length === written.length, 'one highlight per note');
+        const o = await overflow(page);
+        assert(o.sw <= o.iw, 'horizontal overflow');
+      });
+    }
+
+    if (key === 'wall3' || key === 'wall1') {
+      await check(`chalk ${key} ${width}px: screenshots`, async () => {
+        await go(page, I.lobby);
+        await chalkShot(page, `chalk-${key}-lobby-${width}`);
+        await go(page, I.waiting);
+        await chalkShot(page, `chalk-${key}-waiting-${width}`);
+        await go(page, I.actions);
+        await chalkShot(page, `chalk-${key}-actions-${width}`);
+        await go(page, I.lastWrite);
+        await chalkShot(page, `chalk-${key}-epilogue-${width}`);
+        await go(page, I.thoughts, true);
+        await chalkShot(page, `chalk-${key}-epilogue-cut-${width}`);
+        await go(page, I.end, false);
+        if (SHOTS) await page.locator('#results').screenshot({ path: path.join(screensDir, `chalk-${key}-results-${width}.png`) });
+      });
+    }
+    await check(`chalk ${key} ${width}px: no console errors, no failed requests`, async () => noIssues(page));
+    await closePage(page);
+  }
+}
+
+{
+  const lone = chalkTapes.lone;
+  if (lone) {
+    const I = cIdx(lone);
+    const page = await openPage(390, { url: `/?tape=chalk-lone&i=${I.lastWrite}` });
+    await check('chalk lone survivor 390px: one writer on the 1st block, shot', async () => {
+      assert((await page.locator('.fig:not(.gone):not(.off)').count()) === 1, 'one figure');
+      await chalkShot(page, 'chalk-lone-epilogue-390');
+    });
+    await closePage(page);
+  }
+}
+
+// the epilogue writes in as it plays, and is instant when scrubbed or with reduced motion
+{
+  const tape = chalkTapes.wall3;
+  const I = cIdx(tape);
+  const full = tape.chalkWritten[0].text;
+  const page = await openPage(1440, { url: `/?tape=chalk-wall3&i=${I.firstWrite - 1}` });
+  await check('chalk typing: a new note is scratched in when stepping, whole when scrubbed', async () => {
+    await page.evaluate((i) => window.__viewer.goto(i, { animate: true }), I.firstWrite);
+    await page.waitForTimeout(260);
+    const mid = await boardInfo(page);
+    const typed = mid.notes[0];
+    assert(typed.typing && typed.text.length < full.length, `typing in progress: ${typed.text.length}/${full.length}`);
+    await page.waitForFunction(() => !document.querySelector('.chalk-note.typing'), null, { timeout: 12000 });
+    assert((await boardInfo(page)).notes[0].text.length >= Math.min(full.length, 20), 'finished text');
+    await go(page, I.firstWrite - 1);
+    await go(page, I.firstWrite);
+    const scrubbed = await boardInfo(page);
+    assert(!scrubbed.notes[0].typing, 'scrubbing is instant');
+  });
+  await closePage(page);
+  const calm = await openPage(1440, { url: `/?tape=chalk-wall3&i=${I.firstWrite - 1}`, reducedMotion: 'reduce' });
+  await check('chalk typing: reduced motion shows the note at once', async () => {
+    await calm.evaluate((i) => window.__viewer.goto(i, { animate: true }), I.firstWrite);
+    const info = await boardInfo(calm);
+    assert(!info.notes[0].typing && info.notes[0].text.length > 5, 'instant');
+    noIssues(calm);
+  });
+  await closePage(calm);
+}
+
+// playing the epilogue end to end, and the Next button, work like any other stage
+{
+  const tape = chalkTapes.wall1;
+  const I = cIdx(tape);
+  const page = await openPage(768, { url: `/?tape=chalk-wall1&i=${I.epiStart - 1}` });
+  await check('chalk: Next steps through the epilogue to the results, playing reaches the end', async () => {
+    let guard = 0;
+    while ((await page.evaluate(() => window.__viewer.app.idx)) < I.end && guard++ < 40) await page.click('#btn-fwd');
+    assert((await page.evaluate(() => window.__viewer.app.idx)) === I.end, 'reached the end by stepping');
+    await go(page, I.epiStart - 1);
+    await page.selectOption('#speed', '4');
+    await page.click('#btn-play');
+    await page.waitForFunction((i) => window.__viewer.app.idx >= i, I.end, { timeout: 40000 });
+    assert((await page.locator('#results h2').count()) === 1, 'results card shown');
+    noIssues(page);
+  });
+  await closePage(page);
+}
+
+// old tapes: no wall, no marker, no chalk in the card, exactly as before
+for (const width of [390, 1440]) {
+  const page = await openPage(width, { url: '/?tape=chalk-old&i=0' });
+  await check(`chalk old tape ${width}px: nothing chalky anywhere`, async () => {
+    const last = chalkTapes.old.events.length - 1;
+    for (const at of [0, 30, last]) {
+      await go(page, at);
+      assert((await page.locator('#arena .chalk-board:not([hidden])').count()) === 0, 'no board');
+    }
+    assert((await page.locator('#chapters button', { hasText: 'Chalk' }).count()) === 0, 'no Chalk marker');
+    assert(!/chalk/i.test(await page.locator('#results').innerText()), 'no chalk in the results');
+    assert(!/chalk/i.test(await page.locator('#tape-meta').innerText()), 'no chalk in the meta line');
+    assert(!/chalk|wall says/i.test(await page.locator('#highlights').innerText()), 'no chalk highlights');
+    noIssues(page);
   });
   await closePage(page);
 }

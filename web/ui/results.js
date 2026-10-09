@@ -1,5 +1,5 @@
 // Results card, shown once the tape reaches game_end.
-import { powerName, shortModel, ordinal, STAGE_TITLES, deathCaption } from '../lib/text.js';
+import { powerName, shortModel, ordinal, STAGE_TITLES, deathCaption, chalkBy } from '../lib/text.js';
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -7,6 +7,38 @@ const el = (tag, cls, text) => {
   if (text != null) n.textContent = text;
   return n;
 };
+
+// Notes are public: the earlier ones are only tagged by place, this game's by author and final place.
+function chalkSection(root, state, seat) {
+  const c = state.chalk;
+  if (!c || (!c.shown.length && !c.epilogue)) return;
+  root.append(el('h3', null, 'The chalk wall'));
+  if (c.shown.length) {
+    root.append(el('p', 'chalk-sub', 'On the wall when the game began'));
+    const old = el('ul', 'chalk-results');
+    for (const n of c.shown) {
+      const li = el('li');
+      li.append(el('q', null, n.text), el('span', 'by', chalkBy(n.byPlace)));
+      old.append(li);
+    }
+    root.append(old);
+  }
+  if (!c.epilogue) return;
+  root.append(el('p', 'chalk-sub', 'Left on the wall by this game\u2019s finishers'));
+  if (!c.written.length) {
+    root.append(el('p', null, 'Nobody left a message.'));
+    return;
+  }
+  const mine = el('ul', 'chalk-results');
+  for (const w of c.written) {
+    const li = el('li');
+    li.style.setProperty('--c', `var(--seat-${(seat[w.name] || 0) % 8})`);
+    const place = state.players[w.name] && state.players[w.name].place;
+    li.append(el('q', null, w.text), el('span', 'by', `${w.name}, ${ordinal(place || w.place)} place`));
+    mine.append(li);
+  }
+  root.append(mine);
+}
 
 export function renderResults(root, state, tape) {
   root.replaceChildren();
@@ -38,6 +70,8 @@ export function renderResults(root, state, tape) {
   }
   if (!placed.length) medals.append(el('li', 'medal', 'Nobody finished in the top three.'));
   root.append(medals);
+
+  chalkSection(root, state, seat);
 
   root.append(el('h3', null, 'Who went where'));
   const deaths = el('ol', 'death-list');

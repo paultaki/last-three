@@ -46,7 +46,7 @@ export class Transcript {
     btn.type = 'button';
     btn.dataset.i = String(line.i);
     const text = cut ? line.cut : line.pub;
-    if (line.name != null && this.seat[line.name] != null && ['say', 'thought', 'whisper', 'action', 'death', 'ability', 'lucky'].includes(line.kind)) {
+    if (line.name != null && this.seat[line.name] != null && ['say', 'thought', 'whisper', 'action', 'death', 'ability', 'lucky', 'chalk'].includes(line.kind)) {
       const chip = document.createElement('span');
       chip.className = 'tl-chip';
       chip.style.setProperty('--c', `var(--seat-${this.seat[line.name]})`);

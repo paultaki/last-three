@@ -1,6 +1,6 @@
 // Auto-detected moments for a tape, as jump buttons. Pure detection (highlights) plus a tiny renderer.
 // `pub` is the label with Director's cut off: it never names a power or says who forged a message.
-import { powerName } from '../lib/text.js';
+import { powerName, capText } from '../lib/text.js';
 
 const MAX = 8;
 
@@ -69,7 +69,22 @@ export function highlights(tape) {
   });
 
   const picked = found.sort((a, b) => a.rank - b.rank || a.i - b.i).slice(0, MAX);
-  return picked.sort((a, b) => a.i - b.i);
+  // the chalk wall (rules v4): notes are public, so these labels are the same with the cut on
+  const quote = (t) => `\u201c${capText(t, 24)}\u201d`;
+  const chalk = [];
+  const read = events.find((e) => e && e.type === 'chalk_read' && Array.isArray(e.notes) && e.notes.some((n) => n && typeof n.text === 'string' && n.text.trim()));
+  if (read) {
+    const notes = read.notes.filter((n) => n && typeof n.text === 'string' && n.text.trim());
+    const rd = `The wall already says: ${quote(notes[0].text)}${notes.length > 1 ? ` (+${notes.length - 1} more)` : ''}`;
+    chalk.push({ i: Number.isFinite(read.i) ? read.i : events.indexOf(read), pub: rd, cut: rd });
+  }
+  events.forEach((e, k) => {
+    if (e && e.type === 'chalk_write' && typeof e.text === 'string' && e.text.trim() && e.name) {
+      const lm = `${e.name} left a message: ${quote(e.text)}`;
+      chalk.push({ i: Number.isFinite(e.i) ? e.i : k, pub: lm, cut: lm });
+    }
+  });
+  return [...picked, ...chalk].sort((a, b) => a.i - b.i);
 }
 
 export class Highlights {
