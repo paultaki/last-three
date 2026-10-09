@@ -39,9 +39,13 @@ export const PREMIUM_ROSTER = [
   'deepseek/deepseek-v4-pro',
 ];
 
-/** Frontier roster: the newest flagship from each maker (about $1.35 a game at October 2026 prices). */
+/**
+ * Frontier roster: the newest flagship from each maker (about $1.50 a game at October 2026 prices).
+ * Anthropic's seat is Opus 4.8: Opus 5, Opus 5.5 and Fable 5.1 are blocked on this game's prompt by
+ * Anthropic's anti-distillation filter (finish_reason content-filter, empty reply), Opus 4.8 and Sonnet 5.5 play.
+ */
 export const FRONTIER_ROSTER = [
-  'anthropic/claude-opus-5.5',
+  'anthropic/claude-opus-4.8',
   'openai/gpt-6.1-sol',
   'google/gemini-3.1-pro-preview',
   'spacexai/grok-4.7',
