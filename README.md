@@ -20,7 +20,7 @@ node bin/stats.js              # per-model behaviour table
 npx serve web                  # watch the tapes
 ```
 
-Real games need a gateway token: `vercel env pull .env.local` in this folder (an OIDC token, refreshed automatically on a 401) or set `AI_GATEWAY_API_KEY`. Spend is tracked in `.ledger/` and capped (default $12, hard ceiling $18).
+Real games need a gateway token: `vercel env pull .env.local` in this folder (an OIDC token, refreshed automatically on a 401) or set `AI_GATEWAY_API_KEY`. Spend is tracked in `.ledger/` and capped (default $12, hard ceiling $30).
 
 ## The obstacles
 

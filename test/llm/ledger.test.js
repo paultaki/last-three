@@ -44,8 +44,8 @@ test('cap is clamped to the hard ceiling', () => {
   const { make } = fresh();
   const ledger = make({ capUsd: 500 });
   assert.equal(ledger.cap, HARD_CEILING_USD);
-  assert.equal(HARD_CEILING_USD, 18);
-  assert.throws(() => ledger.assertCanSpend(19), SpendCapError);
+  assert.equal(HARD_CEILING_USD, 30);
+  assert.throws(() => ledger.assertCanSpend(31), SpendCapError);
 });
 
 test('default cap is $12', () => {

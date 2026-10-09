@@ -7,7 +7,7 @@ const PROJECT_ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const MODELS_URL = 'https://ai-gateway.vercel.sh/v1/models';
 const PRICE_TTL_MS = 24 * 60 * 60 * 1000;
 /** No matter what cap is requested, total spend never goes above this. */
-export const HARD_CEILING_USD = 18;
+export const HARD_CEILING_USD = 30;
 export const DEFAULT_CAP_USD = 12;
 const UNKNOWN_PRICE = { input: 1 / 1e6, output: 5 / 1e6 };
 
