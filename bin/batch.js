@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // Play many LLM games under a spend cap.
-// Usage: node bin/batch.js --games N [--start-seed S] [--cap USD] [--per-game-cap USD] [--concurrency 2] [--tier cheap|heavy|premium]
+// Usage: node bin/batch.js --games N [--start-seed S] [--cap USD] [--per-game-cap USD] [--concurrency 2] [--tier cheap|heavy|premium|frontier]
 import { parseArgs } from 'node:util';
 import { pathToFileURL } from 'node:url';
 import { createLedger, SpendCapError } from '../src/llm/ledger.js';
-import { DEFAULT_ROSTER, HEAVY_ROSTER, PREMIUM_ROSTER } from '../src/llm/llmAgent.js';
+import { DEFAULT_ROSTER, HEAVY_ROSTER, PREMIUM_ROSTER, FRONTIER_ROSTER } from '../src/llm/llmAgent.js';
 import { playLlmGame, resolveRoster, saveTape } from './run-llm.js';
 
 const DEFAULT_PER_GAME_CAP_USD = 0.6;
@@ -97,8 +97,8 @@ async function main() {
     perGameCapUsd: opts.perGameCapUsd,
   });
   await ledger.ready();
-  const rosters = { cheap: DEFAULT_ROSTER, heavy: HEAVY_ROSTER, premium: PREMIUM_ROSTER };
-  if (!rosters[opts.tier]) throw new Error('--tier must be cheap, heavy or premium');
+  const rosters = { cheap: DEFAULT_ROSTER, heavy: HEAVY_ROSTER, premium: PREMIUM_ROSTER, frontier: FRONTIER_ROSTER };
+  if (!rosters[opts.tier]) throw new Error('--tier must be cheap, heavy, premium or frontier');
   const models = await resolveRoster(rosters[opts.tier], ledger);
   const result = await runBatch({ ...opts, ledger, models });
   console.log(`done: ${result.played} played, ${result.failed} failed${result.stopped ? `; stopped: ${result.stopped}` : ''}`);

@@ -39,6 +39,18 @@ export const PREMIUM_ROSTER = [
   'deepseek/deepseek-v4-pro',
 ];
 
+/** Frontier roster: the newest flagship from each maker (about $1.35 a game at October 2026 prices). */
+export const FRONTIER_ROSTER = [
+  'anthropic/claude-opus-5.5',
+  'openai/gpt-6.1-sol',
+  'google/gemini-3.1-pro-preview',
+  'spacexai/grok-4.7',
+  'moonshotai/kimi-k3',
+  'alibaba/qwen3.8-max-prime',
+  'deepseek/deepseek-v4-pro-0813',
+  'zai/glm-5.3',
+];
+
 /** Substitutes for any roster model that fails its probe. */
 export const RESERVE_MODELS = [
   'mistral/mistral-small',
