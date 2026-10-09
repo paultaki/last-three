@@ -7,3 +7,11 @@
 - Reached-ledge finalists can be dead and still have a valid podium place. The podium and chalk epilogue must show them.
 - Presentation clocks cannot change tape outcomes. A settled event has the same projected positions and camera after forward or backward seeking.
 - Source models and private cast exports are ignored. Do not add them or screenshots containing those assets to public Git without publication clearance.
+
+## Video presentation
+
+- Film view is the default. Studio is available with `view=studio`; clean frame affects composition, never tape state.
+- `web/demo.json` remains the shared editorial source. The film player derives a sorted, unique, visibility-filtered event list and stops at its last beat. Loading another tape exits the edit.
+- Dialogue uses current event text only, with `textContent`. Hidden private events cannot leave a stale speech bubble. Director thoughts and whispers have explicit labels. Forged public speech follows the visible identity.
+- A speaking passage is never truncated. Its hold is proportional to word count, and pause freezes its current page. Tape text is quoted verbatim, including any original punctuation.
+- Bridge contestants sharing a known-safe pane receive small standing offsets on that same pane. Film wall cutaways and treading-water height are staging changes, not changed recorded outcomes.

@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · codex (video-first show)
+- **Did:** reframed the show for Paul's narrated YouTube overview: default 16:9 film view, larger dialogue coverage, named speech/thought/whisper bubbles, reading-paced pagination, a 44-beat curated cut, F/Escape clean frame, visible shove approach, bridge spacing, Pit swimming pose and chalk text spacing. Exported a local silent 1920x1080 MP4, 216.56 seconds, and checked its frames.
+- **Why:** the primary deliverable is a demo film, so dialogue and character actions now dominate while editing controls stay outside the recording frame.
+- **Next:** Paul can narrate or edit docs/show/recordings/video-first-story.mp4 and inspect the local film at port 8843. No additional build work remains in this pass; asset publication clearance remains as previously documented.
+- **Watch out:** 395 tests, 113 tapes and both film/studio browser checks pass. The critical Claude review timed out at 180 seconds without a verdict and was auto-closed; no retry or fallback. Studio pixel checks permit only a tiny bounded label-antialiasing variance. Capture requires explicit Chrome window bounds to avoid an 86-pixel crop. Purchased-cast visuals remain ignored; no push or public upload.
+
 ## 2026-10-08 · codex (3D show local delivery)
 - **Did:** finished and locally verified the 3D show, corrected bridge crowd and death framing, Pit water volume, trapdoor openings and mobile labels; added a launcher, a scene reel, stage/death screenshots, and delivery notes. Actual npm run check passes (391 tests, 113 tapes); browser checks at 390/768/1440 pass, including identical settled pixels after reverse seeks. Loaded content is about 4.35 MB.
 - **Why:** the existing tape mechanics now have a separate visual broadcast with the selected Synty cast, original stage architecture, sound and accessible transport.

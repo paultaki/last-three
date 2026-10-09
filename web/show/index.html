@@ -62,6 +62,7 @@
           <div id="viewport">
             <div id="canvas"></div>
             <div id="labels" aria-hidden="true"></div>
+            <div id="film-overlay" hidden></div>
             <div class="corner tl"></div>
             <div class="corner br"></div>
             <span class="arena-stamp">LAST THREE / ARENA FEED</span>
@@ -76,6 +77,14 @@
               ><span id="event-counter">000 / 000</span>
             </div>
             <p id="caption" aria-live="polite">Loading the recording.</p>
+          </div>
+          <div class="film-controls">
+            <button id="demo">Play the story cut</button>
+            <button id="presentation" aria-pressed="true">Film view</button>
+            <button id="clean-frame" aria-pressed="false">
+              Clean frame (F)
+            </button>
+            <span id="edit-status">Full recording</span>
           </div>
           <div class="transport">
             <button

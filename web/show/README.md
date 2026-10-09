@@ -33,3 +33,14 @@ Browser checks require local Chrome; set SHOW_BROWSER for another installed Play
 Controls: play/pause, previous/next visible event, exact-event scrubber, 1x/2x/4x, chapter buttons, director mode, camera wide/cinema, graphics quality and audio. Space plays/pauses outside controls, arrows step, D toggles director. Focused controls retain native keyboard behavior. Reduced motion removes camera drift, character movement and particles.
 
 All clocks are event-local. A settled seek is independent of previous playback. No physics engine or audio timing can change an outcome. Untrusted tape text always uses textContent or canvas text drawing.
+
+## Film presentation
+
+The show now opens in a 16:9 film view. The cast and dialogue occupy the frame; transport and editing controls sit below it. **Play the story cut** loads the existing curated tape, with director thoughts enabled and explicit thought/whisper labels. The reading-paced cut is about 3 minutes 17 seconds, longer than the legacy viewer's cut.
+
+- **F** opens a clean recording frame. **Escape** returns to controls. Space pauses or resumes; arrows step between beats; D toggles private thoughts.
+- Speech is paged without deleting any recorded words. Pause also pauses reading progress. White bubbles are spoken lines, dark gold bubbles are private thoughts, and dashed bubbles are whispers.
+- The **Film view** button switches to the existing studio controls for choosing a tape, graphics quality, sound, or a wide camera. `?view=studio` opens those controls directly.
+- Local film link: `http://127.0.0.1:8843/last-three/show/?cast=city&tape=20261009-0025&edit=story&i=82`
+- Clean capture adds `&clean=1`. Capture at 1920 x 1080 for YouTube. The small-screen page is a preview of that landscape composition, not a mobile reading layout.
+- With the local server running, `node web/show/tools/record-film.mjs` captures a silent 1080p WebM plus trim metadata into the ignored `docs/show/recordings/` directory. Add narration in an editor. Purchased-cast recordings remain local under the existing asset publication restriction.

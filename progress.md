@@ -1,0 +1,9 @@
+Original prompt: "this is going to be more of a demo video than it will be for someone to go use. All the heads-up display things, keep those to a minimum."
+
+2026-10-08: Reframe the local show for a narrated YouTube overview. Default 16:9 film presentation, large cast closeups, one readable speech bubble at a time, explicit private thoughts, clean recording frame, and the existing curated dramatic cut. Keep tape outcomes and public/director privacy unchanged. Browser proof and one critical playback review before delivery.
+
+Implemented the film frame, dialogue coverage, reading beats, story cut, clean-frame controls, shove approach, bridge spacing and Pit treading-water pose. All 44 selected beats exercised at 1080p. Skill client ran using a temporary copy adapted only to resolve the project's Playwright dependency and installed Chrome. Studio pixel comparison exposed fractional label-border rasterization; label positions now snap to whole CSS pixels. Final gate and reviewer pending.
+
+Critical review b05e3554-4121-42c9-8969-a4eeb420b6f5 timed out at 180 seconds and auto-closed as stopped. No verdict, retry or fallback. Primary checks passed. Export QA caught Chrome's capture surface clipping its 86-pixel window frame; explicit 1920x1166 browser bounds produce the full 1920x1080 recording. Chalk notes now fit separate lines. Replacement capture and final checks running.
+
+Completed: replacement MP4 verified at 1920x1080, 25 fps, 216.56 seconds, with no crop or browser errors. Final repository and film/studio checks pass. No pending implementation TODOs for this pass. Independent review remains unavailable after the bounded timeout. Asset publication clearance and Paul's narration/editorial choices remain outside local build completion.

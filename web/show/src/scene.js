@@ -16,6 +16,7 @@ import {
   textPlate,
 } from "./sets.js";
 import { presentation, COLORS } from "./model.js";
+import { filmShot, dialogue } from "./film.js";
 const X = new T.Vector3(1, 0, 0),
   Y = new T.Vector3(0, 1, 0),
   Z = new T.Vector3(0, 0, 1);
@@ -230,6 +231,7 @@ export class Arena {
     this.prev = prev;
     this.view = presentation(s, prev, cut);
     this.cut = cut;
+    this.dialogue = this.film ? dialogue(s, cut) : null;
     if (this.set?.key !== this.view.key) {
       if (this.set) disposeSet(this.set);
       this.set = buildSet(this.view.key);
@@ -257,10 +259,10 @@ export class Arena {
           str,
           11,
           0,
-          2.5 - i * 0.55,
+          (s.stage === "lobby" ? 1.6 : 2.5) - i * 0.7,
           s.stage === "chalk" ? -4.34 : -5.2,
           "#d8e4c9",
-        );
+        ).scale.y = 0.35;
       });
     }
   }
@@ -318,7 +320,10 @@ export class Arena {
       this.rotate(c, "upperarm_l", X, -stride);
       this.rotate(c, "upperarm_r", X, stride);
     }
-    if (["base", "brace"].includes(a.pose)) {
+    if (
+      ["base", "brace"].includes(a.pose) &&
+      !(this.film && this.dialogue && a.active)
+    ) {
       this.rotate(c, "spine_01", X, 0.5);
       this.rotate(c, "thigh_l", X, -0.5);
       this.rotate(c, "thigh_r", X, -0.5);
@@ -334,6 +339,9 @@ export class Arena {
     const t = this.reduced ? 0 : Math.min(seconds, 2.8),
       p = this.reduced ? 1 : ease(Math.min(1, t / 1.15));
     updateSet(this.set, s, t);
+    // Remove the near wall only in dialogue coverage, like a practical cutaway set.
+    if (this.set.refs.wall)
+      this.set.refs.wall.visible = !(this.film && this.dialogue);
     this.view.actors.forEach((a, i) => {
       const c = this.cast[i];
       c.group.visible = a.visible;
@@ -354,7 +362,44 @@ export class Arena {
           : v.key === "ledge"
             ? Math.atan2(-a.position[0], -a.position[2])
             : 0.12;
+      if (this.film && this.dialogue && a.active) c.group.rotation.y = 0.28;
+      if (this.film && ["shove", "flinch"].includes(a.pose)) {
+        const otherName =
+          a.pose === "shove" ? String(s.ev.action).split(":")[1] : s.ev.name;
+        const other = v.actors.find((b) => b.name === otherName && b.visible);
+        if (other) {
+          const direction = new T.Vector3(...other.position).sub(
+            new T.Vector3(...a.position),
+          );
+          const distance = direction.length();
+          direction.normalize();
+          c.group.rotation.y = Math.atan2(direction.x, direction.z);
+          if (a.pose === "shove")
+            c.group.position.addScaledVector(
+              direction,
+              Math.max(0, distance - 1.05) * Math.sin(p * Math.PI),
+            );
+          else
+            c.group.position.addScaledVector(
+              direction,
+              -0.22 * Math.sin(p * Math.PI),
+            );
+        }
+      }
+      if (
+        this.film &&
+        v.key === "pit" &&
+        a.position[1] < 0 &&
+        a.pose !== "sink"
+      ) {
+        const waterTop = -0.55 + Math.min(5, s.pit.flood) * 0.44;
+        c.group.position.y = Math.max(c.group.position.y, waterTop - 1.5);
+      }
       this.pose(c, a, t);
+      if (this.film && this.dialogue && a.active && !this.reduced) {
+        this.rotate(c, "upperarm_r", X, -0.4 - Math.sin(t * 3) * 0.18);
+        this.rotate(c, "lowerarm_r", X, -0.7);
+      }
       if (!this.reduced) c.puppet.position.y += Math.sin(t * 2 + i) * 0.015;
       if (a.pose === "flinch") {
         c.puppet.rotation.x = -Math.sin(p * Math.PI) * 0.3;
@@ -393,14 +438,14 @@ export class Arena {
       }
       c.ring.material.opacity = a.active ? 0.95 : 0.32;
       c.ring.scale.setScalar(a.active ? 1.15 : 1);
-      c.ring.visible = !v.death || !a.active;
+      c.ring.visible = !this.film && (!v.death || !a.active);
       const label = this.labels[i];
       label.textContent =
         String(i + 1).padStart(2, "0") +
         (this.host.clientWidth < 600 && !a.active ? "" : " " + a.name);
       label.title = a.name;
       label.classList.toggle("speaking", a.active);
-      label.hidden = !a.visible || (v.death && a.active);
+      label.hidden = this.film || !a.visible || (v.death && a.active);
     });
     if (this.set.refs.rope && s.pit.rope) {
       const by = this.cast[s.order.indexOf(s.pit.rope.by)],
@@ -474,6 +519,13 @@ export class Arena {
         }
       }
     }
+    if (this.film && this.mode === "cinema") {
+      const shot = filmShot(v, s, this.cut, p);
+      if (shot) ({ eye, target } = shot);
+      else {
+        eye = eye.map((n, i) => target[i] + (n - target[i]) * 0.83);
+      }
+    }
     if (mobile) {
       eye = eye.map((n, i) => target[i] + (n - target[i]) * 1.06);
     }
@@ -491,11 +543,29 @@ export class Arena {
           .add(new T.Vector3(0, 2.35, 0))
           .project(this.camera);
       const label = this.labels[i];
-      label.style.left = (vec.x * 0.5 + 0.5) * 100 + "%";
-      label.style.top = (-vec.y * 0.5 + 0.5) * 100 + "%";
+      label.style.left =
+        Math.round((vec.x * 0.5 + 0.5) * this.host.clientWidth) + "px";
+      label.style.top =
+        Math.round((-vec.y * 0.5 + 0.5) * this.host.clientHeight) + "px";
       if (vec.z > 1 || Math.abs(vec.x) > 0.97 || Math.abs(vec.y) > 0.95)
         label.hidden = true;
     });
+    this.speakerAnchor = null;
+    if (this.dialogue) {
+      const speaker = this.cast[s.order.indexOf(this.dialogue.name)];
+      if (speaker) {
+        const point = speaker.group.position
+          .clone()
+          .add(new T.Vector3(0, 2.15, 0))
+          .project(this.camera);
+        this.speakerAnchor = {
+          x: point.x * 0.5 + 0.5,
+          y: -point.y * 0.5 + 0.5,
+          visible:
+            point.z < 1 && Math.abs(point.x) < 1 && Math.abs(point.y) < 1,
+        };
+      }
+    }
     this.effects.visible = v.death && !this.reduced;
     const victim = v.actors.find((a) => a.active);
     if (victim) {
@@ -515,8 +585,8 @@ export class Arena {
     const occupied = [];
     for (const label of this.labels) {
       if (label.hidden) continue;
-      let x = (parseFloat(label.style.left) / 100) * this.host.clientWidth,
-        y = (parseFloat(label.style.top) / 100) * this.host.clientHeight;
+      let x = parseFloat(label.style.left),
+        y = parseFloat(label.style.top);
       for (
         let attempt = 0;
         attempt < 3 &&
@@ -529,7 +599,7 @@ export class Arena {
       )
         y -= 22;
       y = Math.max(20, y);
-      label.style.top = (y / this.host.clientHeight) * 100 + "%";
+      label.style.top = Math.round(y) + "px";
       occupied.push({ x, y });
     }
     if (this.quality === "lite") this.renderer.render(this.scene, this.camera);

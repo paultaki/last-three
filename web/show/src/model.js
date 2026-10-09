@@ -120,6 +120,23 @@ export function positions(s, cut = false) {
       ];
     } else out[n] = [-5.25 + (i % 4) * 3.5, 0, 2.5 - Math.floor(i / 4) * 3];
   }
+  // Two followers can share a known-safe pane. Give each a distinct standing spot.
+  if (key === "bridge") {
+    const groups = new Map();
+    for (const n of living) {
+      const key = out[n].join(",");
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(n);
+    }
+    for (const names of groups.values())
+      if (names.length > 1) {
+        names.forEach((n, i) => {
+          out[n][0] += ((i % 2) - 0.5) * 1.1;
+          out[n][2] +=
+            (Math.floor(i / 2) - (Math.ceil(names.length / 2) - 1) / 2) * 0.8;
+        });
+      }
+  }
   return out;
 }
 export function presentation(s, previous, cut = false) {

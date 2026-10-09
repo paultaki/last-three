@@ -9,3 +9,7 @@
 - Foundation review: five accepted findings fixed; two unsupported assumptions rejected and documented with regression coverage.
 - Final polish: volumetric Pit water, open trapdoor shafts, explicit bridge break visibility, bridge death camera correction, compact mobile labels, and pixel-equality seek checks.
 - Integrated reviewer timed out without a verdict; recorded honestly, no retry.
+
+## 2026-10-08: Video-first presentation
+
+Made film view the default with a 16:9 clean frame, closer dialogue cameras, named speech/thought/whisper bubbles and word-count reading holds. Added the existing curated story sequence, explicit end/restart behavior, F/Escape clean-frame controls, paired shove coverage, distinct bridge standing spots, Pit swimming height and corrected chalk-board spacing. Added film tests, browser proofs and a local narration capture utility. Critical review timed out without a verdict; no retry or fallback.
