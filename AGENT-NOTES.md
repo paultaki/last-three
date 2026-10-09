@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-09 · codex (second audience pass)
+- **Did:** ranked 20 further opportunities and implemented eight: bridge cutaways and lane labels, distinct public gestures and quiet private poses, power explanation/lift, zero-footing danger, rejected-action clarity, named podium finish.
+- **Why:** the first film still obscured some faces and left important mechanics or intentions visually ambiguous.
+- **Next:** critical integrated review and refreshed video export. The twelve unselected items are ranked in docs/show/AUDIENCE-OPPORTUNITIES-2.md.
+- **Watch out:** 413 tests, 113 tapes and performance/direction/film/Studio browser checks pass. Thought/whisper/anchor/rejection visibility follows isStepWorthy. No tape, outcomes or legacy viewer edits. Export and review are separate pending gates.
+
 ## 2026-10-09 · codex (audience direction)
 - **Did:** ranked 20 opportunities and implemented the nine selected in docs/show/AUDIENCE-OPPORTUNITIES.md: forged sender reveal, public/private motive receipts, restored story continuity, betrayal callback, Cole contradiction, pit confrontation framing, focal names, staged shove contact/recoil and delayed consequences with witness attention.
 - **Why:** the demo needs viewers to understand who is using whom and feel the consequences without a roster HUD or invented dialogue.

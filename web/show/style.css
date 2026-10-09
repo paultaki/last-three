@@ -1025,3 +1025,67 @@ body.clean #viewport {
 #film-overlay[data-rule="true"] .film-beat span {
   font-size: 1cqw;
 }
+
+/* Temporary editorial context, never a persistent game HUD. */
+.context-card {
+  position: absolute;
+  left: 18%;
+  bottom: 5%;
+  width: 64%;
+  padding: 1.2cqw 1.6cqw;
+  border-left: 0.3cqw solid #a9dae0;
+  background: #0c1929f2;
+  color: #fff7e6;
+}
+.context-card > span {
+  display: block;
+  font-size: 0.85cqw;
+  letter-spacing: 0.13em;
+  color: #a9dae0;
+  font-weight: 800;
+}
+.context-card strong {
+  display: block;
+  font-size: 2.5cqw;
+  line-height: 1.1;
+  margin-top: 0.45cqw;
+}
+.context-card p {
+  font-size: 1.25cqw;
+  line-height: 1.3;
+  margin: 0.55cqw 0 0;
+}
+.context-card[data-kind="danger"],
+.context-card[data-kind="rejected"] {
+  border-color: #ff9a80;
+}
+.context-card[data-kind="danger"] > span,
+.context-card[data-kind="rejected"] > span {
+  color: #ffb49b;
+}
+.film-finish {
+  position: absolute;
+  top: 12%;
+  left: 4%;
+  color: #ffe0a4;
+}
+.film-finish span {
+  display: block;
+  font-size: 0.9cqw;
+  letter-spacing: 0.2em;
+}
+.film-finish strong {
+  display: block;
+  font-size: 3.4cqw;
+  line-height: 1.15;
+}
+.speech-leader[data-kind="thought"] path {
+  stroke-dasharray: 2 9;
+  stroke: #efd494;
+}
+.speech-leader[data-kind="thought"] circle {
+  fill: #efd494;
+}
+.speech-leader[data-kind="whisper"] path {
+  stroke-dasharray: 8 6;
+}

@@ -298,6 +298,8 @@ export function buildSet(key) {
       box(g, 0.06, 0.08, 23, x, -0.17, -0.5, mats.cyan);
     }
     refs.panes = [];
+    refs.bridgePosts = [];
+    refs.laneLabels = [];
     for (let i = 0; i < 8; i++)
       for (let j = 0; j < 2; j++) {
         const z = 10 - (i + 1) * 2.35,
@@ -308,6 +310,17 @@ export function buildSet(key) {
           box(g, 2.88, 0.18, 0.09, x, -0.15, z + dz, mats.metal);
         const p = box(g, 2.62, 0.15, 1.98, x, 0, z, mats.glass);
         refs.panes.push(p);
+        const lane = textPlate(
+          g,
+          `${i + 1} / ${j ? "RIGHT" : "LEFT"}`,
+          1.4,
+          x,
+          0.11,
+          z + 0.58,
+          "#fff5db",
+        );
+        lane.rotation.x = -Math.PI / 2;
+        refs.laneLabels.push(lane);
         box(g, 2.4, 0.045, 0.025, x, 0.09, z + 0.85, mats.cyan);
         textPlate(
           g,
@@ -319,8 +332,9 @@ export function buildSet(key) {
         ).rotation.x = -Math.PI / 2;
       }
     for (let z of [-12, 11.5]) {
-      box(g, 8, 0.2, 0.2, 0, 5, z, mats.gold);
-      for (let x of [-4, 4]) box(g, 0.23, 5, 0.23, x, 2.5, z, mats.metal);
+      refs.bridgePosts.push(box(g, 8, 0.2, 0.2, 0, 5, z, mats.gold));
+      for (let x of [-4, 4])
+        refs.bridgePosts.push(box(g, 0.23, 5, 0.23, x, 2.5, z, mats.metal));
     }
     textPlate(g, "01 / TRUST YOUR STEP", 6, 0, 4, -12);
     stripes(g, 12, -3.4, 0.01, 10.3);

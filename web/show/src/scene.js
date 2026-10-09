@@ -1,3 +1,9 @@
+import {
+  gesturePose,
+  contextBeat,
+  finalists,
+  powerLift,
+} from "./performance.js";
 import { contactBeat, deathProgress } from "./direction.js";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -384,6 +390,14 @@ export class Arena {
         o.visible = !cutaway;
       });
     }
+    if (this.set.refs.bridgePosts)
+      this.set.refs.bridgePosts.forEach((o) => {
+        o.visible = !(this.film && this.mode === "cinema" && this.dialogue);
+      });
+    if (this.set.refs.laneLabels)
+      this.set.refs.laneLabels.forEach((o, i) => {
+        o.visible = !!this.film && this.set.refs.panes[i].visible;
+      });
     // Remove the near wall only in dialogue coverage, like a practical cutaway set.
     if (this.set.refs.wall)
       this.set.refs.wall.visible = !(this.film && this.dialogue);
@@ -458,9 +472,34 @@ export class Arena {
         c.group.position.y = Math.max(c.group.position.y, waterTop - 1.5);
       }
       this.pose(c, a, t);
-      if (this.film && this.dialogue && a.active && !this.reduced) {
-        this.rotate(c, "upperarm_r", X, -0.4 - Math.sin(t * 3) * 0.18);
-        this.rotate(c, "lowerarm_r", X, -0.7);
+      if (this.film && this.dialogue && a.active) {
+        const [ul, ur, ll, lr, head] = gesturePose(
+          this.performanceKind,
+          t,
+          this.reduced,
+        );
+        this.rotate(c, "upperarm_l", X, ul);
+        this.rotate(c, "upperarm_r", X, ur);
+        this.rotate(c, "lowerarm_l", X, ll);
+        this.rotate(c, "lowerarm_r", X, lr);
+        this.rotate(c, "head", X, head);
+      }
+      if (this.film && v.key === "disc" && this.discSaves?.includes(a.name)) {
+        c.puppet.position.y +=
+          a.active && s.ev?.type === "ability_use"
+            ? powerLift(s, this.cut, t, this.reduced)
+            : 0.55;
+      }
+      if (this.film && a.active && contextBeat(s, this.cut)?.kind === "power") {
+        if (s.ev.power === "feather") {
+          this.rotate(c, "upperarm_l", Z, 0.45);
+          this.rotate(c, "upperarm_r", Z, -0.45);
+        } else if (s.ev.power === "anchor") {
+          c.group.rotation.y = Math.PI;
+          this.rotate(c, "spine_01", X, 0.14);
+          this.rotate(c, "thigh_l", X, -0.18);
+          this.rotate(c, "thigh_r", X, -0.18);
+        }
       }
       if (
         this.film &&
@@ -649,7 +688,8 @@ export class Arena {
       if (vec.z > 1 || Math.abs(vec.x) > 0.97 || Math.abs(vec.y) > 0.95)
         label.hidden = true;
     });
-    const focal = new Set();
+    const podium = this.film ? finalists(s) : [];
+    const focal = new Set(podium.map((p) => p.name));
     if (this.film) {
       if (this.dialogue) {
         focal.add(this.dialogue.name);
@@ -659,16 +699,29 @@ export class Arena {
         const target = String(s.ev.action).split(":")[1];
         if (s.players[target]) focal.add(target);
       } else if (v.death && p < 0.8) focal.add(v.actor);
+      else if (contextBeat(s, this.cut)?.kind === "power") focal.add(v.actor);
     }
     this.focalAnchors = v.actors
       .filter((a) => focal.has(a.name) && a.visible)
       .map((a) => {
         const point = this.cast[a.seat].group.position
           .clone()
-          .add(new T.Vector3(0, 2.25, 0))
+          .add(
+            new T.Vector3(
+              0,
+              2.25 +
+                (this.discSaves?.includes(a.name) && this.film
+                  ? this.cast[a.seat].puppet.position.y
+                  : 0),
+              0,
+            ),
+          )
           .project(this.camera);
         return {
           name: a.name,
+          label: podium.some((p) => p.name === a.name)
+            ? `${["", "1ST", "2ND", "3RD"][a.place]} · ${a.name}`
+            : a.name,
           color: a.color,
           x: point.x * 0.5 + 0.5,
           y: -point.y * 0.5 + 0.5,

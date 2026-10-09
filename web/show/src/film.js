@@ -1,3 +1,4 @@
+import { contextBeat, finalists } from "./performance.js";
 import { consequence } from "./direction.js";
 import {
   visibleActor,
@@ -78,6 +79,9 @@ export function filmDuration(s, cut, directing = {}) {
     );
   }
   if (directing.receipt) return readingTime(directing.receipt.text) + 2400;
+  const context = contextBeat(s, cut);
+  if (context) return readingTime(context.title + " " + context.detail) + 800;
+  if (s.ev?.type === "game_end") return 6500;
   return s.ev?.type === "death"
     ? 5400
     : s.ev?.type === "stage_start"
@@ -112,6 +116,8 @@ export function filmShot(view, state, cut, p, directing = {}) {
   if (view.key === "crusher" && (crusherDive(state) || state.crusher.escaped)) {
     return { eye: [15, 3, -1.8], target: [0, 1, -4.5] };
   }
+  if (state.ev?.type === "game_end")
+    return { eye: [4, 6, 16], target: [0, 2, 0] };
   const speaker = dialogue(state, cut);
   const actor = view.actors.find((a) => a.name === view.actor && a.visible);
   if (speaker && actor && directing.pit) {
@@ -125,6 +131,12 @@ export function filmShot(view, state, cut, p, directing = {}) {
       eye: [x + 3.6, y + 2.9, z + 6.8],
       target: [x + 1.65, y + 1.6, z - 0.4],
     };
+  }
+  if (actor && contextBeat(state, cut)?.kind === "power") {
+    const [x, y, z] = actor.position;
+    if (view.key === "crusher")
+      return { eye: [x - 3, y + 2.7, z - 5.5], target: [x, y + 1, z] };
+    return { eye: [x + 4, y + 3.4, z + 7.8], target: [x + 1, y + 1, z] };
   }
   if (actor && state.ev?.type === "action") {
     const name = String(state.ev.action).split(":")[1];
@@ -167,7 +179,7 @@ export class FilmOverlay {
     this.host = host;
     this.directing = {};
     host.innerHTML =
-      '<div class="film-heading"><span>LAST THREE</span><b></b></div><svg class="speech-leader" aria-hidden="true"><path/><circle r="5"/></svg><article class="speech-bubble" hidden aria-live="polite"><div class="speaker"><strong></strong><span></span></div><p></p><small></small></article><aside class="evidence-card" hidden><span></span><p></p><small></small></aside><div class="focal-names"></div><div class="film-stakes" hidden></div><div class="consequence" hidden><span>THE CONSEQUENCE</span><strong></strong><p></p></div><div class="film-beat" hidden><span></span><p></p></div>';
+      '<div class="film-heading"><span>LAST THREE</span><b></b></div><svg class="speech-leader" aria-hidden="true"><path/><circle r="5"/></svg><article class="speech-bubble" hidden aria-live="polite"><div class="speaker"><strong></strong><span></span></div><p></p><small></small></article><aside class="evidence-card" hidden><span></span><p></p><small></small></aside><div class="focal-names"></div><div class="film-stakes" hidden></div><div class="consequence" hidden><span>THE CONSEQUENCE</span><strong></strong><p></p></div><aside class="context-card" hidden><span></span><strong></strong><p></p></aside><div class="film-finish" hidden><span>THE LAST THREE</span><strong></strong></div><div class="film-beat" hidden><span></span><p></p></div>';
     this.bubble = host.querySelector("article");
     this.leader = host.querySelector("svg");
     this.beat = host.querySelector(".film-beat");
@@ -175,11 +187,24 @@ export class FilmOverlay {
     this.names = host.querySelector(".focal-names");
     this.stakes = host.querySelector(".film-stakes");
     this.outcome = host.querySelector(".consequence");
+    this.context = host.querySelector(".context-card");
+    this.finish = host.querySelector(".film-finish");
   }
   setState(state, cut, directing = {}) {
     this.state = state;
     this.directing = directing;
     this.result = consequence(state);
+    const context = contextBeat(state, cut),
+      podium = finalists(state);
+    this.context.hidden = !context;
+    this.context.dataset.kind = context?.kind || "";
+    this.context.querySelector("span").textContent = context?.label || "";
+    this.context.querySelector("strong").textContent = context?.title || "";
+    this.context.querySelector("p").textContent = context?.detail || "";
+    this.finish.hidden = !podium.length;
+    this.finish.querySelector("strong").textContent = podium.length
+      ? `${podium[0].name} wins.`
+      : "";
     this.names.replaceChildren();
     this.evidence.hidden = true;
     this.outcome.hidden = true;
@@ -198,6 +223,7 @@ export class FilmOverlay {
     this.leader.toggleAttribute("hidden", !this.d);
     if (this.d) {
       this.bubble.dataset.kind = this.d.kind;
+      this.leader.dataset.kind = this.d.kind;
       this.bubble.style.setProperty("--speaker", this.d.color);
       this.bubble.querySelector("strong").textContent = this.d.name;
       this.bubble.querySelector(".speaker span").textContent = directing.forged
@@ -211,7 +237,8 @@ export class FilmOverlay {
     const hiddenPrivate =
       ["thought", "whisper"].includes(state.ev?.type) && !cut;
     const caption = cut ? state.captionCut : state.caption;
-    this.beat.hidden = !!this.d || hiddenPrivate;
+    this.beat.hidden =
+      !!this.d || hiddenPrivate || !!context || !!podium.length;
     this.beat.querySelector("span").textContent =
       state.ev?.type === "stage_start" ? "THE RULE" : "";
     this.beat.querySelector("p").textContent =
@@ -269,7 +296,7 @@ export class FilmOverlay {
       const n = visibleNames[i];
       el.hidden = !n;
       if (!n) return;
-      el.textContent = n.name;
+      el.textContent = n.label || n.name;
       el.style.left = `${n.x * 100}%`;
       el.style.top = `${n.y * 100}%`;
       el.style.setProperty("--speaker", n.color);

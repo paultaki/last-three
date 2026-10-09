@@ -1,3 +1,4 @@
+import { performanceKind, discSaves, contextBeat } from "./performance.js";
 import { direction, directedList } from "./direction.js";
 import { FilmOverlay, filmDuration, editList } from "./film.js";
 import { Arena } from "./scene.js";
@@ -163,6 +164,8 @@ function seek(i, { sound = false } = {}) {
   directing = direction(tape, state, cut);
   arena.setState(state, previous, cut);
   arena.direction = directing;
+  arena.performanceKind = performanceKind(state, cut, tape.id);
+  arena.discSaves = discSaves(tape, state, cut);
   overlay.setState(state, cut, directing);
   arena.render(0);
   overlay.render(0, arena.speakerAnchor, arena.focalAnchors);
@@ -490,6 +493,8 @@ async function init() {
       dialogue: overlay.d,
       page: overlay.currentPage,
       direction: directing,
+      performance: arena.performanceKind,
+      context: contextBeat(state, cut),
       actors: arena.view?.actors,
       coordinates: "world units; x right, y up, z toward front",
     });
