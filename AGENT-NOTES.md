@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · codex (3D show planning)
+- **Did:** organized 665 Synty City Characters files in the shared Blender library with hash verification, indexed 19 rigs, and documented The Broadcast art direction, asset register and staged build plan.
+- **Why:** Paul selected this cast and requested a premium 3D map with reviews only at critical checkpoints.
+- **Next:** implement and verify the tape-driven local show; first critical review covers replay state and Pit mechanics.
+- **Watch out:** purchased character source/export files stay out of public git; current Synty terms need publication clarification for this AI replay product. Pre-existing untracked web/tapes/demo.json lacks version metadata and fails the repository validation gate. Do not overwrite that file.
+
 ## 2026-10-09 · claude-code (rules v4)
 - **Did:** Paul raised the model budget to $30 and I used it on the chalk wall he asked for in his first message (survivors leave warnings for the next contestants): rules v4 adds config.chalk input, `chalkWall` in every view, a `chalk` epilogue stage where the top three write one note each, `chalk_read`/`chalk_write` events, rope cost 2, a persistent store `data/chalk.json` (src/llm/chalk.js, uses the engine's sanitiser), the viewer's chalkboard and epilogue scene, premium roster (`--tier premium`). A Grok review (Codex was at capacity, then its safety filter flagged the brief) found six issues in note quoting, validation and the sanitiser charset; all reproduced and fixed. 381 tests, 300-game fuzz, 106+ tapes validate, 2,497 viewer checks. 27 real v4 tapes.
 - **Why:** The chalk wall is cross-game memory: it lets a culture of honest and dishonest advice form between games, and makes agents decide whom to trust.
