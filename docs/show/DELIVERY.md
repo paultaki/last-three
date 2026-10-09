@@ -18,7 +18,7 @@ Local preview: http://127.0.0.1:8843/last-three/show/?cast=city&tape=20261009-00
 
 - Actual repository npm run check: 391 tests passed and 113 tapes validated. The earlier invalid untracked demo blocker was resolved by the concurrent legacy-viewer work; this build did not edit its tape.
 - Browser checks at 390, 768 and 1440 px: no console errors, no horizontal overflow, stage snapshots with pixel-equal reverse seeks, controls, public/director visibility, asynchronous tape switching, rope rescue and all 512 events of the v4 fixture.
-- Local scene screenshots and a 36.8-second scene reel are under ignored docs/show/screens and docs/show/recordings. The reel is an edited sequence of replay positions, not an uninterrupted full game. It has no recorded audio track.
+- Local scene screenshots and a 38.4-second scene reel are under ignored docs/show/screens and docs/show/recordings. The reel is an edited sequence of replay positions, not an uninterrupted full game. It has no recorded audio track.
 - Eight private character GLBs total about 3.5 MB. The full tested viewer loaded about 4.35 MB decoded content. Auto quality uses Lite at 390 px and Balanced at 768/1440. Local headless Chrome median frames were about 16.7 ms; see browser-results.json for exact run data.
 - No physical phone, Safari or Firefox performance claim. Chrome viewport emulation is not device QA.
 
