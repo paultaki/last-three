@@ -23,7 +23,7 @@ export const HEAVY_ROSTER = [
   'moonshotai/kimi-k2.6',
   'deepseek/deepseek-v4-pro',
   'alibaba/qwen3.8-max',
-  'spacexai/grok-4.1-fast-reasoning',
+  'spacexai/grok-4.20-reasoning',
   'zai/glm-5.3-flashx',
 ];
 
