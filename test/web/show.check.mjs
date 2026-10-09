@@ -84,6 +84,7 @@ try {
         __show.settle();
       }, i);
       const before = await page.evaluate(() => __show.snapshot());
+      const frameBefore = await page.locator("#viewport").screenshot();
       await page.evaluate(() => {
         __show.seek(0);
         __show.seek(12);
@@ -96,6 +97,10 @@ try {
         await page.evaluate(() => __show.snapshot()),
         before,
         `seek determinism ${stage}`,
+      );
+      assert(
+        frameBefore.equals(await page.locator("#viewport").screenshot()),
+        `settled pixels differ after reverse seek: ${stage}/${width}`,
       );
       await page.screenshot({
         path: `${screenshots}/${stage}-${width}.png`,

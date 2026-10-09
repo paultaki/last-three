@@ -395,7 +395,10 @@ export class Arena {
       c.ring.scale.setScalar(a.active ? 1.15 : 1);
       c.ring.visible = !v.death || !a.active;
       const label = this.labels[i];
-      label.textContent = String(i + 1).padStart(2, "0") + " " + a.name;
+      label.textContent =
+        String(i + 1).padStart(2, "0") +
+        (this.host.clientWidth < 600 && !a.active ? "" : " " + a.name);
+      label.title = a.name;
       label.classList.toggle("speaking", a.active);
       label.hidden = !a.visible || (v.death && a.active);
     });
@@ -456,6 +459,19 @@ export class Arena {
         ];
         const d = v.death ? 10 : 15;
         eye = [target[0] + d * 0.65, target[1] + d * 0.45, target[2] + d];
+        if (v.death) {
+          target = [
+            a.position[0],
+            a.position[1] + 0.6 - (a.pose === "flatten" ? 0 : p * 1.5),
+            a.position[2],
+          ];
+          eye =
+            v.key === "bridge"
+              ? [target[0] + 11, target[1] + 6, target[2] + 4]
+              : v.key === "crusher"
+                ? [target[0] + 8, target[1] + 2.5, target[2] + 12]
+                : [target[0] + 9, target[1] + 7, target[2] + 13];
+        }
       }
     }
     if (mobile) {
@@ -503,8 +519,12 @@ export class Arena {
         y = (parseFloat(label.style.top) / 100) * this.host.clientHeight;
       for (
         let attempt = 0;
-        attempt < 8 &&
-        occupied.some((q) => Math.abs(q.x - x) < 65 && Math.abs(q.y - y) < 21);
+        attempt < 3 &&
+        occupied.some(
+          (q) =>
+            Math.abs(q.x - x) < (this.host.clientWidth < 600 ? 28 : 65) &&
+            Math.abs(q.y - y) < 21,
+        );
         attempt++
       )
         y -= 22;

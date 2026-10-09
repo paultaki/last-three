@@ -213,7 +213,7 @@ export function buildSet(key) {
   const refs = {};
   // Practical lighting and architectural framing repeat across the arena.
   const pad = cyl(g, 10, 0.65, 0, -1.6, 0, mats.dark, 64);
-  if (["bridge", "ledge"].includes(key)) pad.visible = false;
+  if (["bridge", "ledge", "disc"].includes(key)) pad.visible = false;
   for (let k = 0; k < 12; k++) {
     const a = (k / 12) * Math.PI * 2;
     const x = Math.sin(a) * 11,
@@ -355,7 +355,7 @@ export function buildSet(key) {
     stripes(g, 17, -5, 0.04, 4.5);
     textPlate(g, "02 / NO FREE EXIT", 5, -1.3, 4.1, -5.72);
   } else if (key === "disc") {
-    cyl(g, 5.7, 0.65, 0, -0.38, 0, mats.dark);
+    annulus(g, 4.6, 5.7, 0.65, -0.7, mats.dark);
     annulus(g, 4.6, 5.7, 0.15, 0, mats.light);
     studs(g, 5.2, 0.2);
     refs.tiles = [];
@@ -545,9 +545,12 @@ export function updateSet(set, s, t) {
   const r = set.refs;
   mats.water.userData.clock.value = t;
   if (r.water) {
-    r.water.position.y = -0.55 + Math.min(5, s.pit.flood) * 0.44;
+    const waterTop = -0.55 + Math.min(5, s.pit.flood) * 0.44;
+    const depth = waterTop + 0.9;
+    r.water.scale.y = depth / 0.055;
+    r.water.position.y = -0.9 + depth / 2;
     for (const [i, o] of r.ripples.entries()) {
-      o.position.y = r.water.position.y + 0.04;
+      o.position.y = waterTop + 0.025;
       o.scale.setScalar(1 + 0.05 * Math.sin(t * 2 + i));
     }
     r.rope.visible = !!s.pit.rope;
@@ -556,7 +559,13 @@ export function updateSet(set, s, t) {
     r.panes.forEach((p, i) => {
       const row = Math.floor(i / 2) + 1,
         side = i % 2 ? "R" : "L";
-      p.visible = s.bridge.rows[row]?.weak !== side;
+      const falling =
+        s.ev?.type === "death" && s.ev.style === "shatter"
+          ? s.bridge.stepping[s.ev.name]
+          : null;
+      p.visible =
+        s.bridge.rows[row]?.weak !== side &&
+        !(falling?.row === row && falling.side === side);
     });
   if (r.wall) r.wall.position.z = 6.3 - (s.round || 0) * 0.3;
   if (r.ceiling) {

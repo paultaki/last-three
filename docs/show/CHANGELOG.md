@@ -7,3 +7,5 @@
 - Added event-local bone performances, camera cues, cartoon death effects, original synthesized audio, captions, transcript, chapters, transport, deep links and three graphics presets.
 - Added deterministic projection and privacy tests, responsive browser checks and local proof captures.
 - Foundation review: five accepted findings fixed; two unsupported assumptions rejected and documented with regression coverage.
+- Final polish: volumetric Pit water, open trapdoor shafts, explicit bridge break visibility, bridge death camera correction, compact mobile labels, and pixel-equality seek checks.
+- Integrated reviewer timed out without a verdict; recorded honestly, no retry.

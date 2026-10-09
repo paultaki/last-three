@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-08 · codex (3D show local delivery)
+- **Did:** finished and locally verified the 3D show, corrected bridge crowd and death framing, Pit water volume, trapdoor openings and mobile labels; added a launcher, a scene reel, stage/death screenshots, and delivery notes. Actual npm run check passes (391 tests, 113 tapes); browser checks at 390/768/1440 pass, including identical settled pixels after reverse seeks. Loaded content is about 4.35 MB.
+- **Why:** the existing tape mechanics now have a separate visual broadcast with the selected Synty cast, original stage architecture, sound and accessible transport.
+- **Next:** Paul can review the local preview at port 8843; publication of the purchased cast requires Synty licence clarification. Physical-phone testing and optional hero depth of field remain unverified or deferred, documented in docs/show/DELIVERY.md.
+- **Watch out:** foundation review fixed five real findings and discarded two; the integrated follow-up timed out at 180 seconds with no verdict and was closed as stopped. No retry or fallback. Private GLBs, screenshots and recordings are ignored. No production push made by this work.
+
 ## 2026-10-08 · codex (3D show checkpoint)
 - **Did:** built web/show with all five obstacles, lobby, chalk epilogue, podium, local rigged Synty cast, deterministic tape projection, transport, captions, director mode, synthesized audio and responsive quality presets; fixed five foundation review findings and documented two rejected assumptions.
 - **Why:** Paul's selected City Characters now perform the existing recorded gauntlet in a separate 3D broadcast viewer, preserving engine and legacy viewer behavior.
