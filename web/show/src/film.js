@@ -1,3 +1,9 @@
+import {
+  climbDuration,
+  climbNames,
+  coverage,
+  reactionAllowed,
+} from "./cinematography.js";
 import { contextBeat, finalists } from "./performance.js";
 import { consequence } from "./direction.js";
 import {
@@ -70,7 +76,7 @@ export function filmDuration(s, cut, directing = {}) {
     const read = d.pages.reduce((sum, text) => sum + readingTime(text), 0);
     return (
       read +
-      600 +
+      (reactionAllowed(s, directing) ? 2000 : 600) +
       (directing.receipt
         ? readingTime(directing.receipt.text)
         : directing.forged
@@ -78,6 +84,7 @@ export function filmDuration(s, cut, directing = {}) {
           : 0)
     );
   }
+  if (climbDuration(s)) return climbDuration(s);
   if (directing.receipt) return readingTime(directing.receipt.text) + 2400;
   const context = contextBeat(s, cut);
   if (context) return readingTime(context.title + " " + context.detail) + 800;
@@ -112,7 +119,9 @@ export function editList(tape, demo, cut) {
 }
 
 // Camera composition leaves the right half of dialogue shots for the bubble.
-export function filmShot(view, state, cut, p, directing = {}) {
+export function filmShot(view, state, cut, p, directing = {}, ms = 0) {
+  if (climbNames(state).length)
+    return { eye: [7, 5.6, 8.8], target: [0, 1.8, -2.9] };
   if (view.key === "crusher" && (crusherDive(state) || state.crusher.escaped)) {
     return { eye: [15, 3, -1.8], target: [0, 1, -4.5] };
   }
@@ -120,16 +129,20 @@ export function filmShot(view, state, cut, p, directing = {}) {
     return { eye: [4, 6, 16], target: [0, 2, 0] };
   const speaker = dialogue(state, cut);
   const actor = view.actors.find((a) => a.name === view.actor && a.visible);
-  if (speaker && actor && directing.pit) {
-    // Keep the abandoned contestant and the people with the rope in one frame.
-    const shift = Math.max(0, actor.position[0] - 1.7) * 1.1;
-    return { eye: [6.5 + shift, 5.8, 8.4], target: [2.6 + shift, 2.2, -2.5] };
-  }
   if (speaker && actor) {
-    const [x, y, z] = actor.position;
+    const read = speaker.pages.reduce((n, text) => n + readingTime(text), 0);
+    const phase = coverage(state, directing, read, ms);
+    const listener = view.actors.find(
+      (a) => a.name === directing.listener && a.visible,
+    );
+    const focus = phase === "listener" && listener ? listener : actor;
+    const [x, y, z] = focus.position;
+    if (phase === "establish" && directing.pit)
+      return { eye: [6.5, 5.8, 8.4], target: [2.6, 2.2, -2.5] };
+    const wide = phase === "establish" ? 1.35 : 1;
     return {
-      eye: [x + 3.6, y + 2.9, z + 6.8],
-      target: [x + 1.65, y + 1.6, z - 0.4],
+      eye: [x + 1.8 * wide, y + 2.2, z + 4.6 * wide],
+      target: [x + 1.2, y + 1.5, z],
     };
   }
   if (actor && contextBeat(state, cut)?.kind === "power") {
@@ -191,6 +204,7 @@ export class FilmOverlay {
     this.finish = host.querySelector(".film-finish");
   }
   setState(state, cut, directing = {}) {
+    this.host.classList.remove("cold-open");
     this.state = state;
     this.directing = directing;
     this.result = consequence(state);
@@ -202,9 +216,8 @@ export class FilmOverlay {
     this.context.querySelector("strong").textContent = context?.title || "";
     this.context.querySelector("p").textContent = context?.detail || "";
     this.finish.hidden = podium[0]?.place !== 1;
-    this.finish.querySelector("strong").textContent = podium[0]?.place === 1
-      ? `${podium[0].name} wins.`
-      : "";
+    this.finish.querySelector("strong").textContent =
+      podium[0]?.place === 1 ? `${podium[0].name} wins.` : "";
     this.names.replaceChildren();
     this.evidence.hidden = true;
     this.outcome.hidden = true;
@@ -252,7 +265,16 @@ export class FilmOverlay {
       this.beat.querySelector("p").textContent = directing.contrast;
     this.render(0);
   }
+  setHook() {
+    this.host.classList.add("cold-open");
+    this.d = null;
+    this.host.querySelector(".film-heading b").textContent = "LATER";
+    this.beat.hidden = false;
+    this.beat.querySelector("span").textContent = "THREE PRIZES. EIGHT MINDS.";
+    this.beat.querySelector("p").textContent = "Who would you trust?";
+  }
   render(ms, anchor, names = []) {
+    if (this.host.classList.contains("cold-open")) return;
     const revealAt = this.d ? this.revealAt : 0;
     const evidence = this.directing.receipt;
     const forged = this.directing.forged;

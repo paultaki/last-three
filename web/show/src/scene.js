@@ -1,4 +1,10 @@
 import {
+  blockFilm,
+  climbPose,
+  climbNames,
+  coverage,
+} from "./cinematography.js";
+import {
   gesturePose,
   contextBeat,
   finalists,
@@ -28,7 +34,7 @@ import {
   crusherEscapePoint,
   crusherDive,
 } from "./model.js";
-import { filmShot, dialogue } from "./film.js";
+import { filmShot, dialogue, readingTime } from "./film.js";
 const X = new T.Vector3(1, 0, 0),
   Y = new T.Vector3(0, 1, 0),
   Z = new T.Vector3(0, 0, 1);
@@ -242,6 +248,7 @@ export class Arena {
     this.state = s;
     this.prev = prev;
     this.view = presentation(s, prev, cut);
+    if (this.film) this.view = blockFilm(this.view, s, prev);
     this.cut = cut;
     this.dialogue = this.film ? dialogue(s, cut) : null;
     if (this.set?.key !== this.view.key) {
@@ -298,12 +305,47 @@ export class Arena {
     );
     b.bone.updateMatrixWorld(true);
   }
+  grip(c, side, target, weight = 1) {
+    const hand = c.bones[`hand_${side}`]?.bone;
+    if (!hand || weight <= 0) return;
+    c.group.updateMatrixWorld(true);
+    // The hand bone is at the wrist; the palm extends beyond it to the contact.
+    const shoulder = c.bones[`upperarm_${side}`]?.bone.getWorldPosition(
+      new T.Vector3(),
+    );
+    const wrist = shoulder
+      ? target.clone().addScaledVector(shoulder.sub(target).normalize(), 0.12)
+      : target;
+    const goal = hand.getWorldPosition(new T.Vector3()).lerp(wrist, weight);
+    for (let pass = 0; pass < 8; pass++) {
+      for (const name of [`lowerarm_${side}`, `upperarm_${side}`]) {
+        const bone = c.bones[name]?.bone;
+        if (!bone) continue;
+        const origin = bone.getWorldPosition(new T.Vector3());
+        const from = hand
+          .getWorldPosition(new T.Vector3())
+          .sub(origin)
+          .normalize();
+        const to = goal.clone().sub(origin).normalize();
+        const parent = bone.parent.getWorldQuaternion(new T.Quaternion());
+        const turn = new T.Quaternion().setFromUnitVectors(from, to);
+        const local = parent.clone().invert().multiply(turn).multiply(parent);
+        bone.quaternion.premultiply(local);
+        bone.updateMatrixWorld(true);
+      }
+    }
+    this.contactErrors.push({
+      kind: this.gripKind,
+      side,
+      error: hand.getWorldPosition(new T.Vector3()).distanceTo(goal),
+    });
+  }
   pose(c, a, t) {
     for (const b of Object.values(c.bones)) b.bone.quaternion.copy(b.base);
     c.group.updateMatrixWorld(true);
     const wave = Math.sin(t * 4 + a.seat) * 0.05,
       beat =
-        this.film && this.view.key === "ledge" && a.pose === "shove"
+        this.film && a.pose === "shove"
           ? contactBeat(t, this.reduced).strike
           : Math.sin(Math.min(1, t / 1.05) * Math.PI);
     let armL = -1.26,
@@ -316,7 +358,7 @@ export class Arena {
       armL = -0.55;
       armR = 0.55;
     }
-    if (this.film && this.view.key === "ledge" && a.pose === "shove") {
+    if (this.film && a.pose === "shove") {
       armL = -1.4;
       armR = 1.4;
     }
@@ -333,7 +375,10 @@ export class Arena {
       this.rotate(c, "lowerarm_r", X, -0.35);
     }
     if (["walk", "climb", "dodge"].includes(a.pose)) {
-      const stride = Math.sin(t * 9) * 0.45;
+      const stride =
+        Math.sin(t * 9) *
+        0.45 *
+        (this.film && a.pose === "walk" ? Math.max(0, 1 - t / 1.15) : 1);
       this.rotate(c, "thigh_l", X, stride);
       this.rotate(c, "thigh_r", X, -stride);
       this.rotate(c, "upperarm_l", X, -stride);
@@ -354,7 +399,7 @@ export class Arena {
     }
     if (a.active) this.rotate(c, "head", Y, Math.sin(t * 2) * 0.12);
   }
-  render(seconds = 0) {
+  render(seconds = 0, beatMs = seconds * 1000) {
     if (!this.view || this.cast.length < 8) return;
     this.renderer.info.reset();
     const s = this.state,
@@ -367,6 +412,13 @@ export class Arena {
             ? 1
             : ease(Math.min(1, t / 1.15));
     const contact = contactBeat(t, this.reduced);
+    this.contactErrors = [];
+    if (this.set.refs.lever)
+      this.set.refs.lever.position.set(
+        -4.3,
+        this.film ? 0.85 : 1.2,
+        this.film ? -2.18 : -2.5,
+      );
     updateSet(
       this.set,
       s,
@@ -385,14 +437,22 @@ export class Arena {
       const cutaway =
         this.film &&
         this.mode === "cinema" &&
-        (crusherDive(s) || s.crusher.escaped);
+        (crusherDive(s) ||
+          s.crusher.escaped ||
+          s.ev?.type === "action" ||
+          !!this.dialogue ||
+          s.ev?.type === "ability_use");
       this.set.refs.cameraObstacles.forEach((o) => {
         o.visible = !cutaway;
       });
     }
     if (this.set.refs.bridgePosts)
       this.set.refs.bridgePosts.forEach((o) => {
-        o.visible = !(this.film && this.mode === "cinema" && this.dialogue);
+        o.visible = !(
+          this.film &&
+          this.mode === "cinema" &&
+          (this.dialogue || s.ev?.type === "action" || v.death)
+        );
       });
     if (this.set.refs.laneLabels)
       this.set.refs.laneLabels.forEach((o, i) => {
@@ -436,14 +496,28 @@ export class Arena {
           ahead[2] - point[2],
         );
       }
+      if (this.film && v.key === "pit" && s.pit.out.includes(a.name))
+        c.group.rotation.y =
+          Math.atan2(-a.position[0], -2.35 - a.position[2]) +
+          (a.seat % 2 ? 0.3 : -0.3);
       if (this.film && this.dialogue && a.active) c.group.rotation.y = 0.28;
       if (this.film && ["shove", "flinch"].includes(a.pose)) {
         const otherName =
           a.pose === "shove" ? String(s.ev.action).split(":")[1] : s.ev.name;
         const other = v.actors.find((b) => b.name === otherName && b.visible);
         if (other) {
-          const direction = new T.Vector3(...other.position).sub(
-            new T.Vector3(...a.position),
+          const direction = new T.Vector3(
+            ...(v.key === "crusher" && a.pose === "shove"
+              ? other.from
+              : other.position),
+          ).sub(
+            new T.Vector3(
+              ...(v.key === "crusher" &&
+              a.pose === "flinch" &&
+              a.name === s.crusher.holder
+                ? a.from
+                : a.position),
+            ),
           );
           const distance = direction.length();
           direction.normalize();
@@ -451,16 +525,26 @@ export class Arena {
           if (a.pose === "shove")
             c.group.position.addScaledVector(
               direction,
-              Math.max(0, distance - 1.05) *
-                (v.key === "ledge" ? contact.approach : Math.sin(p * Math.PI)),
+              Math.max(0, distance - 1.05) * contact.approach,
             );
           else
-            c.group.position.addScaledVector(
-              direction,
-              -0.22 *
-                (v.key === "ledge" ? contact.recoil : Math.sin(p * Math.PI)),
-            );
+            c.group.position.addScaledVector(direction, -0.22 * contact.recoil);
         }
+      }
+      if (
+        this.film &&
+        v.key === "crusher" &&
+        a.pose === "flinch" &&
+        a.name === s.crusher.holder
+      ) {
+        const travel = this.reduced
+          ? 1
+          : ease(Math.max(0, Math.min(1, (t - 0.95) / 0.7)));
+        c.group.position.lerpVectors(
+          new T.Vector3(...a.from),
+          new T.Vector3(...a.position),
+          travel,
+        );
       }
       if (
         this.film &&
@@ -484,6 +568,15 @@ export class Arena {
         this.rotate(c, "lowerarm_r", X, lr);
         this.rotate(c, "head", X, head);
       }
+      if (this.film && a.pose === "shove") {
+        this.rotate(c, "thigh_l", X, -0.16 * contact.approach);
+        this.rotate(c, "calf_l", X, 0.28 * contact.approach);
+        if (!this.reduced && t < 0.85) {
+          const step = Math.sin(Math.PI * Math.max(0, (t - 0.15) / 0.7)) * 0.3;
+          this.rotate(c, "thigh_r", X, step);
+          this.rotate(c, "calf_r", X, -step);
+        }
+      }
       if (this.film && v.key === "disc" && this.discSaves?.includes(a.name)) {
         c.puppet.position.y +=
           a.active && s.ev?.type === "ability_use" && s.ev.power === "feather"
@@ -506,14 +599,26 @@ export class Arena {
         !a.active &&
         !v.death &&
         this.direction?.listener === a.name &&
-        this.dialogue
+        this.dialogue &&
+        this.state.ev?.type === "say"
       ) {
         const speaker = v.actors.find((b) => b.name === this.dialogue.name);
         if (speaker) {
           const dx = speaker.position[0] - a.position[0],
             dz = speaker.position[2] - a.position[2];
           c.group.rotation.y = Math.atan2(dx, dz);
-          this.rotate(c, "head", X, -0.08);
+          const read = this.dialogue.pages.reduce(
+            (n, text) => n + readingTime(text),
+            0,
+          );
+          const reaction =
+            coverage(s, this.direction, read, beatMs) === "listener";
+          this.rotate(c, "head", X, reaction ? 0.1 : -0.08);
+          if (reaction) {
+            c.group.rotation.y = 0.28;
+            this.rotate(c, "head", Y, -0.2);
+            this.rotate(c, "spine_01", Y, 0.12);
+          }
         }
       }
       if (this.film && v.death && a.visible && !a.active) {
@@ -531,22 +636,20 @@ export class Arena {
       }
       if (!this.reduced) c.puppet.position.y += Math.sin(t * 2 + i) * 0.015;
       if (a.pose === "flinch") {
-        const recoil =
-          this.film && v.key === "ledge"
-            ? contact.recoil
-            : Math.sin(p * Math.PI);
+        const recoil = this.film ? contact.recoil : Math.sin(p * Math.PI);
         c.puppet.rotation.x = -recoil * 0.3;
         // In ledge coverage local +Z faces the attacker, so recoil goes backwards.
-        c.puppet.position.z +=
-          (this.film && v.key === "ledge" ? -1 : 1) * recoil * 0.35;
+        c.puppet.position.z += (this.film ? -1 : 1) * recoil * 0.35;
       }
       if (a.pose === "dodge") c.puppet.position.x = Math.sin(p * Math.PI) * 0.7;
       if (a.pose === "shove")
         c.puppet.rotation.x =
-          (this.film && v.key === "ledge"
-            ? contact.strike
-            : Math.sin(p * Math.PI)) * 0.18;
-      if (a.pose === "climb" && !this.reduced) {
+          (this.film ? contact.strike : Math.sin(p * Math.PI)) * 0.18;
+      if (
+        a.pose === "climb" &&
+        !this.reduced &&
+        !(this.film && climbNames(s).includes(a.name))
+      ) {
         if (v.key === "pit" && a.from[1] < a.position[1]) {
           const baseName = this.prev?.pit?.base || s.pit.base;
           const base = v.actors.find((x) => x.name === baseName);
@@ -559,6 +662,28 @@ export class Arena {
           else c.group.position.lerpVectors(step, end, (p - 0.38) / 0.62);
         }
         c.puppet.position.y += Math.sin(p * Math.PI) * 0.7;
+      }
+      if (this.film) {
+        const climb = climbPose(s, a, seconds, this.reduced);
+        if (climb) {
+          c.group.position.fromArray(climb.point);
+          c.group.rotation.y =
+            climb.u >= 1
+              ? Math.atan2(-a.position[0], -2.35 - a.position[2])
+              : Math.PI;
+          c.puppet.position.y = -climb.crouch;
+          this.rotate(c, "thigh_r", X, -climb.crouch * 2.5);
+          this.rotate(c, "calf_r", X, climb.crouch * 3);
+          if (!climb.moving) {
+            // Reset the climb limb cycling while waiting and after landing.
+            this.pose(c, { ...a, pose: "idle" }, 0);
+          }
+        }
+        if (climbNames(s).length && a.name === s.pit.base) {
+          this.rotate(c, "spine_01", X, 0.25);
+          this.rotate(c, "thigh_l", X, -0.25);
+          this.rotate(c, "thigh_r", X, -0.25);
+        }
       }
       if (a.pose === "flatten") {
         c.puppet.scale.y = 1 - p * 0.94;
@@ -585,12 +710,77 @@ export class Arena {
       label.classList.toggle("speaking", a.active);
       label.hidden = this.film || !a.visible || (v.death && a.active);
     });
+    if (this.film) {
+      this.set.group.updateMatrixWorld(true);
+      v.actors.forEach((a) => {
+        if (!a.visible) return;
+        const c = this.cast[a.seat];
+        if (
+          v.key === "crusher" &&
+          s.crusher.holder === a.name &&
+          !crusherDive(s) &&
+          !s.crusher.escaped &&
+          (a.pose === "hold" || (a.pose === "flinch" && t > 1.65))
+        ) {
+          this.gripKind = "lever";
+          c.group.rotation.y = Math.PI;
+          for (const [side, x] of [
+            ["l", 0.26],
+            ["r", -0.26],
+          ])
+            this.grip(
+              c,
+              side,
+              this.set.refs.lever.localToWorld(new T.Vector3(x, 0.75, 0.45)),
+            );
+        }
+        if (a.pose === "shove" && contact.strike > 0) {
+          const other = v.actors.find(
+            (b) => b.name === String(s.ev.action).split(":")[1] && b.visible,
+          );
+          if (other) {
+            this.gripKind = "shove";
+            const otherCast = this.cast[other.seat];
+            for (const [side, x] of [
+              ["l", -0.22],
+              ["r", 0.22],
+            ]) {
+              const target = otherCast.group.localToWorld(
+                new T.Vector3(x, 1.35, 0.25),
+              );
+              this.grip(c, side, target, contact.strike);
+            }
+          }
+        }
+        const climb = climbPose(s, a, seconds, this.reduced);
+        if (climb?.moving && climb.u > 0.35 && climb.u < 0.78) {
+          this.gripKind = "rim";
+          for (const [side, x] of [
+            ["l", 0.25],
+            ["r", -0.25],
+          ])
+            this.grip(
+              c,
+              side,
+              new T.Vector3(x, 2.86, -3.03),
+              Math.sin(((climb.u - 0.35) / 0.43) * Math.PI),
+            );
+        }
+      });
+    }
     if (this.set.refs.rope && s.pit.rope) {
       const by = this.cast[s.order.indexOf(s.pit.rope.by)],
         saved = this.cast[s.order.indexOf(s.pit.rope.saved)];
       if (by && saved) {
-        const a = by.group.position.clone().add(new T.Vector3(0, 1.05, 0)),
-          b = saved.group.position.clone().add(new T.Vector3(0, 1.45, 0));
+        let a = by.group.localToWorld(new T.Vector3(0.3, 1.25, 0.45)),
+          b = saved.group.localToWorld(new T.Vector3(-0.3, 1.7, 0.35));
+        if (this.film) {
+          this.gripKind = "rope";
+          this.grip(by, "r", a);
+          this.grip(saved, "l", b);
+          a = by.bones.hand_r?.bone.getWorldPosition(new T.Vector3()) || a;
+          b = saved.bones.hand_l?.bone.getWorldPosition(new T.Vector3()) || b;
+        }
         this.set.refs.rope.children.forEach((o, i) => {
           const n = this.set.refs.rope.children.length,
             u = i / n,
@@ -658,9 +848,19 @@ export class Arena {
       }
     }
     if (this.film && this.mode === "cinema") {
-      const shot = filmShot(v, s, this.cut, p, this.direction);
+      const liveView = {
+        ...v,
+        actors: v.actors.map((a) => ({
+          ...a,
+          position: this.cast[a.seat].group.position.toArray(),
+        })),
+      };
+      const shot = filmShot(liveView, s, this.cut, p, this.direction, beatMs);
       if (shot) ({ eye, target } = shot);
-      else {
+      if (this.hook) {
+        eye = [5, 2.4, 6.8];
+        target = [0.3, 1.1, 0];
+      } else if (!shot) {
         eye = eye.map((n, i) => target[i] + (n - target[i]) * 0.83);
       }
     }

@@ -1,3 +1,4 @@
+import { hookIndex, HOOK_MS } from "./cinematography.js";
 import { performanceKind, discSaves, contextBeat } from "./performance.js";
 import { direction, directedList } from "./direction.js";
 import { FilmOverlay, filmDuration, editList } from "./film.js";
@@ -22,7 +23,9 @@ let film = params.get("view") !== "studio",
   demo,
   story = false,
   playlist = [],
-  overlay;
+  overlay,
+  hook = false,
+  previewFrozen = false;
 document.body.classList.toggle("film", film);
 document.body.classList.toggle("clean", clean);
 let arena,
@@ -149,6 +152,9 @@ function paintTranscript() {
 }
 function seek(i, { sound = false } = {}) {
   if (!tape) return;
+  hook = false;
+  previewFrozen = false;
+  arena.hook = false;
   index = Math.max(
     0,
     Math.min(tape.events.length - 1, Math.floor(Number(i) || 0)),
@@ -172,6 +178,19 @@ function seek(i, { sound = false } = {}) {
   paint();
   updateURL();
   if (sound) score.event(state);
+}
+function startHook() {
+  const i = hookIndex(tape, cut);
+  if (!film || !story || index !== playlist[0] || i === null) return;
+  hook = true;
+  elapsed = 0;
+  arena.hook = true;
+  arena.setState(stateAt(tape, i), stateAt(tape, i - 1), cut);
+  arena.direction = {};
+  arena.performanceKind = null;
+  arena.discSaves = [];
+  overlay.setHook();
+  arena.render(0.15, 0);
 }
 function nextIndex(dir) {
   if (story)
@@ -248,6 +267,7 @@ async function load(id, start = 0, asStory = false) {
       return b;
     });
     seek(start);
+    if (Number(start) === playlist[0]) startHook();
     metrics.ready = true;
     $("loading").hidden = true;
   } catch (e) {
@@ -257,8 +277,18 @@ async function load(id, start = 0, asStory = false) {
   }
 }
 function advance(ms) {
-  if (!metrics.ready) return;
-  animationMs = Math.min(2800, animationMs + ms * speed);
+  if (!metrics.ready || previewFrozen) return;
+  if (hook) {
+    if (playing) elapsed += ms * speed;
+    if (elapsed >= HOOK_MS) seek(index);
+    else
+      arena.render(
+        arena.reduced ? 0.82 : 0.15 + (0.67 * elapsed) / HOOK_MS,
+        elapsed,
+      );
+    return;
+  }
+  animationMs = Math.min(15000, animationMs + ms * speed);
   if (playing) {
     elapsed += ms * speed;
     const hold = film
@@ -272,7 +302,7 @@ function advance(ms) {
       } else seek(next, { sound: true });
     }
   }
-  arena.render(animationMs / 1000);
+  arena.render(animationMs / 1000, elapsed);
   overlay.render(elapsed, arena.speakerAnchor, arena.focalAnchors);
 }
 function loop(now) {
@@ -292,7 +322,9 @@ function setFilm(on) {
   document.body.classList.toggle("clean", clean);
   $("film-overlay").hidden = !film;
   arena.resize();
+  const preserveHook = hook;
   seek(index);
+  if (preserveHook) startHook();
 }
 function toggleClean() {
   clean = !clean;
@@ -338,9 +370,12 @@ async function init() {
   $("tape").onchange = () => load($("tape").value);
   $("play").onclick = () => {
     if (!metrics.ready) return;
-    if (index >= (story ? playlist.at(-1) : tape.events.length - 1))
+    if (index >= (story ? playlist.at(-1) : tape.events.length - 1)) {
       seek(story ? playlist[0] : 0);
+      startHook();
+    }
     playing = !playing;
+    previewFrozen = !playing;
     paint();
   };
   $("back").onclick = () => {
@@ -371,7 +406,7 @@ async function init() {
     arena.mode = arena.mode === "wide" ? "cinema" : "wide";
     $("camera").textContent = "Camera: " + arena.mode;
     $("camera").setAttribute("aria-pressed", arena.mode === "wide");
-    arena.render(animationMs / 1000);
+    arena.render(animationMs / 1000, elapsed);
   };
   $("quality").onchange = () => arena.setQuality($("quality").value);
   $("sound").onclick = async () => {
@@ -429,6 +464,7 @@ async function init() {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       playing = false;
+      previewFrozen = true;
       if (state) paint();
     }
   });
@@ -437,14 +473,18 @@ async function init() {
     load,
     preview: (ms) => {
       playing = false;
+      previewFrozen = true;
       elapsed = Math.max(0, Number(ms) || 0);
-      animationMs = Math.min(2800, elapsed);
-      arena.render(animationMs / 1000);
+      animationMs = Math.min(15000, elapsed);
+      arena.render(animationMs / 1000, elapsed);
       overlay.render(elapsed, arena.speakerAnchor, arena.focalAnchors);
     },
     settle: () => {
       animationMs = 2800;
       arena.render(2.8);
+    },
+    get hook() {
+      return hook;
     },
     get film() {
       return film;
@@ -494,7 +534,17 @@ async function init() {
       page: overlay.currentPage,
       direction: directing,
       performance: arena.performanceKind,
-      context: contextBeat(state, cut),
+      context: hook ? null : contextBeat(state, cut),
+      hook,
+      camera: arena.camera.position.toArray(),
+      contactErrors: arena.contactErrors,
+      stagedActors: arena.view?.actors
+        .filter((a) => a.visible)
+        .map((a) => ({
+          name: a.name,
+          position: arena.cast[a.seat].group.position.toArray(),
+          facing: arena.cast[a.seat].group.rotation.y,
+        })),
       actors: arena.view?.actors,
       coordinates: "world units; x right, y up, z toward front",
     });

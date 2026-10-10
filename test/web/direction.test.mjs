@@ -81,7 +81,7 @@ test("receipts have their own reading time after the public line", () => {
     d = direction(tape, s, true);
   assert.equal(
     filmDuration(s, true, d),
-    filmDuration(s, true) + readingTime(d.receipt.text),
+    filmDuration(s, true) + readingTime(d.receipt.text) + 1400,
   );
   const forged = stateAt(tape, 269);
   assert.equal(

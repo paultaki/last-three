@@ -27,6 +27,7 @@ const targets = {
   269: "Cole",
   378: "Dara",
   436: "Eli",
+  434: "Bex",
   440: "Bex",
   443: "Bex",
   445: "Bex",
@@ -43,7 +44,9 @@ const expected = {
 export function directedList(tape, base, cut) {
   if (tape.id !== FEATURE_TAPE) return base;
   // Stage geography and every elimination remain visible. Private material stays gated.
-  const additions = [327, 434, 443, 456, 493, 499, 502, 503, 506, 531];
+  const additions = [
+    327, 391, 410, 431, 434, 443, 456, 493, 499, 502, 503, 506, 531,
+  ];
   if (cut) additions.push(269);
   return [...new Set([...base, ...additions])]
     .filter((i) => tape.events[i] && isStepWorthy(tape.events[i], cut))
@@ -110,9 +113,10 @@ export function consequence(s) {
   const remaining = s.order.filter((n) => s.players[n].alive).length;
   return {
     name: e.name,
-    title: e.place === 2 || e.place === 3
-      ? `${e.name.toUpperCase()} TAKES ${e.place === 2 ? "SECOND" : "THIRD"}`
-      : `${e.name.toUpperCase()} IS OUT`,
+    title:
+      e.place === 2 || e.place === 3
+        ? `${e.name.toUpperCase()} TAKES ${e.place === 2 ? "SECOND" : "THIRD"}`
+        : `${e.name.toUpperCase()} IS OUT`,
     detail: `${remaining} ${remaining === 1 ? "contestant remains" : "contestants remain"}`,
   };
 }

@@ -341,16 +341,18 @@ export function buildSet(key) {
   } else if (key === "crusher") {
     box(g, 13, 0.7, 12, 0, -0.38, 0, mats.light);
     // A real doorway and exit apron, rather than a door painted over a solid wall.
-    box(g, 8.3, 5, 0.4, -2.35, 2.5, -6, mats.concrete);
-    refs.cameraObstacles = [box(g, 1.7, 5, 0.4, 5.65, 2.5, -6, mats.concrete)];
-    box(g, 3, 1.4, 0.4, 3.3, 4.3, -6, mats.concrete);
+    refs.cameraObstacles = [
+      box(g, 8.3, 5, 0.4, -2.35, 2.5, -6, mats.concrete),
+      box(g, 1.7, 5, 0.4, 5.65, 2.5, -6, mats.concrete),
+      box(g, 3, 1.4, 0.4, 3.3, 4.3, -6, mats.concrete),
+    ];
     box(g, 5, 0.7, 5, 3.3, -0.38, -7.8, mats.light);
     stripes(g, 7, 1.1, 0.01, -9.8);
     for (let x of [-5.8, 5.8])
       for (let z of [-4.5, 4.5]) {
         const post = cyl(g, 0.35, 7, x, 3.2, z, mats.metal, 16);
         const foot = cyl(g, 0.56, 0.6, x, 0.1, z, mats.dark);
-        if (x > 0) refs.cameraObstacles.push(post, foot);
+        refs.cameraObstacles.push(post, foot);
       }
     refs.ceiling = box(g, 11, 0.85, 9, 0, 5, 0, mats.dark);
     for (let i = 0; i < 12; i++)
@@ -364,7 +366,9 @@ export function buildSet(key) {
         0,
         i % 2 ? mats.gold : mats.black,
       );
-    box(g, 3.2, 3.8, 0.15, 3.3, 1.9, -5.72, mats.black);
+    refs.cameraObstacles.push(
+      box(g, 3.2, 3.8, 0.15, 3.3, 1.9, -5.72, mats.black),
+    );
     refs.door = box(g, 3, 3.4, 0.23, 3.3, 1.7, -5.6, mats.metal);
     textPlate(g, "EXIT", 2, 3.3, 4.3, -5.73, "#90f9df");
     box(g, 0.9, 1.25, 0.75, -4.3, 0.63, -2.5, mats.dark);
