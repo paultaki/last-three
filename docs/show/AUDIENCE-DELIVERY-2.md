@@ -1,5 +1,7 @@
 # Second audience pass delivery, 2026-10-09
 
+Historical second-pass delivery. The newer 6:39 visual polish film uses separate filenames; see [latest delivery](VISUAL-POLISH-DELIVERY.md).
+
 Twenty further opportunities are ranked in [AUDIENCE-OPPORTUNITIES-2.md](AUDIENCE-OPPORTUNITIES-2.md). The selected eight are complete:
 
 1. Bridge gantry cutaways keep conversations visible.

@@ -3,8 +3,8 @@
 ## 2026-10-09 · codex (visual polish)
 - **Did:** implemented the eight approved visual priorities: closer conversations, clear action framing, staggered Pit blocking, listener coverage, body/prop contact, cold open, recorded climb sequence and shot rhythm.
 - **Why:** the film needed larger people, believable contact and more deliberate dramatic pacing.
-- **Next:** refreshed full/mobile exports after this verified checkpoint. See docs/show/VISUAL-POLISH.md.
-- **Watch out:** tape outcomes and dialogue are unchanged. Hook is explicit LATER coverage restricted to the selected Director story edit; no result or private receipt. New motion uses current recorded events and film-only presentation. 419 tests, 113 tapes and five browser suites pass. Critical review timed out at 180 seconds without a verdict and auto-closed; no retry or fallback.
+- **Next:** selected eight complete. New 6:39 1080p and 720p mobile films are documented in docs/show/VISUAL-POLISH-DELIVERY.md; twelve unselected ideas remain a future backlog.
+- **Watch out:** tape outcomes and dialogue are unchanged. Hook is explicit LATER coverage restricted to the selected Director story edit; no result or private receipt. New motion uses current recorded events and film-only presentation. 419 tests, 113 tapes and five browser suites pass. Critical review timed out at 180 seconds without a verdict and auto-closed; no retry or fallback. Uninterrupted 58-beat capture had no page errors; encoded frames, mobile decode and MP4 fast-start verified. No push/public upload.
 
 ## 2026-10-09 · codex (second audience pass)
 - **Did:** ranked 20 further opportunities and implemented eight: bridge cutaways and lane labels, distinct public gestures and quiet private poses, power explanation/lift, zero-footing danger, rejected-action clarity, named podium finish.

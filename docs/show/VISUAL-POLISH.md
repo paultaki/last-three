@@ -4,14 +4,14 @@ Approved scope: the first eight of the twenty ranked visual delight opportunitie
 
 | Rank | Opportunity | Status |
 |---|---|---|
-| 1 | Closer character coverage | Built: closer, consistently oriented speaker shots |
-| 2 | Unobstructed action coverage | Built: crusher/bridge practical cutaways, corrected crusher attacker staging |
-| 3 | Break up lineup staging | Built: staggered stable Pit deck marks and varied facing |
-| 4 | Direct the listener | Built: dedicated end-of-reading reaction coverage and restrained physical response |
-| 5 | Convincing body and prop contact | Built: deterministic wrist targeting for shoves, lever, climbing rim and rope; planted recovery |
-| 6 | Opening six-second hook | Built: 5.8-second Director story teaser stops before contact, marked LATER, then returns to the beginning |
-| 7 | Readable Pit escape sequence | Built: all three recorded climb pairs, staggered approach, human step, rim contact and landing |
-| 8 | Deliberate shot rhythm | Built: establishing coverage, closer speaker, listener hold; full reading time preserved |
+| 1 | Closer character coverage | Implemented: closer, consistently oriented speaker shots |
+| 2 | Unobstructed action coverage | Implemented: crusher/bridge practical cutaways, corrected crusher attacker staging |
+| 3 | Break up lineup staging | Implemented: staggered stable Pit deck marks and varied facing |
+| 4 | Direct the listener | Implemented: dedicated end-of-reading reaction coverage and restrained physical response |
+| 5 | Convincing body and prop contact | Implemented: deterministic wrist targeting for shoves, lever, climbing rim and rope; planted recovery |
+| 6 | Opening six-second hook | Implemented: 5.8-second Director story teaser stops before contact, marked LATER, then returns to the beginning |
+| 7 | Readable Pit escape sequence | Implemented: all three recorded climb pairs, staggered approach, human step, rim contact and landing |
+| 8 | Deliberate shot rhythm | Implemented: establishing coverage, closer speaker, listener hold; full reading time preserved |
 | 9 | Facial expression controls | Deferred |
 | 10 | Character movement signatures | Deferred |
 | 11 | Tactile glass failure | Deferred |
@@ -32,7 +32,7 @@ Approved scope: the first eight of the twenty ranked visual delight opportunitie
 - Listener performance is authored staging, not a new claim about private emotion. Thought and forged-message subjects do not receive public listener reactions.
 - Camera cuts are deterministic elapsed-time choices. The reading window and any receipt finish before listener coverage begins. The frame remains 16:9 with minimal HUD.
 - Contact solving uses existing bones and a fixed iteration budget. No paid assets, voice generation, new models or expensive postprocessing are required.
-- Studio retains its projection and original lever dimensions. New staging is film-only. The canonical local video and mobile export will be refreshed after verification and critical review.
+- Studio retains its projection and original lever dimensions. New staging is film-only. The new versioned film and mobile export are complete; see VISUAL-POLISH-DELIVERY.md for verification and the reviewer timeout.
 
 ## Proof targets
 
