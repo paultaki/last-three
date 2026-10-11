@@ -33,3 +33,16 @@ The tradeoff favors first-time comprehension while retaining short shots: redund
 Set `LAST_THREE_OUTPUT` to the absolute v3 output directory for resolve, mixing, capture and encoding. Timing and audio manifests measure every processed sample and preserve complete voice windows. Capture checks compiled scene, HTML, motion bank and all eight logo hashes. Full exports require complete frame ranges, exact reverse-seek proof, no render errors, no head/bubble overlaps, strict full decode, 25 fps, 48 kHz audio and faststart.
 
 Recordings, voices, cast and motion bank remain local and ignored. Source changes are local commits only.
+
+## Verified local delivery
+
+- 201.56 seconds, 75 shots, 44 voiced lines, 25 fps and 48 kHz audio.
+- `docs/show/recordings/episode-v3/last-three-episode-01-story-draft-1080p.mp4`: native 1920 x 1080, 84,141,334 bytes.
+- `docs/show/recordings/episode-v3/last-three-episode-01-story-draft-720p.mp4`: 1280 x 720 review copy, 25,829,975 bytes.
+- All 5,039 frames captured in four complete, disjoint ranges. Zero render errors, zero detected head/bubble overlaps and no screenshot retries. All 75 shot checks and seven selected exact canvas/overlay reverse-seek cases passed.
+- Both entire MP4s strictly decoded. Frame rate, sample rate, duration and faststart were checked. Encoded thought, whisper, trapdoor, chalk and glass-break images were visually inspected.
+- 433 tests and 113 authoritative tapes pass. Live checks verify six supported platforms before opening, three hinged doors, simultaneous falls, one feather save and a persistent glass hole. Real discourse labels/logos, non-overlapping rule/score panels and focused chalk coverage pass.
+
+Ten paid replacement voice jobs are ready. Hub approval `aa3565f7-9079-45c5-b143-e387235b011a` has the exact lines and a $3 total cap. No paid speech call was made in this pass. A future final voice pass must preserve these draft MP4s and their temporary audio, restore unchanged original narrator clips, generate only the authorized replacement jobs and render a separate final delivery. Read the decision note before acting. The task's approval-event poll begins after event 7340; the global Codex hub cursor was not advanced past unrelated, unprocessed decisions.
+
+The independent review remains unavailable because Claude hit its weekly limit. See `REVIEW-EPISODE-01-STORY-V3.md` for verbatim output and metrics. This is a completed local story draft for creative review, with temporary voices and static faces. It has not been published or creatively accepted.
