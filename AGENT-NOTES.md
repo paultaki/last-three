@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-10 · codex (Pit film proof)
+- **Did:** created a separate 40-second Pit film with condensed public dialogue, distinct AI voices, 18 authored shots, close-ups and low angles, an unused-rope prop, body performance, local water response, original sound/music and 1080p/720p exports.
+- **Why:** Paul wants a fast YouTube film with drama and emotion; the previous 6:39 cut was paced around reading verbatim speech bubbles.
+- **Next:** Paul can review docs/show/recordings/pit-proof/the-rope-1080p.mp4 before extending this film language to the full episode. Source mapping and production instructions are in docs/show/PIT-FILM-PROOF.md.
+- **Watch out:** original tape, engine, reducer and replay viewer are unchanged. 422 tests and 113 tapes pass. All 1,000 offline frames captured without errors; same-event and cross-event reverse seeks match pixels. Both 40-second exports fully decode, have 48 kHz audio and fast-start MP4 structure. Five second-opinion findings corrected; confirming review pending at this checkpoint. Faces remain static with no lip sync. Purchased cast and recordings stay local and ignored; no public upload or push.
+
 ## 2026-10-09 · codex (visual polish)
 - **Did:** implemented the eight approved visual priorities: closer conversations, clear action framing, staggered Pit blocking, listener coverage, body/prop contact, cold open, recorded climb sequence and shot rhythm.
 - **Why:** the film needed larger people, believable contact and more deliberate dramatic pacing.

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LAST THREE / The Rope / local film proof</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+  <style>
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#060d13;color:#fff;font-family:Arial,Helvetica,sans-serif}
+    #frame{position:absolute;inset:0}#canvas{position:absolute;inset:0}canvas{display:block}#labels{display:none}
+    #shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.30),transparent 24%,transparent 65%,rgba(0,0,0,.75))}
+    #brand{position:absolute;top:5%;left:4%;font-size:clamp(12px,1vw,24px);font-weight:800;letter-spacing:.2em}
+    #chapter{position:absolute;top:5%;right:4%;font-size:clamp(12px,1vw,24px);letter-spacing:.13em;color:#ccd7d8}
+    #caption{position:absolute;bottom:10%;left:13%;right:13%;text-align:center;font-size:clamp(22px,2.35vw,48px);font-weight:800;line-height:1.15;text-shadow:0 2px 4px #000,0 0 15px #000}
+    #speaker{display:block;margin-bottom:.5em;font-size:.42em;letter-spacing:.16em;color:#ffcf74}
+    #caption-text{white-space:pre-line}#stamp{position:absolute;bottom:3.4%;left:4%;font-size:clamp(10px,.8vw,18px);letter-spacing:.04em;color:#bac6c8}
+    #fact{position:absolute;top:14%;left:4%;font-weight:900;font-size:clamp(22px,3vw,62px);line-height:1.06;white-space:pre-line;text-shadow:0 3px 20px #000}
+    #end{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;background:#070d12;opacity:0;pointer-events:none}
+    #end strong{display:block;font-size:clamp(30px,5vw,110px);line-height:.98;letter-spacing:-.04em}#end em{display:block;font-size:clamp(15px,1.2vw,26px);font-style:normal;letter-spacing:.14em;color:#ffcf74;margin-bottom:2em}#end p{font-size:clamp(12px,1vw,22px);color:#b5c4c9;margin-top:2.5em}
+    #loading{position:absolute;inset:0;display:grid;place-items:center;background:#070d12;font-size:25px}
+  </style>
+</head>
+<body>
+  <main id="frame" aria-label="Forty-second film proof, condensed recorded dialogue">
+    <div id="canvas"></div><div id="labels"></div><div id="shade"></div>
+    <div id="brand">LAST THREE</div><div id="chapter">03 / THE PIT</div>
+    <div id="fact"></div><div id="caption"><span id="speaker"></span><span id="caption-text"></span></div>
+    <div id="stamp">RECORDED DECISIONS · CONDENSED DIALOGUE · AI VOICES</div>
+    <div id="end"><div><em>LAST THREE / THE ROPE</em><strong>SIX ESCAPED.<br>ZERO CAME BACK.</strong><p>Based on recorded AI decisions. Dialogue condensed.<br>Voices and character performance are authored.</p></div></div>
+    <div id="loading">Preparing the film proof…</div>
+  </main>
+  <script type="module" src="dist/pit-proof.js"></script>
+</body>
+</html>
