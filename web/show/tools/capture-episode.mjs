@@ -11,7 +11,7 @@ const browser=await launch();
 const timingBytes=await fs.readFile(new URL("../assets/episode/timing.json",import.meta.url));
 const timingHash=createHash("sha256").update(timingBytes).digest("hex");
 const visualInputs={};
-for(const path of ["web/show/dist/episode.js","web/show/episode.html","web/show/assets/episode/motion.json"]){
+for(const path of ["web/show/dist/episode.js","web/show/episode.html","web/show/assets/episode/motion.json",...(["claude","deepseek","glm","grok","gemini","kimi","qwen","gpt"].map(name=>`web/show/assets/logos/${name}.svg`))]){
  const file=new URL("../../../"+path,import.meta.url);visualInputs[path]=createHash("sha256").update(await fs.readFile(file)).digest("hex");
 }
 const ctx=await browser.newContext({viewport:{width:1920,height:1080}}),page=await ctx.newPage(),errors=[];
@@ -46,6 +46,9 @@ try{
   if(before!==afterSink)throw new Error(`Post-sink seek mismatch: ${id}`);
   determinism.push(id);
  }
+ const earlyBlocked=proof.filter(p=>p.blockedHeads.length);
+ if(errors.length||earlyBlocked.length)throw new Error("Shot inspection failed: "+JSON.stringify({errors,blocked:earlyBlocked}));
+ console.log(`Verified ${proof.length} shots and ${determinism.length} reverse-seek cases`);
  const frameRanges=[];
  if(!process.argv.includes("--inspect")){
   await fs.mkdir(out+"frames/",{recursive:true});const count=Math.ceil(edit.duration*edit.fps);

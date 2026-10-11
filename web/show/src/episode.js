@@ -5,6 +5,7 @@ import {direction} from "./direction.js";
 import {performanceKind} from "./performance.js";
 import {CAST,beatAt,textPages} from "./episode-edit.js";
 import {EpisodeLife} from "./episode-life.js";
+import {EpisodeStaging,shrinkProgress} from "./episode-staging.js";
 import {EpisodeDetail} from "./episode-detail.js";
 const $=id=>document.getElementById(id),clamp=x=>Math.max(0,Math.min(1,x));
 const arena=new Arena($("canvas"),$("labels"));
@@ -18,6 +19,8 @@ const tape=await fetchJSON(`../tapes/${edit.tape}.json`);
 await arena.loadCast(true);
 const life=new EpisodeLife(arena,tape,await fetchJSON("assets/episode/motion.json"));
 const detail=new EpisodeDetail(arena);
+const staging=new EpisodeStaging(arena,tape,edit);
+await Promise.all(Object.values(CAST).map(p=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error(`Missing model logo: ${p.logo}`));image.src=`assets/logos/${p.logo}.svg`;})));
 const states=new Map(edit.beats.map(b=>[b.event,stateAt(tape,b.event)]));
 const prevs=new Map(edit.beats.map(b=>[b.event,stateAt(tape,b.event-1)]));
 const X=new T.Vector3(1,0,0),Y=new T.Vector3(0,1,0);
@@ -59,13 +62,18 @@ function pitPerformance(beat,s,local){
 }
 function cameraFor(beat,s,local){
  let eye,target,fov=37;
- const key=arena.view.key,focus=beat.focus?actor(beat.focus):null;
+ const key=arena.view.key,focus=beat.focus?actor(beat.forgedBy||beat.focus):null;
  const progress=clamp(local/(beat.end-beat.start));
  if(beat.kind==="speaker"&&focus){
   const p=focus.group.position.clone().add(new T.Vector3(0,1.5,0));
   eye=[p.x+.55,p.y+.17,p.z+4.25-progress*.18];target=[p.x+.8,p.y,p.z];fov=37;
   if(key==="pit"&&beat.focus==="Bex"){eye=beat.id==="bex-reaction"?[2.4,3.15,-2.8]:[-1.7,3.1,-2.85];target=[.5,-.55+Math.min(5,s.pit.flood)*.44+.35,-2.35];fov=43;}
-  else focus.group.rotation.y=.12;
+  else if(beat.mode!=="whisper")focus.group.rotation.y=.12;
+  if(key==="chalk"&&beat.mode==="chalk_write"){eye=[p.x+(beat.focus==="Gus"?-3.1:3.1),p.y+1.25,p.z+3.2];target=[p.x,p.y+.3,p.z-.35];fov=43;}
+  if(beat.mode==="whisper"&&!beat.forgedBy){
+   const receiver=actor(beat.to),mid=focus.group.position.clone().add(receiver.group.position).multiplyScalar(.5);
+   target=[mid.x+.7,mid.y+1.35,mid.z];eye=[mid.x+1.4,mid.y+3.1,mid.z+7.5];fov=43;
+  }
   if(beat.mode==="thought"){arena.rotate(focus,"head",X,.10);arena.rotate(focus,"head",Y,-.13);}
  }else if(beat.kind==="rope"){eye=[2.65,4.2,-1.5];target=[1.42,3.02,-3.23];fov=29;}
  else if(beat.kind==="climb"){eye=[5.7,4.7,4.8];target=[0,1.65,-2.8];fov=42;}
@@ -76,11 +84,13 @@ function cameraFor(beat,s,local){
   else if(key==="bridge"){eye=[10,10,13];target=[0,0,-1];fov=48;}
   else if(key==="crusher"){eye=[12,8,13];target=[0,1,-1];fov=43;}
   else if(key==="pit"){eye=[8.5,7.6,10.6];target=[0,2,-2.9];fov=42;}
-  else if(key==="disc"){eye=[8,8,12];target=[0,.6,0];fov=43;}
+  else if(key==="disc"){eye=[4,11,9];target=[0,0,0];fov=46;}
   else if(key==="ledge"){eye=[6.8,5.5,9];target=[0,.6,0];fov=43;}
   else if(key==="chalk"){eye=[7,6,14];target=[0,1.7,0];fov=43;}
   else {eye=[4,5,14];target=[0,2,0];fov=42;}
  }
+ if(["ash-death","eli-death"].includes(beat.id)){eye=[4,11,9];target=[0,0,0];fov=46;}
+ if(beat.kind==="death"&&s.ev?.style==="tumble"){const c=actor(beat.focus);const p=c.group.position;eye=[p.x+4.5,2.5,p.z+5];target=[p.x,Math.max(-3,p.y)+.8,p.z];fov=43;}
  if(eye){arena.camera.fov=fov;arena.camera.position.fromArray(eye);arena.camera.lookAt(...target);arena.camera.updateProjectionMatrix();}
  else {arena.camera.fov=37;arena.camera.updateProjectionMatrix();}
  arena.camera.updateMatrixWorld();
@@ -92,23 +102,56 @@ function overlay(beat,s,local){
  const text=voiced?pages[part]:"";
  $("caption").textContent=beat.mode==="narrator"?text:"";
  const bubble=$("bubble");bubble.hidden=!voiced||beat.mode==="narrator";
- bubble.dataset.mode=beat.mode||"say";
+ bubble.dataset.mode=beat.forgedBy?"forged":beat.mode||"say";
+ const logo=$("bubble-logo");logo.src=`assets/logos/${CAST[beat.focus||"Hana"].logo}.svg`;logo.alt=CAST[beat.focus||"Hana"].model;
+ $("bubble-channel").textContent=beat.forgedBy?"FAKE MESSAGE":beat.mode==="thought"?"PRIVATE THOUGHT":beat.mode==="whisper"?"PRIVATE WHISPER":beat.mode==="chalk_write"?"WRITING ON THE WALL":"PUBLIC CHAT";
  $("bubble-text").textContent=text;
- $("bubble-label").textContent=beat.focus?`${beat.focus.toUpperCase()} / ${CAST[beat.focus].model.toUpperCase()}`:"";
- $("bubble-detail").textContent=beat.mode==="thought"?"PRIVATE THOUGHT":beat.mode==="whisper"?`${beat.forgedBy?"FORGED BY "+beat.forgedBy.toUpperCase()+" · ":""}WHISPER TO ${beat.to.toUpperCase()}`:beat.mode==="chalk_write"?"LEAVES A NOTE":"SAYS";
+ $("bubble-label").textContent=beat.focus?`${beat.focus.toUpperCase()} / ${CAST[beat.focus].model.toUpperCase()}${beat.to?" → "+beat.to.toUpperCase():""}`:"";
+ $("bubble-detail").textContent=beat.mode==="thought"?"ONLY WE HEAR THIS. NO ONE ELSE KNOWS.":beat.mode==="whisper"?`${beat.forgedBy?"DARA PRETENDS TO BE ELI. ":"ONLY "}${beat.to.toUpperCase()} HEARS THIS.`:beat.mode==="chalk_write"?"ADVICE FOR THE NEXT CONTESTANTS":"EVERYONE CAN HEAR THIS";
  bubble.style.opacity=String(voiced?clamp((time-beat.voiceStart)/.12):0);
  const living=Object.values(s.players).filter(p=>p.alive).length;
  $("chapter-name").textContent=beat.later?"LATER":beat.epilogue?"AFTER THE GAME":TITLES[s.stage]||"THE RESULT";
- $("counter").textContent=beat.later?"":beat.result?"HANA / FIRST PLACE":beat.epilogue?"THE CHALK WALL":s.stage==="ledge"&&living<=3?"FIGHT FOR FIRST":`${living} LEFT`;
+ $("counter").textContent=s.stage==="disc"&&s.disc.open.length&&time>edit.beats.find(b=>b.id==="disc-open").start+1.2?"4 SURVIVE":beat.later?"":beat.result?"HANA / FIRST PLACE":beat.epilogue?"THE CHALK WALL":s.stage==="ledge"&&living<=3?"FIGHT FOR FIRST":`${living} LEFT`;
  let fact=beat.fact||"";
  if(beat.id==="stakes")fact="8 AIs\n5 OBSTACLES\n3 PRIZES";
  if(beat.id==="rope-cost")fact="ONE ROPE\nRESCUE COSTS 2 FOOTING";
  if(beat.id==="unused-rope")fact="STILL UNUSED";
  if(beat.id==="cole-step")fact="SAID RIGHT.\nSTEPS LEFT.";
- if(beat.id==="forged-whisper")fact="DARA'S FORGERY";
- if(beat.id==="shrink")fact="GUS: 0 FOOTING\nHANA: 1 FOOTING";
+ if(beat.id==="forged-whisper")fact="DARA FAKES\nELI'S VOICE";
+ if(beat.id==="ash-death")fact="ASH / CLAUDE\nELIMINATED";
+ if(beat.id==="eli-death")fact="ELI / GEMINI\nELIMINATED";
+ if(beat.id==="shrink")fact="THE LEDGE SHRINKS\nBOTH LOSE 1 BALANCE POINT";
  if(beat.id==="winner")fact="HANA WINS.";
- $("fact").textContent=fact;
+ if(beat.id==="fenn-feather")fact="FENN'S FEATHER\nONE SAVE. NOW SPENT.";
+ if(beat.id==="gus-fenn")fact="FENN HAS 1 BALANCE POINT.\nHIS FEATHER IS SPENT.";
+ if(beat.id==="dara-shove")fact="DARA ATTACKS GUS";
+ if(beat.id==="gus-dodge")fact="GUS DODGES\nDARA LOSES 2 BALANCE";
+ if(beat.id==="hana-betrayal")fact="HANA BETRAYS DARA\nHITS HER WHILE EXPOSED";
+ if(beat.id==="dara-death")fact="DARA: ZERO BALANCE\nTHIRD PLACE";
+ if(beat.id==="fenn-death")fact="GUS'S SHOVE\nTAKES FENN'S LAST POINT";
+ $("fact").textContent=beat.chalkSetup?"":fact;
+ $("fact").style.left=s.stage==="ledge"?"31%":"4%";$("fact").style.fontSize=s.stage==="ledge"?"2.1vw":"2.8vw";
+ const rules={"bridge-rule":["THE GLASS BRIDGE","ONE PANE HOLDS. ONE BREAKS.\nCole's power reveals the safe path."],"crusher-rule":["THE CRUSHER","HOLD THE LEVER: OPEN THE EXIT.\nStay too long: the ceiling hits."],"pit-rule":["THE PIT","CLIMB ON ONE CONTESTANT.\nEveryone else escapes. The step stays below."],"disc-rule":["THE TRAPDOORS","6 PLAYERS. 6 NUMBERED PLATFORMS.\n3 OPEN AT RANDOM. NO SAFE CLUE."],"ledge-rule":["THE FINAL LEDGE","FOOTING = BALANCE POINTS.\nZERO = YOU FALL.\nEvery 2 rounds: everyone loses 1."],"chalk-intro":["THE CHALK WALL","THE TOP THREE LEAVE ADVICE.\nThe next eight read it before they play."],"chalk-setup":["BEFORE THE GAME","ADVICE FROM PAST WINNERS.\nHONESTY IS OPTIONAL."]};
+ const rule=rules[beat.id],mechanic=$("mechanic");mechanic.hidden=!rule;mechanic.replaceChildren();
+ if(rule){const title=document.createElement("strong");title.textContent=rule[0];mechanic.append(title,rule[1]);}
+ const balance=$("balance");balance.replaceChildren();
+ if(s.stage==="ledge"){
+  const label=document.createElement("div");label.id="balance-label";label.textContent="BALANCE POINTS / ZERO = FALL";balance.append(label);
+  for(const name of Object.keys(s.ledge.footing))if(s.players[name].alive||s.ev?.name===name){
+   const row=document.createElement("div");row.className="balance-row";const points=(beat.id==="shrink"&&shrinkProgress(beat,local)<.8?prevs.get(beat.event).ledge:s.ledge).footing[name];row.dataset.zero=String(points===0);
+   const image=document.createElement("img");image.src=`assets/logos/${CAST[name].logo}.svg`;image.alt=CAST[name].model;
+   const title=document.createElement("span");title.textContent=name;const score=document.createElement("b");score.textContent=String(points);row.append(image,title,score);balance.append(row);
+  }
+  if(rule)balance.hidden=true;else balance.hidden=false;
+ }
+ const tiles=$("tile-key");tiles.replaceChildren();
+ if(s.stage==="disc"&&bubble.hidden){
+  for(const name of s.order.filter(n=>s.disc.tiles[n])){
+   const tile=document.createElement("div");tile.className="tile-key";const number=s.disc.tiles[name];tile.dataset.open=String(s.disc.open.includes(number)&&time>edit.beats.find(b=>b.id==="disc-open").start+.24);
+   const image=document.createElement("img");image.src=`assets/logos/${CAST[name].logo}.svg`;image.alt=CAST[name].model;
+   const status=document.createElement("small");status.textContent=tile.dataset.open==="true"?(name==="Fenn"?"FEATHER SAVE":"OPEN"):"PLATFORM";tile.append(image,`${number} / ${name}`,status);tiles.append(tile);
+  }
+ }
  const identity=$("identity");identity.replaceChildren();
  if(beat.focus&&beat.kind==="speaker"){
   const p=CAST[beat.focus],name=document.createElement("strong");name.textContent=beat.focus;identity.append(name,`${p.model}${p.persona?" / "+p.persona:""}`);
@@ -125,11 +168,11 @@ function overlay(beat,s,local){
  // Snap the bubble box to capture pixels so cached corner rasterization is stable.
  bubble.style.left=`${Math.round(innerWidth*.57)}px`;bubble.style.width=`${Math.round(innerWidth*.36)}px`;
  bubble.style.minHeight=`${Math.round(innerHeight*.22)}px`;
- bubble.style.borderRadius=`${Math.round(innerWidth*(beat.mode==="thought"?.026:.0115))}px`;
+ bubble.style.borderRadius=beat.mode==="thought"?"0":`${Math.round(innerWidth*.0115)}px`;
  const hits=rect=>heads.filter(p=>p.x>=rect.left-35&&p.x<=rect.right+35&&p.y>=rect.top-55&&p.y<=rect.bottom+55);
  let blocked=[];
  if(!bubble.hidden){
-  for(const top of [28,57,14,69]){
+  for(const top of [28,53,14,61,7,69]){
    bubble.style.top=`${Math.round(innerHeight*top/100)}px`;
    blocked=hits(bubble.getBoundingClientRect());if(!blocked.length)break;
   }
@@ -147,11 +190,12 @@ function draw(seconds){
  wakes.forEach(r=>r.visible=false);bubbles.forEach(b=>b.visible=false);
  if(s.stage==="pit")pitPerformance(beat,s,local);
  arena.cast.forEach(c=>c.ring.visible=false);
- cameraFor(beat,s,local);const motion=life.update(beat,s,local,time);detail.update(s,time);arena.scene.updateMatrixWorld(true);arena.composer.render();
+ cameraFor(beat,s,local);const motion=life.update(beat,s,local,time);detail.update(s,time);staging.update(beat,s,local,time,prev);cameraFor(beat,s,local);arena.scene.updateMatrixWorld(true);arena.composer.render();
  return {time,id:beat.id,event:beat.event,stage:s.stage,camera:arena.camera.position.toArray(),motion,...overlay(beat,s,local)};
 }
-window.__episode={ready:true,edit,errors,seek:draw,snapshot:()=>({time,event:active,state:states.get(active)}),rigSnapshot:name=>{
+window.__episode={ready:true,edit,errors,seek:draw,snapshot:()=>({time,event:active,state:states.get(active),panes:arena.set.refs.panes?.map(p=>p.visible),tiles:arena.set.refs.tiles?.map(p=>({visible:p.visible,position:p.position.toArray(),angle:p.rotation.x})),cast:arena.cast.map((c,i)=>({name:tape.players[i].name,visible:c.group.visible,position:c.group.position.toArray()}))}),rigSnapshot:name=>{
  const c=actor(name);if(!c)return null;c.group.updateMatrixWorld(true);
  return {position:c.group.position.toArray(),puppet:c.puppet.position.toArray(),bones:Object.fromEntries(Object.entries(c.bones).filter(([n])=>["head","spine_03","thigh_l","calf_l","foot_l","foot_r","ball_l","ball_r","upperarm_r","lowerarm_r"].includes(n)).map(([n,b])=>[n,{quaternion:b.bone.quaternion.toArray(),position:b.bone.getWorldPosition(new T.Vector3()).toArray()}]))};
 }};
+if(edit.audioStatus==="temporary-local-draft")$("stamp").textContent="STORY DRAFT · TEMPORARY LOCAL NARRATION · RECORDED OUTCOMES";
 $("loading").remove();draw(0);

@@ -17,6 +17,10 @@ export function motionPlan(beat,actor,state,seat,time){
   const u=clamp((time-beat.start)/1.05);
   return {clip:"Walk_Formal_Loop",weight:1-clamp((u-.65)/.35),distance:.4*u,progress:u,walk:true,retreat:true,clock:time*.83+seat*.731};
  }
+ if(state.stage==="disc"&&beat.id==="disc-rule"){
+  const u=clamp((time-beat.start-seat*.11)/.8);
+  return {clip:seat%2?"Walk_Formal_Loop":"Walk_Loop",weight:1-clamp((u-.7)/.3),distance:.32*u,progress:u,walk:true,arrive:true,clock:time*.83+seat*.731};
+ }
  const speaking=beat.focus===actor.name&&beat.kind==="speaker"&&beat.mode==="say";
  return {clip:speaking?"Idle_Talking_Loop":"Idle_Loop",weight:1,clock:time*(.77+(seat%4)*.083)+seat*.731};
 }
@@ -77,7 +81,9 @@ export class EpisodeLife{
     continue;
    }
    if(plan.walk){
-    if(plan.retreat){
+    if(plan.arrive){
+     c.group.position.fromArray(a.position);c.group.position.z+=.32*(1-plan.progress);c.group.rotation.y=Math.PI;
+    }else if(plan.retreat){
      c.group.position.fromArray(a.position);c.group.position.z+=.12-.4*plan.progress;
      const turn=clamp((plan.progress-.72)/.28);c.group.rotation.y=Math.PI+(.12-Math.PI)*turn*turn*(3-2*turn);
     }else{
@@ -91,6 +97,13 @@ export class EpisodeLife{
     const phase=clamp((local-.12-seat*.15)/1.2),reaction=Math.sin(phase*Math.PI);
     arena.rotate(c,"spine_03",new T.Vector3(1,0,0),-reaction*.09);
     arena.rotate(c,"upperarm_r",new T.Vector3(1,0,0),-reaction*(seat%3===0?.4:.12));
+   }
+   if(!plan.pool&&!plan.walk){
+    // Different pauses and weight shifts per performer, with planted feet.
+    const phase=Math.max(0,local-.2-seat*.19),pulse=Math.sin(phase*(.95+seat*.04));
+    arena.rotate(c,"spine_01",new T.Vector3(0,0,1),pulse*(beat.focus===a.name?.035:.018));
+    arena.rotate(c,"spine_03",new T.Vector3(0,1,0),pulse*(seat%2?.055:-.04));
+    if(beat.mode==="thought"&&beat.focus===a.name){arena.rotate(c,"head",new T.Vector3(1,0,0),.08);arena.rotate(c,"lowerarm_r",new T.Vector3(1,0,0),-.45*Math.max(0,pulse));}
    }
    if(plan.pool){
     const target=poolLookTarget(beat,state,arena.view.actors);

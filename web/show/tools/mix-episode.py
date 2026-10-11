@@ -1,4 +1,5 @@
 """Mix measured voices with an original local score, at the exact frame origin."""
+import os
 import json
 import hashlib
 import subprocess
@@ -7,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT / 'docs/show/recordings/episode-v1'
+OUT = Path(os.environ.get('LAST_THREE_OUTPUT', ROOT / 'docs/show/recordings/episode-v1'))
 AUDIO = OUT / 'audio'
 edit = json.loads((OUT / 'timing.json').read_text())
 RATE = 48000
@@ -82,15 +83,17 @@ for b in edit['beats']:
         add(music, b['start'], bed.astype(np.float32))
     if b['id'].startswith(('climb-', 'bex-')) or b['id'] in ('pit-rule', 'unused-rope'):
         add(effects, b['start'], noise(length, .011, 0, 24), -.1)
-    if b['kind'] == 'death':
+    if b['kind'] == 'death' and b['id'] not in ('ash-death', 'eli-death'):
         add(effects, b['start']+.12, tone(.8, 48, .12, 4))
         add(effects, b['start']+.2, noise(.6, .11, 8, 5))
     if b['kind'] == 'action':
         add(effects, b['start']+.18, noise(.17, .055, 14, 4))
-    if b['id'] == 'cole-step':
-        add(effects, b['start']+.35, noise(.8, .1, 7, 2))
+    if b['id'] == 'cole-death':
+        add(effects, b['start']+.24, noise(.8, .1, 7, 2))
     if b['id'] == 'hana-dive':
         add(effects, b['end']-.45, tone(.6, 65, .12, 9))
+    if b['id'] == 'shrink':
+        add(effects, b['start']+b['voiceDuration']*.48, tone(.9, 72, .065, 3))
     if b['id'] == 'disc-open':
         add(effects, b['start']+.2, tone(.5, 90, .1, 8))
     if b['id'] == 'bex-sink':

@@ -14,7 +14,7 @@ timing = (OUT/'timing.json').read_bytes()
 assert timing == (ROOT/'web/show/assets/episode/timing.json').read_bytes(), 'Runtime/edit mismatch'
 assert hashlib.sha256(timing).hexdigest() == audio['timing_hash'], 'Stale soundtrack timing'
 assert capture['timingHash'] == audio['timing_hash'], 'Stale captured video timing'
-for path in ['web/show/dist/episode.js', 'web/show/episode.html', 'web/show/assets/episode/motion.json']:
+for path in ['web/show/dist/episode.js', 'web/show/episode.html', 'web/show/assets/episode/motion.json'] + [f'web/show/assets/logos/{name}.svg' for name in ['claude','deepseek','glm','grok','gemini','kimi','qwen','gpt']]:
     assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest() == capture['visualInputs'][path], 'Stale visual capture: '+path
 assert hashlib.sha256((OUT/'audio/mix.wav').read_bytes()).hexdigest() == audio['mix_hash'], 'Changed soundtrack'
 assert not capture['errors'], capture['errors']

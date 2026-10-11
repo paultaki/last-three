@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-11 · codex (story clarity v3)
+- **Did:** implemented real model logos, distinct public/thought/whisper/fake-message language, two-person whisper coverage, explicit game rules and balance scores, early chalk setup and Gus's actual misleading note, staggered platform arrivals, shared trapdoor drop timing, persistent glass holes/fragments and gravity-driven falls.
+- **Why:** first-time viewers could not follow private channels, the chalk payoff or the last two games; the original opening/fall timing obscured causes and outcomes.
+- **Next:** full 3:22 local story draft is rendering in docs/show/recordings/episode-v3; finish native 1080p/720p encode and inspection. Ten original-voice replacement jobs (805 characters) await the pending $3 ElevenLabs authorization. Temporary narration is offline macOS speech, clearly stamped as a draft.
+- **Watch out:** 433 tests and 113 tapes pass. Live scene checks verify six supported platforms, three shared hinged openings, two simultaneous falls, one feather save, persistent broken glass, four discourse modes, loaded logos, exclusive rules/score panels and focused chalk coverage. All 75 shots and seven selected exact-pixel/overlay reverse-seek cases pass. Engine, reducer, tape and v1/v2 media remain unchanged. Claude's review hit its weekly limit and auto-closed stopped without a verdict after one allowed oversized-packet preflight correction; no retry/fallback or independent CLEAN claim. See docs/show/REVIEW-EPISODE-01-STORY-V3.md. New voices/media remain local and ignored; no public upload or push.
+
 ## 2026-10-11 · codex (movement and detail v2)
 - **Did:** completed two film passes: five real Quaternius clips retargeted onto eight Synty rigs, independent continuing idle/talking/walking motion, staggered reactions, Bex looking up and reaching toward actual deck occupants, original set wear/water/mechanical detail, and separate native 1080p/720p 3:14 exports.
 - **Why:** the cast was too static and synchronized; Paul requested more varied movement and deeper scene aliveness, especially the woman in the pool.
