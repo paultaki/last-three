@@ -47,3 +47,23 @@ VERDICT: FINDINGS:5
 --- anomalies ---
 none
 ```
+
+## Reviewer reliability snapshot
+
+Claude Fable global lane statistics, captured 2026-10-10. These describe the lane across projects, not this proof. Rates are fractions. This proof had two valid verdicts, seven accepted findings, zero discarded findings and zero timeouts; both rows are resolved. The literal-fix close-out is recorded separately.
+
+| Metric | Last seven days | Lifetime |
+| --- | --- | --- |
+| Catch rate among valid verdicts | 0.6041 | 0.612 |
+| Actionable findings per finished dispatch | 0.4745 | 0.4688 |
+| Bugs per closed review | 1.2867 | 1.3359 |
+| Provisional precision | 0.7741 | 0.7559 |
+| Dispatch verdict rate | 0.7855 | 0.7661 |
+| End-to-end verdict rate | 0.7418 | 0.6594 |
+| Brief validation failures | 8 | 121 |
+| Oversized packet failures | 14 | 45 |
+| Timeout rate | 0.1796 | 0.1491 |
+| Loop count | 0 | 0 |
+| Stale pending rows | 3 | 11 |
+| Retry dispatches | 136 | 382 |
+| Double-timeout series | 0 | 0 |
