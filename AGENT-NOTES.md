@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-11 · codex (movement and detail v2)
+- **Did:** completed two film passes: five real Quaternius clips retargeted onto eight Synty rigs, independent continuing idle/talking/walking motion, staggered reactions, Bex looking up and reaching toward actual deck occupants, original set wear/water/mechanical detail, and separate native 1080p/720p 3:14 exports.
+- **Why:** the cast was too static and synchronized; Paul requested more varied movement and deeper scene aliveness, especially the woman in the pool.
+- **Next:** local delivery complete. Paul can review docs/show/recordings/episode-v2/last-three-episode-01-720p.mp4; production and verification are in docs/show/EPISODE-01-MOVEMENT-V2.md.
+- **Watch out:** original edit, voices, tape, engine, reducer and v1 exports remain unchanged. 429 tests and 113 tapes pass. All 4,848 frames have zero render errors or projected-head bubble overlaps; seven reverse-seek checks compare exact canvas pixels plus actual film overlay DOM, excluding legacy display:none replay labels. Four contiguous 1,212-frame ranges completed without screenshot retries. Both complete MP4s strictly decode at 25 fps with 48 kHz audio and faststart; encoded frames visually inspected. Browser proof passes 26 upward-gaze samples, 42 sole checks, eight continuing actors after the settle cap and all four original human-step support heights. Claude review timed out at 180 seconds without a verdict and auto-closed as stopped; no retry/fallback or independent CLEAN claim. See docs/show/REVIEW-EPISODE-01-MOVEMENT-V2.md. Cast, motion bank, voices and recordings stay private/local/ignored; faces and lip sync remain unchanged. No push or public upload.
+
 ## 2026-10-10 · codex (Episode 01 film)
 - **Did:** built the first full voiced 3:14 film from the approved Pit direction and revised Claude beat sheet: 74 shots, 44 voices, condensed dialogue, speech/thought/whisper bubbles, narrator captions, all five obstacles, all seven eliminations, original local score/effects and 1080p/720p MP4 exports.
 - **Why:** Paul approved a fast YouTube episode with surprise, betrayal and emotional pauses rather than the earlier reading-paced 6:39 cut.

@@ -2,10 +2,11 @@
 import json
 import hashlib
 import subprocess
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT/'docs/show/recordings/episode-v1'
+OUT = Path(os.environ.get('LAST_THREE_OUTPUT', ROOT/'docs/show/recordings/episode-v1'))
 (OUT/'delivery.json').unlink(missing_ok=True)
 capture = json.loads((OUT/'capture.json').read_text())
 audio = json.loads((OUT/'audio-manifest.json').read_text())
@@ -13,11 +14,20 @@ timing = (OUT/'timing.json').read_bytes()
 assert timing == (ROOT/'web/show/assets/episode/timing.json').read_bytes(), 'Runtime/edit mismatch'
 assert hashlib.sha256(timing).hexdigest() == audio['timing_hash'], 'Stale soundtrack timing'
 assert capture['timingHash'] == audio['timing_hash'], 'Stale captured video timing'
+for path in ['web/show/dist/episode.js', 'web/show/episode.html', 'web/show/assets/episode/motion.json']:
+    assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest() == capture['visualInputs'][path], 'Stale visual capture: '+path
 assert hashlib.sha256((OUT/'audio/mix.wav').read_bytes()).hexdigest() == audio['mix_hash'], 'Changed soundtrack'
 assert not capture['errors'], capture['errors']
 assert not capture['frameIssues'], capture['frameIssues']
 assert not any(p['blockedHeads'] for p in capture['proof'])
 assert len(capture['determinism']) == 7
+assert capture['determinismType'] == 'exact-canvas-pixels-and-overlay-DOM'
+assert sum(r['captured'] for r in capture['frameRanges']) == capture['frameCount']
+next_frame = 0
+for r in capture['frameRanges']:
+    assert r['start'] == next_frame and r['end'] - r['start'] == r['captured'], 'Invalid frame range'
+    next_frame = r['end']
+assert next_frame == capture['frameCount']
 assert capture['fps'] == 25
 assert capture['frameCount'] == audio['frames']
 duration = capture['frameCount']/capture['fps']
@@ -27,7 +37,7 @@ for i in range(capture['frameCount']):
 outputs = []
 for width, height, crf in [(1920, 1080, 18), (1280, 720, 21)]:
     dst = OUT/f'last-three-episode-01-{height}p.mp4'
-    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-framerate', '25', '-start_number', '0',
+    subprocess.run(['ffmpeg', '-v', 'error', '-xerror', '-y', '-framerate', '25', '-start_number', '0',
                     '-i', capture['frames'], '-i', str(OUT/'audio/mix.wav'),
                     '-map', '0:v:0', '-map', '1:a:0', '-t', str(duration),
                     '-vf', f'scale={width}:{height},fps=25', '-c:v', 'libx264', '-preset', 'fast',
