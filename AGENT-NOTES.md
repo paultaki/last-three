@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-10 · codex (Episode 01 film)
+- **Did:** built the first full voiced 3:14 film from the approved Pit direction and revised Claude beat sheet: 74 shots, 44 voices, condensed dialogue, speech/thought/whisper bubbles, narrator captions, all five obstacles, all seven eliminations, original local score/effects and 1080p/720p MP4 exports.
+- **Why:** Paul approved a fast YouTube episode with surprise, betrayal and emotional pauses rather than the earlier reading-paced 6:39 cut.
+- **Next:** corrective review of the audio/capture safeguards is pending at this checkpoint; then Paul can review docs/show/recordings/episode-v1/last-three-episode-01-720p.mp4. Production and source maps are in docs/show/EPISODE-01-DELIVERY.md and EPISODE-01-SOURCE-MAP.md.
+- **Watch out:** tape, engine, reducer and earlier approved Pit proof remain unchanged. 426 tests and 113 tapes pass. All 4,848 frames render without errors or projected-head bubble overlaps. Seven same-event/cross-event/post-sink reverse seeks match pixels. Both exports fully decode at 25 fps with 48 kHz audio and faststart. Round 1 accepted two low findings (complete measured processed audio, capture timing hash) and discarded one missing-context visibility finding, with the existing renderer contract documented and tested. All voice samples are retained. No lip sync; faces remain static. Purchased cast, voices and recordings stay local and ignored. No public upload or push.
+
 ## 2026-10-10 · codex (Pit film proof)
 - **Did:** created a separate 40-second Pit film with condensed public dialogue, distinct AI voices, 18 authored shots, close-ups and low angles, an unused-rope prop, body performance, local water response, original sound/music and 1080p/720p exports.
 - **Why:** Paul wants a fast YouTube film with drama and emotion; the previous 6:39 cut was paced around reading verbatim speech bubbles.

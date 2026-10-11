@@ -24,3 +24,9 @@ The tape and `web/lib/state.js` are authoritative. The 3D layer must not invent 
 
 - Presentation actors already carry `place` from reducer players (model.js presentation). The game_end reducer writes authoritative event placements to those players. Finalist name/ordinal rendering uses that same projected result; it is not an absent actor field. Browser proof asserts all three exact ordinals/names. Missing place 1 never permits a runner-up winner headline.
 - Context diagnostics may run before initial load and return null then. Disc save lift stays at its held height on later non-feather ability events; only the actual feather-use event animates the lift.
+
+## Offline episode rendering
+
+- `Arena.render` resets effects visibility on every call to `v.death && !this.reduced` (scene.js). Film-only suppression of Pit particles after that call cannot leak into another frame. The episode capture checks pixel-identical return to bridge and disc deaths after visiting the Pit sink, in addition to same-event and cross-event reverse seeks.
+- Episode voice windows measure the complete pitch-preserving processed PCM at 48 kHz, including filter output length. The mixer retains every sample; it cannot infer or truncate a spoken tail from MP3 container duration.
+- Offline captured frames carry the SHA-256 of the runtime timing bytes. Encoding requires that hash to match the measured soundtrack timeline, so equal total frame counts cannot hide redistributed beat windows.
