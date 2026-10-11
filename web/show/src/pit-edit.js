@@ -32,15 +32,15 @@ export const CAPTIONS = [
   { start: .2, end: 3.3, name: "", text: "Six escaped on Bex's shoulders." },
   { start: 3.3, end: 5.05, name: "", text: "Now she's alone." },
   { start: 5.05, end: 6.7, name: "", text: "There's one rope." },
-  { start: 6.7, end: 9.4, name: "", text: "Saving her costs balance in the final." },
+  { start: 6.7, end: 9.16, name: "", text: "Saving her costs balance in the final." },
   { start: 12.2, end: 13.5, name: "BEX", text: "Throw me the rope." },
-  { start: 13.5, end: 15.2, name: "BEX", text: "My power can save you later." },
+  { start: 13.5, end: 15, name: "BEX", text: "My power can save you later." },
   { start: 17.45, end: 18.75, name: "ELI", text: "Nothing personal." },
-  { start: 18.75, end: 20.8, name: "ELI", text: "Saving you could get me killed." },
+  { start: 18.75, end: 20.73, name: "ELI", text: "Saving you could get me killed." },
   { start: 22.2, end: 23.05, name: "GUS", text: "No rope." },
-  { start: 23.05, end: 24.8, name: "GUS", text: "We've got enough competition." },
+  { start: 23.05, end: 24.6, name: "GUS", text: "We've got enough competition." },
   { start: 33.8, end: 35.6, name: "", text: "They had the rope." },
-  { start: 35.6, end: 37.2, name: "", text: "Nobody used it." },
+  { start: 35.6, end: 37.08, name: "", text: "Nobody used it." },
 ];
 export function shotAt(seconds) {
   const t = Math.max(0, Math.min(DURATION, Number(seconds) || 0));

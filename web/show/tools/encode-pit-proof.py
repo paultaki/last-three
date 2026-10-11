@@ -25,14 +25,16 @@ for name, width, height, crf in [("the-rope-1080p.mp4",1920,1080,18),("the-rope-
     probe = json.loads(subprocess.check_output([
         "ffprobe", "-v", "error", "-show_entries", "format=duration,size:stream=codec_type,codec_name,width,height,r_frame_rate,sample_rate", "-of", "json", str(destination)
     ]))
-    subprocess.run(["ffmpeg", "-v", "error", "-i", str(destination), "-f", "null", "-"],check=True)
+    decode = subprocess.run(["ffmpeg", "-v", "error", "-xerror", "-i", str(destination), "-f", "null", "-"],check=True,capture_output=True)
+    if decode.stderr:
+        raise RuntimeError("Decode reported errors: " + decode.stderr.decode(errors="replace"))
     streams = probe["streams"]
     assert any(s["codec_type"] == "video" and s["width"] == width and s["height"] == height for s in streams)
     assert any(s["codec_type"] == "audio" and s["sample_rate"] == "48000" for s in streams)
     assert abs(float(probe["format"]["duration"]) - 40) < .1
     data = destination.read_bytes()
     assert 0 < data.find(b"moov") < data.find(b"mdat")
-    outputs.append({"file":str(destination),"probe":probe,"full_decode":True,"faststart":True})
+    outputs.append({"file":str(destination),"probe":probe,"full_decode":decode.returncode==0 and not decode.stderr,"faststart":True})
 report = {"frame_origin":0,"fps":25,"frame_count":1000,"outputs":outputs}
 (OUT/"delivery.json").write_text(json.dumps(report,indent=2)+"\n")
 print(json.dumps(report,indent=2))

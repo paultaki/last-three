@@ -49,4 +49,6 @@ The repository gate passed 422 tests and 113 tape validations. The source checks
 
 The first screen recording showed timing drift during encoded-frame inspection, despite correct source shot timing. Final production uses exact offline frame sampling rather than wall-clock screen recording. Export verification includes dimensions, duration, audio/video streams, complete decode and MP4 fast-start. See the delivery diagnostics for the actual final results.
 
+Both final files are exactly 40 seconds at 25 fps with stereo 48 kHz AAC audio. The 1080p film is about 10.3 MB; the 720p copy is about 3.7 MB. Integrated loudness is -16.2 LUFS and true peak about -2.5 dBFS. Subtitle tails end within the measured voice windows. Decode verification fails on reported errors rather than relying only on ffmpeg's exit code. All seven accepted findings across two Claude review rounds are resolved; the final literal fixes qualify for the skill's verbatim-fix exemption. See REVIEW-PIT-FILM.md.
+
 The soundtrack is a proof mix, not a final commissioned score. Subtitle breaks are authored and are not claimed to be automatic word alignment. Existing low-poly faces remain static. Final taste and creative acceptance belong to Paul.

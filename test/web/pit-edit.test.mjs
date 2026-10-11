@@ -35,4 +35,9 @@ test("Subtitle and voice windows remain inside the edit and do not overlap",()=>
     assert.ok(end>c.start&&end<=DURATION);
     if(i)assert.ok(c.start>=(list[i-1].end??list[i-1].start+list[i-1].duration));
   });
+  for(const caption of CAPTIONS){
+    const voice=VOICES.find(v=>caption.start>=v.start&&caption.start<v.start+v.duration);
+    assert.ok(voice,"Caption must begin inside its voice window");
+    assert.ok(caption.end<=voice.start+voice.duration+1e-8,"Caption must end within its measured voice window");
+  }
 });

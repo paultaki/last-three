@@ -5,6 +5,25 @@ Round 1: `f7857622-dcc6-426e-8c42-a06d8ee84d99`. Claude Fable, fixed safe courie
 
 All five findings were accepted. The sync-marker design was removed in favor of exact offline frame rendering, also fixing the independently observed screen-recording drift. Encoder output now explicitly requests and verifies 48 kHz audio. Audio starts and expected voice lengths come from the shared edit manifest; decoded lengths are checked before mixing. Peak reporting records the pre-limit value separately. Capture validates cross-event and same-event reverse seeks.
 
+Round 2: `2263a93d-787e-4f73-a2bc-0e44b27627db`. Valid verdict: two low findings, no anomalies. Both accepted and fixed exactly as prescribed: subtitle ends clamped to measured voice windows with the missing containment assertion, and decoding fails on any reported error using `-xerror`, captured stderr and a derived decode result. Final exports were regenerated. The final confirming round is skipped under the skill's verbatim-fix exemption after the verification gate passes. This is a resolved-findings review, not an independent CLEAN verdict.
+
+## Round 2 output, verbatim
+
+```text
+VERDICT: FINDINGS:2
+
+**1. Low — `web/show/src/pit-edit.js` lines 31–42 (CAPTIONS) vs lines 24–28 (VOICES); `test/web/pit-edit.test.mjs` lines 31–37**
+Failure scenario: the stated invariant is "subtitle timing is authored within the measured voice windows", but every caption group overruns its voice window: narrator captions end at 9.4 vs voice end 0.2+8.96=9.16 (+0.24 s); BEX ends 15.2 vs 15.0 (+0.2 s); ELI ends 20.8 vs 20.73; GUS ends 24.8 vs 24.6 (+0.2 s); ending ends 37.2 vs 37.08. Why the diff causes it: `CAPTIONS` end values were authored independently of `VOICES.start+duration`, and the test named "Subtitle and voice windows remain inside the edit…" only checks edit bounds and intra-list ordering — it never asserts `caption.end <= voice.start+voice.duration` (or ≥ voice.start), so the invariant is unenforced and currently violated. If this overhang is intentional (standard subtitle hold), the invariant/disclosure wording and the test should say so; otherwise clamp caption ends to the voice windows and add the assertion.
+
+**2. Low — `web/show/tools/encode-pit-proof.py` lines 26 and 34**
+Failure scenario: `subprocess.run(["ffmpeg","-v","error","-i",dst,"-f","null","-"],check=True)` is treated as proof of "complete successful decode", and `"full_decode": True` is hardcoded into `delivery.json`. ffmpeg returns exit 0 on recoverable decode errors (corrupt/concealed H.264 or AAC frames are logged on stderr and skipped) unless `-xerror` is given, so a partially-corrupt MP4 passes this gate and is reported as fully decoded. Why the diff causes it: the check relies solely on the return code with no `-xerror` and no stderr capture/inspection; the report field is a literal rather than derived from the result. Add `-xerror` (and/or `capture_output=True` and assert empty stderr) and set `full_decode` from that outcome.
+
+No frame-determinism, audio/video origin, or export-sync defects found: frames are rendered at exact `frame/25` via synchronous `seek`, mix is exactly `48000*40` samples at origin 0, voice offsets use `round(start*RATE)`, loudnorm/aac muxing preserves alignment, and 48 kHz / dimensions / faststart are asserted rather than assumed.
+
+--- anomalies ---
+none
+```
+
 ## Round 1 output, verbatim
 
 ```text
