@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-11 · codex (v3 final voices)
+- **Did:** completed a separate 3:38 v3 film in verified native 1080p and 720p: ten ElevenLabs replacements, 34 unchanged original voice clips, 75 shots and 44 complete voiced lines. All ten replacements were independently transcribed and checked. Final files are in docs/show/recordings/episode-v3-final/.
+- **Why:** the clearer story draft still used temporary offline narration and two temporary Gus lines. Paul authorized the replacements directly, then removed the ElevenLabs spending cap and confirmed sufficient credits.
+- **Next:** local voice/render delivery complete. Review docs/show/recordings/episode-v3-final/last-three-episode-01-720p.mp4; production evidence is in docs/show/EPISODE-01-FINAL-VOICES-V3.md. Prior voice approval aa3565f7-9079-45c5-b143-e387235b011a was superseded after direct chat authorization, closing that loose end.
+- **Watch out:** all 5,438 frames have zero render errors, detected head/bubble overlaps or screenshot retries; four complete contiguous ranges, 75 shot checks and seven exact reverse-seek cases pass. Both complete exports strictly decode at 25 fps with 48 kHz audio and faststart; six encoded key scenes visually inspected. 433 tests, 113 tapes and live scene checks pass. Source implementation, engine, reducer, tapes and v1/v2/v3 draft media remain unchanged. Cast/voices/media remain private, local and ignored. No lip sync. Prior v3 Claude review stopped at its weekly limit without a verdict; documentation/audio-only follow-up does not claim a new CLEAN code review. No push or public upload.
+
 ## 2026-10-11 · codex (story clarity v3)
 - **Did:** completed a separate 3:22 story draft in verified native 1080p and 720p exports: real model logos, distinct public/thought/whisper/fake-message language, two-person whisper coverage, explicit game rules and balance scores, early chalk setup and Gus's actual misleading note, staggered platform arrivals, shared trapdoor drop timing, persistent glass holes/fragments and gravity-driven falls.
 - **Why:** first-time viewers could not follow private channels, the chalk payoff or the last two games; the original opening/fall timing obscured causes and outcomes.

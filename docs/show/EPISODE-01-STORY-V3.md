@@ -1,5 +1,7 @@
 # Episode 01: story and visual language v3
 
+The separate final-voice delivery is now complete. See [EPISODE-01-FINAL-VOICES-V3.md](EPISODE-01-FINAL-VOICES-V3.md) for the 3:38 film with original cast voices and its verification. The draft described below is preserved as delivered.
+
 A separate local story draft, preserving the original game, contestants, decisions and results. Engine, reducer and tape files are unchanged. Earlier v1 and v2 videos/audio remain untouched.
 
 ## What changed
