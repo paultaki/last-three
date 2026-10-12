@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-12 · claude-code (v5 redesign handoff)
+- **Did:** with Paul, chose the rules v5 lineup (Guided Bridge, Crusher, Pit, Trapdoor Vote, Jury of the Fallen) plus pacts, life debts, jury box, last words and intro motives; cut powers, chalk wall and numeric HUDs. Wrote a self-contained handoff in docs/HANDOFF-V5-CHATGPT.md. No code changed.
+- **Why:** Disc was pure luck, Ledge was unreadable on film, powers needed narration. The Pit's recipe (visible victim, public choice, said-vs-thought gap, slow consequence) is now the bar for every stage.
+- **Next:** the next agent writes the v5 spec on a new branch from codex/pit-film-proof, implements it test-first, runs free scripted games, then 12 budget games under a $2 cap.
+- **Watch out:** this branch is 9 commits ahead of main and unpushed; renders and purchased cast are gitignored and local only. Gateway last returned 402 (credits). Existing tapes and Episode 01 must stay untouched.
+
 ## 2026-10-11 · codex (v3 final voices)
 - **Did:** completed a separate 3:38 v3 film in verified native 1080p and 720p: ten ElevenLabs replacements, 34 unchanged original voice clips, 75 shots and 44 complete voiced lines. All ten replacements were independently transcribed and checked. Final files are in docs/show/recordings/episode-v3-final/.
 - **Why:** the clearer story draft still used temporary offline narration and two temporary Gus lines. Paul authorized the replacements directly, then removed the ElevenLabs spending cap and confirmed sufficient credits.
