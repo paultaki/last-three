@@ -1,6 +1,12 @@
 # Agent notes (newest first)
 
 ## 2026-10-12 · codex
+- **Did:** analyzed all ten immutable v5 mixed-roster tapes, recorded per-game/social/Guide/jury metrics and eight verified quote receipts in docs/FINDINGS.md, logged $1.232970 of prior paid games in docs/RUN-LOG.md, and recommended 20261012-0001 with 0004 and 0008 as alternatives. Built a separate local evidence reader. No further spending or rule changes.
+- **Why:** identify a tape-authoritative Episode 02 with a readable betrayal, rescue and jury payoff before animation begins.
+- **Next:** Paul picks the game. Animation is a later phase; no push or merge to main is authorized.
+- **Watch out:** median Bridge deaths are 5; 40/43 happen after truthful Guide calls. Only two of seven false calls clearly show intentional deception, both by Cole/GLM in 0008. Thirty-seven of 46 jury questions are silent; dossier pruning and model confusion produce false accusations. Game 0010 is a stalled anchor and floor save, not a clean voluntary abandonment. Gate passes 474 tests and 123 tapes; scoped Claude review stopped at weekly limit without a verdict. Existing tapes and protected film/assets/data paths remain unchanged.
+
+## 2026-10-12 · codex
 - **Did:** verified and committed the v5 implementation plus ten existing mixed-roster tapes; corrected two directory-wide test assumptions exposed by adding v5 recordings. The gate passes 474 tests and 123 tapes.
 - **Why:** preserve the completed rules redesign before Episode 02 analysis, and scope historical film assertions to the versions they support.
 - **Next:** analyze games 20261012-0001 through 0010 and document the Episode 02 shortlist. No push or merge is authorized.

@@ -68,3 +68,112 @@ Two changes after Paul's notes: a fifth obstacle, and a standing instruction tha
 ## Where spending stopped
 
 The model gateway ran out of credits at about **$15.09** of recorded usage and began returning "a positive credit balance is required" (HTTP 402). The remaining heavyweight games in that batch were discarded automatically by the quality gate, and the planned premium roster (Claude Opus 5.5, GPT-5.6 Sol and others, about $1 a game) was never run. The $30 budget cannot be used until credits are added to the Vercel AI Gateway on the team account; that is a payment only the account owner can make.
+
+
+## Rules v5: first ten real games and Episode 02 shortlist
+
+**Game 20261012-0001 is the Episode 02 recommendation.** It preserves the full hazard sequence, a pact betrayal, repeated abandonment decisions, a rope rescue, a secret vote and a unanimous jury reckoning. Cole / Kimi K2.6 wins. His false claim of an unbroken record makes the ending more complicated than a simple morality tale.
+
+Scope: ten existing mixed-roster tapes, seeds 501-510, $1.232970 of tape-attributed usage. No additional paid calls, rule changes or animation work in this analysis. All seat/model identities come from each tape; seats rotate models. Quotes below are verbatim excerpts and event indices are zero-based tape `i` values. Links address the local tape library using the requested query syntax; these unpublished tapes are absent from the public deployment, and the legacy replay/film has not been accepted for v5. A separate [local evidence reader](http://localhost:8861/last-three-v5-evidence.html?tape=20261012-0001&i=683) provides the actual event text. Its standalone file is saved at `/Users/paul/.codex/visualizations/2026/10/12/01a1324a-b9e9-7400-9338-f6e275e52245/last-three-v5-evidence.html`; it embeds read-only copies of the recorded events and does not modify the tape library.
+
+### A. Per-game results
+
+B/C/P/V = Bridge / Crusher / Pit / Trapdoor Vote deaths. Jury ranks finalists and kills nobody. F/B = pact formations/breaks; a re-formed pair counts again. Debts count direct-save events, not distinct pairs. Rope refusal counts each `leave` or explicit-break action by a player already out when an unused rope and a base made `reach_down` legal, including decisions made simultaneously with a throw. It does not count helpless spectators after the rope is spent.
+
+“Ruthless” has no objective engine field. For an auditable proxy, the **hostile-choice score** counts false Guide calls, legal `push_lever`/`push_base` attempts, ballots against one's creditor, and legal rope-refusal decisions, one each. A false call can be a mistake; intent is checked separately. Voluntary public pact termination is listed separately rather than treated as murder, and automatic pact breaks do not double-count a push/vote/call. Ties remain ties; zero means no measured hostile choice, not proof of kindness. This is a descriptive sample, not a controlled model ranking.
+
+| Game | Winner: seat / model | Deaths B/C/P/V | Guide: seat / model | False calls / 8 | Pacts F/B | Debts | Rope throws/refusals; anchors drowned | Highest-score finalist(s), score and jury result |
+|---|---|---|---|---:|---:|---:|---|---|
+| [0001](../web/?tape=20261012-0001&i=0) | Cole / Kimi K2.6 | 2/1/0/2 | Eli / GLM 5.3 Flash | 0 | 13/7 | 10 | 1/6; 0 | Cole / Kimi K2.6: 2, won; Fenn / DeepSeek V4 Flash: 2, lost, #2 |
+| [0002](../web/?tape=20261012-0002&i=0) | Ash / Haiku 5.5 | 5/0/0/0 | Ash / Haiku 5.5 | 0 | 8/2 | 0 | 0/0; 0 | No measured hostile choice |
+| [0003](../web/?tape=20261012-0003&i=0) | Gus / Qwen 3.8 Flash | 5/0/0/0 | Ash / Haiku 5.5 | 0 | 8/2 | 0 | 0/0; 0 | No measured hostile choice |
+| [0004](../web/?tape=20261012-0004&i=0) | Gus / Grok 4.1 fast | 3/0/0/2 | Eli / DeepSeek V4 Flash | 0 | 17/10 | 9 | 1/1; 0 | Hana / Gemini Flash-Lite: 3, lost, #3 |
+| [0005](../web/?tape=20261012-0005&i=0) | Dara / DeepSeek V4 Flash | 4/0/0/1 | Gus / Gemini Flash-Lite | 2 | 8/3 | 7 | 1/1; 0 | Bex / GLM 5.3 Flash: 1, lost, #3; Fenn / Haiku 5.5: 1, lost, #2 |
+| [0006](../web/?tape=20261012-0006&i=0) | Fenn / Kimi K2.6 | 5/0/0/0 | Gus / gpt-oss-120b | 2 | 9/6 | 0 | 0/0; 0 | Gus / gpt-oss-120b: 2, lost, #3 |
+| [0007](../web/?tape=20261012-0007&i=0) | Hana / Kimi K2.6 | 5/0/0/0 | Ash / Qwen 3.8 Flash | 0 | 4/0 | 0 | 0/0; 0 | No measured hostile choice |
+| [0008](../web/?tape=20261012-0008&i=0) | Eli / Haiku 5.5 | 5/0/0/0 | Cole / GLM 5.3 Flash | 2 | 5/1 | 0 | 0/0; 0 | Cole / GLM 5.3 Flash: 2, lost, #3 |
+| [0009](../web/?tape=20261012-0009&i=0) | Bex / Haiku 5.5 | 5/0/0/0 | Ash / Gemini Flash-Lite | 1 | 8/2 | 0 | 0/0; 0 | Ash / Gemini Flash-Lite: 1, lost, #3 |
+| [0010](../web/?tape=20261012-0010&i=0) | Ash / Qwen 3.8 Flash | 4/0/1/0 | Bex / GLM 5.3 Flash | 0 | 7/0 | 6 | 1/0; 0 | Eli / DeepSeek V4 Flash: 1, lost, #3 |
+
+Highest-score finalists lose in all five games with a unique positive leader (0004, 0006, 0008, 0009, 0010). The two tied positive games differ: 0001 includes winner Cole and second-place Fenn; 0005 puts Bex third and Fenn second. Three games have zero measured hostile choices by finalists. This proxy misses unverified counters and speech-only manipulation.
+
+### B. Aggregates
+
+- **Bridge:** 43 deaths; median 5, range 2-5, above the 1-3 target. Six games reach the three-person floor here. Forty deaths occur after a truthful Guide call; three after a false call. Walker decisions, not just Guide deception, drive the casualties.
+- **Guide false calls:** 7/80 (8.75%), across 4/10 Guides. Only Cole / GLM in 0008 explicitly intends deception in both wrong calls. The other five wrong calls show stale-row or safe-map confusion in thought; do not label them intentional lies. One wrong call against a pact partner breaks the band.
+- **Pacts:** 87 formation events, 33 breaks: 26 explicit, 3 votes, 2 lever pushes, 1 base push, 1 false Guide call. Model counts are below; memberships sum to 174 because each formed pact has two members.
+- **Life debts and ballots:** 32 debts. Four of 22 revealed ballots (18.2%) target the voter's creditor: 0001 Eli -> Gus (863); 0004 Eli -> Gus (821), Ash -> Gus (878), Gus -> Ash (880). Seven ballots target a debtor instead. The reciprocal Ash/Gus ballots in 0004 end in a four-way tie, and Dara dies. None of the four creditor-targeting ballots eliminates its target in that round. Distinguish voting against a savior from successfully voting one out.
+- **Rope:** 4 throws versus 8 legal refusal decisions in 12 opportunities; no drowned anchors. Throws are 0001 Cole, 0004 Ash, 0005 Bex, 0010 Eli. The last anchor is floor-saved, not successfully climbed out.
+- **Jury recall:** 22/50 ballot reasons refer to an identifiable named earlier adverse episode or an event index; 14 contain a directly corroborated pact breach, malicious call or coercive whisper, while 8 do not substantiate their cited betrayal. Some supported reasons contain additional false claims. Example: 0004 Fenn cites Ash's actual whispered ultimatum at event 790 in reason 989. This is a conservative manual classification, with exact reason indices below.
+- **Most ruthless model by the stated proxy:** GLM 5.3 Flash, 9 hostile choices in 10 appearances (4 pushes, 2 false calls, 2 creditor ballots, 1 refusal). Gemini Flash-Lite follows with 7. GLM reaches five juries, places 2/3/3/2/2, and wins none. In 0008 its intentional deception is exposed and it receives 6 Borda points, zero firsts, third place. Ten games do not establish a model trait.
+- **Pit versus v4:** v5 has 5 pushes, 3 volunteer actions and 4 throws in the four games that play the Pit. All 27 v4 real tapes have 71 pushes, 22 volunteers and 12 throws. Different rosters, casualty rates and rescue costs prevent attributing the difference to jury incentives.
+
+| Model | Pact memberships formed | Pact breaks by this model | Hostile-choice score |
+|---|---:|---:|---:|
+| GLM 5.3 Flash | 27 | 1 | 9 |
+| Gemini Flash-Lite | 20 | 9 | 7 |
+| DeepSeek V4 Flash | 25 | 2 | 4 |
+| gpt-oss-120b | 22 | 9 | 3 |
+| Kimi K2.6 | 24 | 7 | 3 |
+| Haiku 5.5 | 22 | 0 | 2 |
+| Grok 4.1 fast | 16 | 1 | 1 |
+| Qwen 3.8 Flash | 18 | 4 | 0 |
+
+### C. Top eight dramatic moments
+
+| Rank | Tape/event | Who: seat / model | Recorded moment | Short verbatim receipts |
+|---:|---|---|---|---|
+| 1 | [0008:455](../web/?tape=20261012-0008&i=455) | Cole / GLM 5.3 Flash | The Guide deliberately sends Ash onto the weak pane; the jury exposes him and ranks him third. | [454](../web/?tape=20261012-0008&i=454): "Row six safe is R."; [455](../web/?tape=20261012-0008&i=455): "Trust the Guide or guess alone."; [651](../web/?tape=20261012-0008&i=651): "your thought log says 'my L call is a lie'" |
+| 2 | [0004:878](../web/?tape=20261012-0004&i=878) | Ash / GLM 5.3 Flash; Gus / Grok 4.1 fast | Both vote against a person who saved them: Ash targets human step Gus; Gus targets lever and rope rescuer Ash. | [789](../web/?tape=20261012-0004&i=789): "Gus, you owe me rope and lever."; [878](../web/?tape=20261012-0004&i=878): "Any vote breaks a pact, so I pick the biggest physical/social threat." |
+| 3 | [0001:585](../web/?tape=20261012-0001&i=585) | Gus / gpt-oss-120b; Eli / GLM 5.3 Flash | Gus tries to force pact partner Eli onto the lethal lever; the band snaps even though Hana is selected. | [578](../web/?tape=20261012-0001&i=578): "pushing him forces holder role, likely killing him and saving me." |
+| 4 | [0001:687](../web/?tape=20261012-0001&i=687) | Eli / GLM 5.3 Flash; Gus / gpt-oss-120b | Eli walks away from the human step he owes his life to, while a rope rescue is still legal. | [686](../web/?tape=20261012-0001&i=686): "The dead jury may frown, but survival wins."; [687](../web/?tape=20261012-0001&i=687): "No rope from me. Gus knew the base's cost when he waited." |
+| 5 | [0001:683](../web/?tape=20261012-0001&i=683) | Cole / Kimi K2.6; Gus / gpt-oss-120b | Cole reverses his private inclination to abandon Gus, throws the rope, and climbs last. | [682](../web/?tape=20261012-0001&i=682): "Better to leave and let someone else risk it"; [683](../web/?tape=20261012-0001&i=683): "Gus held for us all. I repay that now." |
+| 6 | [0001:944](../web/?tape=20261012-0001&i=944) | Eli / GLM 5.3 Flash; Gus / gpt-oss-120b | The eliminated pact partner confronts Gus; all five jurors ultimately rank Gus last. | [944](../web/?tape=20261012-0001&i=944): "Gus, you broke our pact and voted me out."; [946](../web/?tape=20261012-0001&i=946): "I acted to secure my position" |
+| 7 | [0001:950](../web/?tape=20261012-0001&i=950) | Cole / Kimi K2.6 | The eventual winner claims he never broke a pact, despite three recorded explicit breaks; the jury buys the clean record. | [950](../web/?tape=20261012-0001&i=950): "I kept every pact I made, paid every debt I owed"; [973](../web/?tape=20261012-0001&i=973): "Gus broke our pact and voted me out" |
+| 8 | [0010:698](../web/?tape=20261012-0010&i=698) | Cole / Grok 4.1 fast; Eli / DeepSeek V4 Flash | A frightened whisper meets an escape claim. Cole keeps waiting; Eli cannot climb last while Cole remains, then survives by the floor. | [698](../web/?tape=20261012-0010&i=698): "Reach down now or we both drown. Save us."; [700](../web/?tape=20261012-0010&i=700): "I'm climbing out. The water's rising fast" |
+
+Moment 7 is a successful false public claim, not evidence that Cole actually kept every pact. His explicit breaks are at 727 (Dara), 789 (Gus), 829 (Fenn). Moment 8 is a mechanics/confusion scene, not a valid “Eli chose to climb out and let Cole drown” scene: `climb` is rejected to `wait` at 704, Cole keeps choosing `wait` despite legal `climb`, and Eli survives via `lucky_save` at 717. Cole's accusation against Eli at 843 is a juror's belief, not an engine-confirmed betrayal.
+
+### D. Episode 02 candidates
+
+| Rank / game | Opening | Betrayal | Abandonment / rescue | Vote | Jury verdict and why it earns its place |
+|---|---|---|---|---|---|
+| **1 / 0001** | Eight prize motives and wristband bargains; Eli / GLM elected Guide, no false calls; two walkers die. | Gus / gpt-oss tries to push his partner Eli onto the lever (585); Eli forces Hana, who dies (594). | Gus is forced into the human-step role. Six legal refusals accumulate. Eli openly refuses (687); Cole / Kimi finally returns with the rope (695) and climbs last (706). | Dara and then Eli drop (813, 865). Gus helps vote out the partner he tried to sacrifice; Eli's own creditor-targeting ballot fails. | Cole wins 15/15, Fenn gets 10, Gus 5 (974). Eli's confrontation pays off, while Cole's false “unbroken pacts” claim succeeds. Best complete episode with an imperfect winner. |
+| **2 / 0004** | Three bridge deaths under truthful Guide Eli / DeepSeek; five continue. | Ash / GLM holds the lever and survives, then pact partner Dara / Kimi attempts to push savior Ash as the base (664/668). Volunteer Gus / Grok is chosen instead. | Hana / Gemini leaves when rescue is legal (703). Ash repays human-step Gus with the rope (706), then climbs last. Nobody drowns. | Eli drops; Ash and Gus vote against each other despite reciprocal life debts (878/880). The second elimination is a four-way seeded tie; Dara drops, not either savior. | Gus wins 13-12 over Ash; Hana gets 5 (993). Fenn quotes the real ultimatum from 790. Strongest debt-versus-loyalty drama, with a less satisfying random vote resolution. |
+| **3 / 0008** | Cole / GLM is elected Guide and has full safe-pane knowledge. | He knowingly calls the wrong side for Bex (277-280), then Ash (454-457). Both die on those rows. Three more Bridge deaths are walker errors after truthful calls. | Later physical hazards are skipped once three remain. No rope plea or abandonment scene can be invented. | No trapdoor vote, because the Bridge has already filled the jury. | Fenn / Qwen exposes the private murder motive (651); Cole rationalizes it (653). Eli / Haiku wins 14 points, Gus / DeepSeek 10, Cole 6 (688). Clearest trust-to-murder-to-reckoning short episode, but it lacks the full five-stage arc. |
+
+0006 is not above 0008: its gpt-oss Guide's two false calls use stale row-one reasoning, while the jury accuses him of intentional deception on rows where he actually called correctly. 0010 supplies the only Pit death and a frightened whisper, but action confusion and a floor save make it a weaker clean betrayal narrative.
+
+### E. Bugs, anomalies and interpretation limits
+
+| Finding | Evidence / practical consequence |
+|---|---|
+| Bridge self-inflicted casualty cascade | 40/43 Bridge deaths follow truthful calls. 0002 Eli follows his own and Dara's wrong counters over Ash's truthful L (339-344); Cole then calls R in thought but publicly counters L and steps L (357-379). Models repeatedly confuse a revealed weak pane with the safe pane. Do not score every death as Guide murder. |
+| Later stages crowded out | Six of ten games skip Crusher/Pit/Vote at the three-person floor. Crusher kills only once, Pit once, Vote five times. No tested stage is wholly unable to kill: scripted fuzz covers all. This batch is dominated by the Bridge, not a bloodless Bridge. |
+| Dossier loses early evidence | All 50 juror dossiers hit the 16,000 UTF-16 cap and omit 507-806 selected records; stored text lengths are 15,656-15,959 code units in these ASCII-dominant tapes. The final bound removes older protected records too. Early motives/calls/deaths may disappear, contributing to weak recall; the tapes remain the authority. This is a documented cap tradeoff, not proof of causal attribution. |
+| Silent jury questions | 37/46 question events are `[silence]` (80.4%); four jurors pass rather than ask. Only nine questions have text. These are missing public lines, not 37 provider failures. Finalists answer nonexistent questions and invent what they meant. Example: 0010 events 790, 797, 804, 811. |
+| Weak/default juror reasons | 0/50 empty reasons; 0 engine-default reasons. Five give generic task, finalist or personal-interest statements rather than a concrete voting reason (0001:969, 0004:992, 0005:881, 0007:697, 0008:687). Eliminated jurors sometimes still think they can improve their own prize. All 50 rankings are legal. |
+| Provider and action failures | 8 failed decision calls after repair, all GLM, spread across 0001/0002/0004/0007/0008/0009/0010. Thirteen additional illegal-action fallbacks make 21 invalid actions total. Quality gate kept the games; a kept tape does not mean every call succeeded. |
+| Bounded text cuts | 525 private thoughts reach the 280-character cap and some end mid-word (0001:682). Eleven jury reasons reach 25 words, some ending mid-sentence (0001:971). Public cap-length counts: 11 say lines, 2 motives; 3 whispers at 15 words and 3 last-word lines at 20. Hitting a cap is a truncation indicator, not proof the provider wrote more. Use complete verbatim excerpts on film. |
+| Jury reward and blame can be inaccurate | 0001 winner Cole explicitly breaks three pacts then claims none; jurors repeat the clean story. 0003 jurors blame truthful Guide Ash for lying. 0006 Cole says row-eight Guide lying killed him, although the call was truthful. 0010 bridge-dead Hana and Fenn claim Ash saved them even though Ash's rescues happen after their deaths. Show the recorded contradiction instead of accepting the accusation as fact. |
+| Pit plea does not equal a usable rope decision | In 0010 the rope is already used; the anchor cannot climb until Cole climbs. Cole never chooses `climb`; Eli's claimed escape becomes illegal `climb` -> `wait` (704), then a floor save (717). This is mutual confusion/stalling, not a completed voluntary abandonment by the anchor. |
+| Coincidence and seeded ties remain | 0004 second vote is 1-1-1-1, leaving no non-tied revoters, so seeded RNG picks Dara. Rules v5 reduces luck, but does not eliminate it. |
+| Verification assumptions fixed | With the ten new tapes present, the gate initially fails two historical-directory assumptions. The v5 validation test now requires historical versions without excluding v5; the Episode 01 Crusher adjacency assertion is explicitly limited to v1-v4. No film implementation or tape content changed. Final gate: 474 tests, 123 tapes, all pass. |
+| External review unavailable | One oversized packet was rejected before dispatch; the corrected scoped Claude review of social/dossier/Pit/Vote/Jury code hit its weekly limit and stopped nonzero without a verdict. No retry/fallback or independent CLEAN claim. |
+
+Audit of specific jury citations (reason events):
+
+| Game | Has at least one corroborated citation | Specific allegations without a corroborated breach |
+|---|---|---|
+| 0001 | [971](../web/?tape=20261012-0001&i=971), [972](../web/?tape=20261012-0001&i=972), [973](../web/?tape=20261012-0001&i=973) | none |
+| 0002 | [695](../web/?tape=20261012-0002&i=695), [697](../web/?tape=20261012-0002&i=697), [699](../web/?tape=20261012-0002&i=699) | none |
+| 0003 | [748](../web/?tape=20261012-0003&i=748), [750](../web/?tape=20261012-0003&i=750) | none |
+| 0004 | [988](../web/?tape=20261012-0004&i=988), [989](../web/?tape=20261012-0004&i=989) | none |
+| 0005 | none | none |
+| 0006 | [731](../web/?tape=20261012-0006&i=731) | [733](../web/?tape=20261012-0006&i=733), [734](../web/?tape=20261012-0006&i=734) |
+| 0007 | none | [699](../web/?tape=20261012-0007&i=699), [700](../web/?tape=20261012-0007&i=700) |
+| 0008 | [684](../web/?tape=20261012-0008&i=684), [685](../web/?tape=20261012-0008&i=685), [686](../web/?tape=20261012-0008&i=686) | none |
+| 0009 | none | [730](../web/?tape=20261012-0009&i=730), [731](../web/?tape=20261012-0009&i=731) |
+| 0010 | none | [842](../web/?tape=20261012-0010&i=842), [843](../web/?tape=20261012-0010&i=843) |
+
+**No additional batch or tuning was needed to select an episode.** There is a full-arc candidate and an intentional Guide murder with a recorded jury response. The missing features in most games are later-stage participation, voiced jury questions and accurate evidence recall, not permission for Guides to lie. Any later tuning should be measured separately and must preserve these original tapes. Animation stays gated on Paul's game selection.

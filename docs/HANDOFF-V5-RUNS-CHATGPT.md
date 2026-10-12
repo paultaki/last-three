@@ -8,7 +8,7 @@ You are picking up **Last Three** at `/Users/paul/Development/last-three`, branc
 
 ## State right now
 
-- **v5 is implemented** (by Codex) and is the default game flow. `npm run check` passes: 474 tests, all 113 historical tapes validate. Twenty free scripted games completed. 
+- **v5 is implemented** (by Codex) and is the default game flow. `npm run check` passes: 474 tests, all 113 historical tapes validate. Twenty free scripted games completed.
 - **All of that work is uncommitted** in the working tree on `v5-rules` (HEAD `556326e` holds only the first handoff doc). First action: review `git status`, then commit it on `v5-rules` with a clear message. **Do not push** and do not merge to `main` without Paul's yes (pushing `main` redeploys the public site).
 - **10 real games have been played** with the `mixed` roster (Claude Haiku 5.5, gpt-oss-120b, Gemini 2.5 Flash-Lite, Grok 4.1 fast, DeepSeek V4 Flash, Qwen 3.8 Flash, Kimi K2.6, GLM 5.3 Flash): tapes `web/tapes/20261012-0001.json` … `20261012-0010.json`, seeds 501–510. Cost was about $0.11–0.16 per game, $1.23 total. Winners: Cole/Kimi, Ash, Gus, Gus, Dara, Fenn, Hana, Eli, Bex, Ash. Game 0001 had two bridge deaths. Nobody has analyzed them yet.
 - **Spend:** the ledger (`.ledger/spend.json`) is at **$16.33 lifetime**. The gateway shows about **$37.5** of credits left. `--cap` is a cap on the **lifetime ledger total**, not per run, so to allow $X more set `--cap` to (current total + X). Paul approved running more games if needed to find a great one. Stay under about $5 more without asking him.
