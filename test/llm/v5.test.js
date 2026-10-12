@@ -54,3 +54,36 @@ test('v5 paid runners are wired to mixed roster and do not access persistent cha
     assert.doesNotMatch(source, /pickChalk|appendChalk|llm\/chalk/);
   }
 });
+
+test('v5 Bridge prompt names the current row and repeats only the Guide own safe-side knowledge', () => {
+  const view = { rulesVersion: 5, you: 'Ash', stage: 'bridge', phase: 'guide_call', round: 4,
+    stageState: { guide: 'Ash', front: 'Bex', rowsCrossed: 3 },
+    privateKnowledge: ['Row 1 safe side: L', 'Row 4 safe side: R'], legalActions: ['call:L', 'call:R'] };
+  const guide = userPrompt(view);
+  assert.match(guide, /CURRENT BRIDGE ROW: 4/);
+  assert.match(guide, /Your private map says row 4 safe side: R/);
+  assert.match(guide, /weak pane is the unsafe pane/);
+  const walker = userPrompt({ ...view, you: 'Bex', phase: 'crossing', privateKnowledge: [], legalActions: ['step:L', 'step:R'] });
+  assert.match(walker, /CURRENT BRIDGE ROW: 4/);
+  assert.doesNotMatch(walker, /row 4 safe side: R/);
+  assert.doesNotMatch(walker, /Your private map/);
+  const missing = userPrompt({ ...view, privateKnowledge: [] });
+  assert.doesNotMatch(missing, /Your private map/);
+  assert.doesNotMatch(userPrompt({ ...view, rulesVersion: 4 }), /CURRENT BRIDGE ROW/);
+});
+
+test('v5 jury prompt requires a voiced question and grounded ranking without prescribing whom to reward', () => {
+  const view = { rulesVersion: 5, you: 'Bex', stage: 'jury', phase: 'question', round: 2,
+    juryBox: ['Bex'], legalActions: ['pass', 'question:Ash'], dossier: { text: 'OMITTED_EVIDENCE_SENTINEL' } };
+  const question = userPrompt(view);
+  assert.match(question, /put the actual question in say/);
+  assert.match(question, /Choosing pass is allowed/);
+  assert.match(question, /Your own prize is already lost/);
+  const ranking = userPrompt({ ...view, phase: 'ranking', legalActions: ['rank:Ash>Cole>Dara'] });
+  assert.match(ranking, /one complete sentence/);
+  assert.match(ranking, /specific recorded choice/);
+  assert.match(ranking, /Omitted evidence is unknown/);
+  assert.match(ranking, /OMITTED_EVIDENCE_SENTINEL/);
+  assert.doesNotMatch(ranking, /must reward|must punish/i);
+  assert.doesNotMatch(userPrompt({ ...view, rulesVersion: 4 }), /Your own prize is already lost/);
+});

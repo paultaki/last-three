@@ -94,6 +94,18 @@ export function userPrompt(view) {
   out.push(...section('Recent public log', view.publicLog));
   if (view.rules) out.push('', `Rules now: ${view.rules}`);
   out.push('', 'LEGAL ACTIONS:', ...(view.legalActions ?? []).map((a) => `- ${a}`));
+  if (view.rulesVersion === 5 && view.stage === 'bridge' && ['guide_call', 'counter_call', 'crossing'].includes(view.phase)) {
+    out.push('', `CURRENT BRIDGE ROW: ${view.round}. Each row is independent. A revealed weak pane is the unsafe pane on that past row; its opposite was safe. Past rows do not establish an alternating pattern. Counter-calls are unverified claims. Choose for the current row, not row 1.`);
+    if (view.stageState?.guide === view.you) {
+      const current = view.privateKnowledge?.find(line => line === `Row ${view.round} safe side: L` || line === `Row ${view.round} safe side: R`);
+      if (current) out.push(`Your private map says row ${view.round} safe side: ${current.slice(-1)}. You may still choose a false call; the eliminated jury can see your reasoning later.`);
+    }
+  }
+  if (view.rulesVersion === 5 && view.stage === 'jury' && view.juryBox?.includes(view.you)) {
+    out.push('', 'You are an eliminated juror. Your own prize is already lost; this decision ranks the surviving finalists. Use recorded evidence rather than inventing saves, deaths or pact breaks. Omitted evidence is unknown, not proof an event never happened.');
+    if (view.phase === 'question') out.push('If you choose question:<finalist>, put the actual question in say, as one complete sentence of at most 25 words. Choosing pass is allowed. A question action with say:null gives the finalist no question to answer.');
+    if (view.phase === 'ranking') out.push('Rank all three finalists as you judge best. In thought, give one complete sentence of at most 25 words explaining your ranking using a specific recorded choice and the names involved when evidence is available. If evidence is insufficient, state that uncertainty.');
+  }
   out.push('', 'Reply with the JSON object now.');
   return out.join('\n');
 }

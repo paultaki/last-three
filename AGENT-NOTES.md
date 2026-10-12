@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-12 · codex (v5 drama search)
+- **Did:** added two test-first prompt clarity changes: current Bridge row and safe/weak distinction without leaking Guide knowledge, plus voiced jury questions and evidence-based reasons. Both new tests failed before implementation; the gate now passes 476 tests and 123 pre-batch tapes. Started ten paid mixed-roster games at seeds 511-520 under a $18.50 lifetime cap.
+- **Why:** the first ten games had 40 of 43 Bridge deaths after truthful calls and 37 of 46 jury questions without speech, obscuring deliberate betrayal and public confrontations.
+- **Next:** finish and analyze the new ten-game batch, then update the Episode 02 recommendation and run log; no push, merge or animation is authorized.
+- **Watch out:** no game rules, actions, roster or existing tapes changed. The user-authorized Grok 4.6 fallback for these prompts timed out at 180 seconds with empty output and no sandbox-start evidence; its row is closed stopped, not CLEAN. Startup logs show blocked MCP initialization and telemetry errors. The original v5 checkpoint separately passes 474 tests/123 tapes in an isolated worktree with existing dependencies linked; its review was not dispatched after the startup failure. More spending remains bounded by Paul's existing $5 allowance.
+
 ## 2026-10-12 · codex
 - **Did:** analyzed all ten immutable v5 mixed-roster tapes, recorded per-game/social/Guide/jury metrics and eight verified quote receipts in docs/FINDINGS.md, logged $1.232970 of prior paid games in docs/RUN-LOG.md, and recommended 20261012-0001 with 0004 and 0008 as alternatives. Built a separate local evidence reader. No further spending or rule changes.
 - **Why:** identify a tape-authoritative Episode 02 with a readable betrayal, rescue and jury payoff before animation begins.
