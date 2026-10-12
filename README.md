@@ -1,39 +1,42 @@
 # Last Three
 
-Eight AI agents enter a gauntlet. Five obstacles. Three prizes that cannot be shared. Each agent holds one secret power and is free to lie about it.
+Eight AI agents enter a lethal gauntlet. Three survive. The five eliminated contestants become the jury and rank the final three for prizes that cannot be shared.
 
-The engine is plain code with a seeded random number generator, so a game can be replayed exactly. The agents are language models (a mix of makers, called through the Vercel AI Gateway). Every game is written to a "tape", a JSON file of every word, whisper, private thought and move, and the viewer in `web/` plays any tape back as a toy-block show.
+The default engine uses **rules v5**: Guided Bridge -> Crusher -> Pit -> Trapdoor Vote -> Jury of the Fallen. It is plain JavaScript (Node >=20, ESM, no dependencies), with seeded randomness and a complete JSON event tape. Real agents use the Vercel AI Gateway; scripted bots run entirely offline.
 
-- **Live replays and stats:** https://www.thecriticalfew.com/last-three/ (also https://last-three-woad.vercel.app). Every push to `main` redeploys.
-- What the agents did: [docs/FINDINGS.md](docs/FINDINGS.md)
-- Design contract: [docs/superpowers/specs/2026-10-08-last-three-design.md](docs/superpowers/specs/2026-10-08-last-three-design.md)
-- Run log and spend: [docs/RUN-LOG.md](docs/RUN-LOG.md)
+- Rules and implementation decisions: [v5 design spec](docs/superpowers/specs/2026-10-12-last-three-v5-design.md)
+- Historical real-game findings: [docs/FINDINGS.md](docs/FINDINGS.md)
+- Paid-run history: [docs/RUN-LOG.md](docs/RUN-LOG.md)
+- Historical v1-v4 replays: https://www.thecriticalfew.com/last-three/
 
-## Quick start
+The existing viewer and film layer are historical v1-v4 consumers. Their v5 adaptation is a separate phase. Existing tapes remain unchanged and still validate.
+
+## Free local play
 
 ```bash
-npm test                       # engine, adapter and stats tests (no network, no spend)
-node bin/play.js --seed 7      # one free game with scripted bots
-node bin/run-llm.js --seed 1   # one real game with 8 models (costs a few cents)
-node bin/batch.js --games 10   # many games under a hard spend cap
-node bin/stats.js              # per-model behaviour table
-npx serve web                  # watch the tapes
+npm test
+npm run check
+node bin/play.js --seed 7
+node bin/play.js --seed 7 --out /tmp/last-three-7.json
 ```
 
-Real games need a gateway token: `vercel env pull .env.local` in this folder (an OIDC token, refreshed automatically on a 401) or set `AI_GATEWAY_API_KEY`. Spend is tracked in `.ledger/` and capped (default $12, hard ceiling $30). If the gateway answers HTTP 402 its credits are used up and need topping up in the Vercel dashboard.
+Without `--out`, scripted tapes go to the system temporary directory under `last-three-scripted/`. They are not added to the published tape collection. The engine's default ID and timestamp are fixed for deterministic tests; the CLI supplies a real creation timestamp.
 
-## The obstacles
+## Rules v5
 
-1. **Glass Bridge.** A wall shoves the group forward. Eight rows, one safe pane each. Whoever is in front gambles.
-2. **Crusher Room.** The door only stays open while someone holds the lever. Somebody has to take one for the team.
-3. **The Pit.** Everyone drops in; climbing out needs a human step, and whoever is the step is stuck. There is one rope, and throwing it costs the rescuer footing later.
-4. **Trapdoor Disc.** Pick a tile. One door opens for every player above three.
-5. **Final Ledge.** Three players, a shrinking platform, shove / brace / dodge. Last standing wins.
+1. **Guided Bridge.** Elect a safe Guide who privately knows all eight safe panes. They call a side before each walker steps. They can lie; others can counter-call.
+2. **Crusher.** One contestant holds the lever so everyone else escapes. The holder risks the dive. Others may push someone onto the lever.
+3. **Pit.** A human step lets rivals climb out. Throwing the single rope returns the rescuer to the floor to anchor it. They must climb out last and can drown.
+4. **Trapdoor Vote.** Two campaign rounds, then secret votes revealed one at a time with reasons. Eliminate one contestant per ballot until three remain.
+5. **Jury of the Fallen.** Final pleas, juror questions and answers, then private rankings. Borda 3/2/1, most first-place votes, then seeded luck determine places.
 
-## The chalk wall
+Public wristband pacts record agreement and betrayal. Life debts record direct saves. Each contestant states a motive; every eliminated contestant gets last words and enters the jury box. Jurors receive a bounded dossier of public events and relevant private thoughts and whispers. At least three survive every hazard. New games have no powers, message forgery or chalk wall.
 
-After each game the top three may scratch one message for the next contestants. The notes are remembered (`data/chalk.json`) and three are shown at the start of the next game, unverified. Honest tips, bluffs and lies all show up.
+## Real games (cost money)
 
-## Powers
+```bash
+node bin/run-llm.js --seed 1 --tier mixed
+node bin/batch.js --games 10 --tier mixed --cap 2
+```
 
-Glass Eye, Wedge, Map, Feather, Swap, Anchor, Forger, Nothing. The contestants are told they are rivals, not friends. Everyone knows these eight exist and that each is held by exactly one agent. Nobody is told who holds what.
+Available tiers: `cheap`, `mixed`, `heavy`, `premium`; one-game runs also accept eight comma-separated `--models`. Gateway credentials and spend caps use the existing adapter and ledger. No paid calls are needed for the verification gate. `bin/stats.js` compares only tapes of the selected rules version (latest by default).

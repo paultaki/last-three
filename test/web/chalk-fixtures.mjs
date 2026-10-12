@@ -72,7 +72,7 @@ export const NOTES = {
 
 /** One real engine tape per scenario: full (3 places), lone survivor, two places. Scanned over seeds, deterministic. */
 export async function buildChalkBases({ maxSeed = 200 } = {}) {
-  const { runGame } = await import(pathToFileURL(path.join(root, 'src', 'engine.js')).href);
+  const { runGame } = await import(pathToFileURL(path.join(root, 'test', 'engine', 'legacy-runner.js')).href);
   const { createScriptedAgents } = await import(pathToFileURL(path.join(root, 'src', 'scripted.js')).href);
   const want = { full: (n) => n === 3, lone: (n) => n === 1, two: (n) => n === 2 };
   const found = {};

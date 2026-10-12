@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runBridge } from '../../src/stages/bridge.js';
+import { runBridge } from '../../src/stages/bridge-v4.js';
 import { SEATS, fixedAgents, idle, lastReveal, makeGame, ofType, reply, spy } from './helpers.js';
 
 /** Events of the waiting room: everything before the first crossing round. */

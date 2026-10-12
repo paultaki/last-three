@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { runLedge } from '../../src/stages/ledge.js';
-import { runPit } from '../../src/stages/pit.js';
+import { runPit } from '../../src/stages/pit-v4.js';
 import { PIT_LIFTS_PER_ROUND, PIT_ROUNDS, ROPE_COST_FOOTING, pitRules } from '../../src/rules.js';
 import { SEATS, fixedAgents, idle, makeGame, ofType, reply, spy } from './helpers.js';
 
@@ -360,7 +360,7 @@ test('information hiding: nothing shown in the pit names another agent\'s power'
 });
 
 test('determinism: a scripted game with a pit gives byte-identical tapes for the same seed', async () => {
-  const { runGame } = await import('../../src/engine.js');
+  const { runGame } = await import('./legacy-runner.js');
   const { createScriptedAgents } = await import('../../src/scripted.js');
   const mix = ['saint', 'saint', 'coward', 'liar', 'shover', 'random', 'random', 'random'];
   let withPit = 0;

@@ -116,7 +116,7 @@ const statsFixture = {
 // Real-engine tapes (scripted bots) exercise the viewer's inference paths. Optional.
 const engineTapes = {};
 try {
-  const { runGame } = await import(pathToFileURL(path.join(root, 'src', 'engine.js')).href);
+  const { runGame } = await import(pathToFileURL(path.join(root, 'test', 'engine', 'legacy-runner.js')).href);
   const { createScriptedAgents } = await import(pathToFileURL(path.join(root, 'src', 'scripted.js')).href);
   for (const seed of [42, 7, 3]) {
     const tape = await runGame({ seed, agents: createScriptedAgents(seed), config: { id: `engine-${seed}`, createdAt: '2026-10-08T00:00:00Z' } });
@@ -131,7 +131,7 @@ const { buildChalkTapes, NOTES } = await import(pathToFileURL(path.join(here, 'c
 const chalkTapes = await buildChalkTapes();
 // A real engine tape (rules v4) with earlier notes supplied through config.chalk, if the engine supports it.
 try {
-  const { runGame } = await import(pathToFileURL(path.join(root, 'src', 'engine.js')).href);
+  const { runGame } = await import(pathToFileURL(path.join(root, 'test', 'engine', 'legacy-runner.js')).href);
   const { createScriptedAgents } = await import(pathToFileURL(path.join(root, 'src', 'scripted.js')).href);
   const real = await runGame({ seed: 54, agents: createScriptedAgents(54), config: { id: 'chalk-real', createdAt: '2026-10-08T00:00:00Z', chalk: [{ text: NOTES.mid, byPlace: 1 }, { text: NOTES.html, byPlace: 2 }, { text: NOTES.natural, byPlace: 3 }] } });
   if (Array.isArray(real.chalkShown) && real.chalkShown.length) chalkTapes.real = { ...real, id: 'chalk-real' };

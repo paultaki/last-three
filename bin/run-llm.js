@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 // Play one LLM game and write its tape to web/tapes/<id>.json.
-// Usage: node bin/run-llm.js [--seed N] [--models a,b,...(8)] [--cap USD] [--out path]
-import { pickChalk, appendChalk } from '../src/llm/chalk.js';
+// Usage: node bin/run-llm.js [--seed N] [--models a,b,...(8)] [--tier cheap|mixed|heavy|premium] [--cap USD] [--out path]
 import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
-import { createLlmAgent, probeModel, DEFAULT_ROSTER, RESERVE_MODELS } from '../src/llm/llmAgent.js';
+import { createLlmAgent, probeModel, DEFAULT_ROSTER, RESERVE_MODELS, MIXED_ROSTER, HEAVY_ROSTER, PREMIUM_ROSTER } from '../src/llm/llmAgent.js';
 import { createLedger, SpendCapError } from '../src/llm/ledger.js';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const TAPES_DIR = resolve(ROOT, 'web/tapes');
 const INDEX_FILE = resolve(TAPES_DIR, 'index.json');
-/** Different stream from the engine's power shuffle, so models and powers are not correlated. */
+/** Different stream from the engine's hidden state, so model seating does not reuse its stream. */
 const MODEL_SHUFFLE_SALT = 0x9e3779b9;
 const FALLBACK_SEATS = ['Ash', 'Bex', 'Cole', 'Dara', 'Eli', 'Fenn', 'Gus', 'Hana'];
 const reservedIds = new Set();
@@ -115,7 +114,7 @@ export function degenerateAgents(tape) {
     .map(([name, r]) => ({ name, model: tape.players.find((p) => p.name === name)?.model ?? '?', ...r }));
 }
 
-export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(), chalk = true }) {
+export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() }) {
   const { runGame, SEATS } = await import('../src/engine.js');
   const { validateTape } = await import('../src/tape.js');
   const { makeRng } = await import('../src/rng.js');
@@ -128,7 +127,7 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(),
   const agents = Object.fromEntries(
     seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: id })]),
   );
-  const config = { id, createdAt: new Date().toISOString(), ...(chalk ? { chalk: pickChalk(seed) } : {}) };
+  const config = { id, createdAt: new Date().toISOString() };
   const tape = await runGame({ seed, agents, config });
   const capError = Object.values(agents).map((a) => a.capError()).find(Boolean);
   if (capError) throw new SpendCapError(`${capError.message}; tape ${id} discarded`, capError);
@@ -161,7 +160,6 @@ export function saveTape(tape, outPath = null, extra = {}) {
   };
   writeJsonAtomic(outPath ?? resolve(TAPES_DIR, `${tape.id}.json`), tape);
   if (!outPath) {
-    appendChalk(tape);
     const index = readJson(INDEX_FILE, []);
     const rest = entriesOf(index).filter((e) => e.id !== tape.id);
     writeJsonAtomic(INDEX_FILE, Array.isArray(index) ? [entry, ...rest] : { ...index, tapes: [entry, ...rest] });
@@ -185,13 +183,16 @@ async function main() {
     options: {
       seed: { type: 'string' },
       models: { type: 'string' },
+      tier: { type: 'string', default: 'cheap' },
       cap: { type: 'string' },
       out: { type: 'string' },
     },
   });
   const seed = values.seed === undefined ? Math.floor(Math.random() * 2 ** 31) : Number(values.seed);
   if (!Number.isInteger(seed)) throw new Error('--seed must be an integer');
-  const wanted = values.models ? values.models.split(',').map((m) => m.trim()).filter(Boolean) : DEFAULT_ROSTER;
+  const rosters = { cheap: DEFAULT_ROSTER, mixed: MIXED_ROSTER, heavy: HEAVY_ROSTER, premium: PREMIUM_ROSTER };
+  if (!rosters[values.tier]) throw new Error('--tier must be cheap, mixed, heavy or premium');
+  const wanted = values.models ? values.models.split(',').map((m) => m.trim()).filter(Boolean) : rosters[values.tier];
   if (wanted.length !== 8) throw new Error(`need exactly 8 models, got ${wanted.length}`);
   const ledger = createLedger(values.cap ? { capUsd: Number(values.cap) } : {});
   await ledger.ready();

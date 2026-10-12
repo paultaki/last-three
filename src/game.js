@@ -4,7 +4,7 @@
 
 import { makeRng } from './rng.js';
 import { POWERS, POWER_IDS, powerById } from './powers.js';
-import { commonText, mapKnowledge, sanitizeChalkNotes } from './rules.js';
+import { v5CommonText, limitWords, WHISPER_WORD_LIMIT, LAST_WORDS_LIMIT, PACT_BREAK_REASONS, commonText, mapKnowledge, sanitizeChalkNotes } from './rules.js';
 
 export const SEATS = ['Ash', 'Bex', 'Cole', 'Dara', 'Eli', 'Fenn', 'Gus', 'Hana'];
 export const TEXT_LIMIT = 280;
@@ -55,7 +55,7 @@ const boundedString = (value, max = READ_LIMIT) => (typeof value === 'string' ? 
  * reach the rest of the engine. Problems are appended to `notes`; the result is null when the
  * response is not an object at all.
  */
-function snapshotResponse(value, notes) {
+function snapshotResponse(value, notes, v5 = false) {
   try {
     if (!isObject(value) || Array.isArray(value)) {
       notes.push('response was not an object');
@@ -75,7 +75,7 @@ function snapshotResponse(value, notes) {
   };
   const action = read(value, 'action');
   const whisper = read(value, 'whisper');
-  const forge = read(value, 'forge');
+  const forge = v5 ? null : read(value, 'forge');
   return {
     thought: cleanText(read(value, 'thought')),
     say: cleanText(read(value, 'say')),
@@ -105,6 +105,7 @@ export class Game {
         throw new TypeError(`runGame: agents.${seat} must be an Agent with an act(view) function`);
       }
     }
+    this.v5 = config.rulesVersion !== 4;
     this.seed = seed;
     this.agents = agents;
     this.config = config;
@@ -121,13 +122,23 @@ export class Game {
     this.bridgeSafe = null;
     this.ropeCost = new Map(); // name -> footing lost at the start of the ledge for throwing the pit's rope
 
-    this.chalk = sanitizeChalkNotes(config.chalk); // earlier winners' notes, public and identical for every viewer
+    this.chalk = this.v5 ? [] : sanitizeChalkNotes(config.chalk); // earlier winners' notes, public and identical for every viewer
     this.chalkWritten = []; // this game's notes, filled by the epilogue
     this.log = [];
     this.cursor = new Map(SEATS.map((s) => [s, 0]));
     this.inbox = new Map(SEATS.map((s) => [s, []]));
-    this.power = this.#assignPowers(config.powers);
-    this.common = commonText(SEATS, this.chalk.length > 0);
+    this.power = this.v5 ? {} : this.#assignPowers(config.powers);
+    this.common = this.v5 ? v5CommonText(SEATS) : commonText(SEATS, this.chalk.length > 0);
+    this.guide = null;
+    this.pacts = new Map();
+    this.offers = new Map();
+    this.lifeDebts = [];
+    this.juryBox = [];
+    this.spectatorInbox = new Map(SEATS.map(n => [n, []]));
+    this.publicEvents = [];
+    this.eventCursor = new Map(SEATS.map(n => [n, 0]));
+    this.pendingLastWords = [];
+    this.phase = null;
   }
 
   #assignPowers(override) {
@@ -166,8 +177,21 @@ export class Game {
 
   /** Every event goes through here: `i`, `stage` and `round` can never be forgotten. */
   emit(type, fields = {}) {
-    const event = { i: this.events.length, type, stage: this.stage, round: this.round, ...fields };
+    const visibility = ['thought', 'whisper', 'jury_dossier', 'jury_ballot'].includes(type) ? 'private' : 'public';
+    const event = { i: this.events.length, type, stage: this.stage, round: this.round,
+      ...(this.v5 ? { phase: this.phase, visibility } : {}), ...fields };
+    if (this.v5 && event.visibility === 'public') event.spectators = [...this.juryBox];
     this.events.push(event);
+    if (this.v5 && event.visibility === 'public') {
+      this.publicEvents.push(event);
+      const { spectators, ...shown } = event;
+      this.announce(JSON.stringify(shown));
+      for (const name of this.juryBox) {
+        this.spectatorInbox.get(name).push(event.i);
+        // observe is a synchronous inbox delivery, never a decision or model call.
+        try { this.agents[name].observe?.(structuredClone(event)); } catch { /* observer cannot affect play */ }
+      }
+    }
     return event;
   }
 
@@ -178,6 +202,7 @@ export class Game {
   /** `alive` is only overridden by the epilogue, which is about the placed agents rather than the living ones. */
   beginStage(stage, note, alive = this.aliveList()) {
     this.stage = stage;
+    this.phase = null;
     this.round = null;
     this.emit('stage_start', { alive, note });
   }
@@ -190,12 +215,15 @@ export class Game {
 
   beginRound(phase, round, roundsTotal) {
     this.round = round;
+    this.phase = phase;
     this.emit('round_start', { phase, roundsTotal });
   }
 
   // ---- views and asking ----------------------------------------------------------------
 
   #knowledgeFor(name) {
+    if (this.v5) return name === this.guide && this.stage === 'bridge' && this.bridgeSafe
+      ? this.bridgeSafe.map((side, row) => `Row ${row + 1} safe side: ${side}`) : [];
     const id = this.power[name];
     const out = [];
     if (id === 'map') out.push(...mapKnowledge());
@@ -207,15 +235,21 @@ export class Game {
 
   /** A plain, fully detached JSON view for one agent. Advances that agent's log cursors. */
   view(name, spec) {
-    const power = powerById(this.power[name]);
+    const power = this.v5 ? null : powerById(this.power[name]);
     const lines = this.log.slice(this.cursor.get(name));
     this.cursor.set(name, this.log.length);
     const whispers = this.inbox.get(name);
     this.inbox.set(name, []);
+    const since = this.eventCursor.get(name);
+    this.eventCursor.set(name, this.publicEvents.length);
     return structuredClone({
       you: name,
-      power: { id: power.id, description: power.description },
-      powerSpent: this.spent.has(name),
+      ...(this.v5 ? {
+        rulesVersion: 5, juryBox: [...this.juryBox],
+        pacts: [...this.pacts.values()], lifeDebts: this.lifeDebts,
+        publicEvents: this.publicEvents.slice(since).slice(-LOG_LIMIT),
+        ...(spec.dossier ? { dossier: spec.dossier } : {}),
+      } : { power: { id: power.id, description: power.description }, powerSpent: this.spent.has(name) }),
       stage: this.stage,
       phase: spec.phase,
       round: this.round,
@@ -228,10 +262,10 @@ export class Game {
       publicLog: lines.slice(-LOG_LIMIT),
       whispersToYou: whispers,
       rules: spec.rules,
-      legalActions: spec.legalActions,
+      legalActions: [...spec.legalActions, ...(this.v5 && this.alive.has(name) && spec.allowBreak !== false
+        ? this.partners(name).map(partner => `break_pact:${partner}`).filter(a => !spec.legalActions.includes(a)) : [])],
       common: this.common,
-      chalkWall: this.chalk,
-      powerBlurbs: POWERS.map(({ id, blurb }) => ({ id, blurb })),
+      ...(!this.v5 ? { chalkWall: this.chalk, powerBlurbs: POWERS.map(({ id, blurb }) => ({ id, blurb })) } : {}),
     });
   }
 
@@ -257,7 +291,12 @@ export class Game {
    * `illegalNote(proposed, view)` may return a more specific note than the generic "illegal action".
    */
   async ask(names, specFor, fallbackFor, illegalNote = null) {
-    const views = names.map((name) => this.view(name, specFor(name)));
+    const specs = names.map(name => specFor(name));
+    if (this.v5) names.forEach((name, k) => {
+      const permitted = specs[k].phase === 'last_words' || (this.stage === 'jury' && ['question', 'ranking'].includes(specs[k].phase));
+      if (!this.alive.has(name) && !permitted) throw new Error(`Spectator ${name} cannot act before the jury`);
+    });
+    const views = names.map((name, k) => this.view(name, specs[k]));
     const raws = await Promise.all(names.map((name, k) => this.#callAgent(name, views[k])));
     return Object.fromEntries(names.map((name, k) => [name, this.#normalize(raws[k], views[k], name, fallbackFor, illegalNote)]));
   }
@@ -268,7 +307,7 @@ export class Game {
     if (!raw.ok) {
       result.notes.push(`agent error: ${clip(describeError(raw.error), NOTE_LIMIT)}`);
     } else {
-      response = snapshotResponse(raw.value, result.notes);
+      response = snapshotResponse(raw.value, result.notes, this.v5);
     }
     if (response) {
       result.thought = response.thought;
@@ -283,6 +322,12 @@ export class Game {
     } else {
       result.action = fallbackFor(name, view);
       if (response) result.notes.push(proposed ? (illegalNote?.(proposed, view) ?? `illegal action "${clip(proposed, 40)}"`) : 'missing action');
+    }
+    if (this.v5) {
+      result.say = limitWords(result.say) || null;
+      if (result.whisper) result.whisper.text = limitWords(result.whisper.text, WHISPER_WORD_LIMIT);
+      result.forge = null;
+      if (result.action.startsWith('break_pact:')) result.afterBreak = fallbackFor(name, view);
     }
     return result;
   }
@@ -320,7 +365,7 @@ export class Game {
         r.notes.push(`delivery failed: ${clip(describeError(error), NOTE_LIMIT)}`);
       }
     }
-    for (const line of this.#inApparentOrder(publicLines)) this.announce(`${line.as}: ${line.text}`);
+    for (const line of this.v5 ? [] : this.#inApparentOrder(publicLines)) this.announce(`${line.as}: ${line.text}`);
     for (const whisper of this.#inApparentOrder(whispers)) this.inbox.get(whisper.to).push({ from: whisper.as, text: whisper.text });
   }
 
@@ -386,7 +431,7 @@ export class Game {
   }
 
   /** One `action` event per asker, in seat order. */
-  emitActions(names, results, extraNotes = {}) {
+  emitActions(names, results, extraNotes = {}, fields = {}) {
     for (const name of names) {
       const r = results[name];
       const notes = [...r.notes, ...(extraNotes[name] ?? [])];
@@ -396,7 +441,12 @@ export class Game {
         valid: r.valid,
         ...(r.forgeRejected ? { forgeRejected: true } : {}),
         ...(notes.length ? { note: notes.join('; ') } : {}),
+        ...fields,
       });
+      if (this.v5 && r.action.startsWith('break_pact:')) {
+        this.breakPact(name, r.action.slice(11), 'explicit');
+        r.action = r.afterBreak;
+      }
     }
   }
 
@@ -404,7 +454,7 @@ export class Game {
 
   /** Passive feather: cancels the first elimination anywhere. Returns true if it fired. */
   tryFeather(name, detail) {
-    if (this.power[name] !== 'feather' || this.spent.has(name)) return false;
+    if (this.v5 || this.power[name] !== 'feather' || this.spent.has(name)) return false;
     this.spent.add(name);
     this.emit('ability_use', { name, power: 'feather', detail });
     this.announce(`${name} should have been eliminated but somehow survived.`);
@@ -419,9 +469,16 @@ export class Game {
 
   /** The only place an agent leaves the alive set. */
   kill(name, { cause, style, place = null }) {
+    if (!this.alive.has(name)) return;
+    if (this.v5 && this.alive.size <= 3) throw new Error('v5 cannot eliminate below three');
     this.alive.delete(name);
     this.deaths.push({ name, stage: this.stage, cause, style });
-    this.emit('death', { name, cause, style, ...(place ? { place } : {}) });
+    const death = this.emit('death', { name, cause, style, ...(place ? { place } : {}) });
+    if (this.v5) {
+      this.juryBox.push(name);
+      this.emit('jury_box_enter', { name, deathEvent: death.i });
+      this.pendingLastWords.push({ name, deathEvent: death.i });
+    }
     if (place) this.places.set(name, place);
     this.announce(`${name} ${DEATH_LINES[style]}.`);
   }
@@ -433,6 +490,7 @@ export class Game {
    * Returns { died, saved } (saved = feather or lucky save).
    */
   eliminate(victims, { cause, style, featherDetail, luckyWhy, floor = 1 }) {
+    if (this.v5) floor = Math.max(3, floor);
     let doomed = [...new Set(victims)].filter((name) => this.alive.has(name));
     const saved = doomed.filter((name) => this.tryFeather(name, featherDetail));
     doomed = doomed.filter((name) => !saved.includes(name));
@@ -445,4 +503,53 @@ export class Game {
     for (const name of doomed) this.kill(name, { cause, style });
     return { died: doomed, saved };
   }
+
+  pactKey(a, b) { return SEATS.filter(n => n === a || n === b).join(':'); }
+
+  partners(name) {
+    return [...this.pacts.values()].filter(p => p.includes(name)).flatMap(p => p.filter(n => n !== name && this.alive.has(n)));
+  }
+
+  formPact(from, to) {
+    if (from === to || !this.alive.has(from) || !this.alive.has(to)) return false;
+    const key = this.pactKey(from, to);
+    if (this.pacts.has(key)) return false;
+    const members = SEATS.filter(n => n === from || n === to);
+    this.pacts.set(key, members);
+    this.emit('pact_formed', { members: [...members], offeredBy: from });
+    return true;
+  }
+
+  breakPact(by, partner, reason) {
+    if (!PACT_BREAK_REASONS.includes(reason)) throw new Error(`Unknown pact break: ${reason}`);
+    const key = this.pactKey(by, partner);
+    const members = this.pacts.get(key);
+    if (!members) return false;
+    this.pacts.delete(key);
+    this.emit('pact_broken', { members: [...members], by, reason });
+    return true;
+  }
+
+  debt(debtor, creditor, reason) {
+    if (debtor === creditor) return;
+    const debt = { debtor, creditor, reason };
+    this.lifeDebts.push(debt);
+    this.emit('life_debt', debt);
+  }
+
+  async finishEliminations() {
+    for (const { name, deathEvent } of this.pendingLastWords.splice(0)) {
+      const phase = this.phase;
+      this.phase = 'last_words';
+      const results = await this.ask([name], () => ({
+        phase: 'last_words', roundsTotal: this.round ?? 1, allowBreak: false,
+        legalActions: ['speak'], rules: 'You have been eliminated and joined the jury. Give your last words to camera in say, at most 20 words.',
+      }), () => 'speak');
+      this.think([name], results);
+      this.emitActions([name], results);
+      this.emit('last_words', { name, deathEvent, text: limitWords(results[name].say, LAST_WORDS_LIMIT) || '[silence]' });
+      this.phase = phase;
+    }
+  }
+
 }

@@ -35,7 +35,7 @@ for (const [label, bad] of Object.entries(GARBAGE)) {
     const coleActions = ofType(tape.events, 'action').filter((a) => a.name === 'Cole' && !a.auto);
     assert.ok(coleActions.length >= 6, 'Cole was asked every round');
     assert.ok(coleActions.every((a) => a.valid === false && typeof a.note === 'string' && a.note.length > 0));
-    assert.ok(coleActions.slice(0, 6).every((a) => a.action === 'hold'), 'waiting room default is hold');
+    assert.ok(coleActions.filter(a => a.phase === 'waiting').every((a) => a.action === 'hold'), 'waiting room default is hold');
     assert.equal(tape.events.at(-1).type, 'game_end');
   });
 }
@@ -90,7 +90,8 @@ test('runGame rejects a seat without a usable agent', async () => {
   delete agents.Hana;
   await assert.rejects(runGame({ seed: 1, agents }), /agents.Hana/);
   await assert.rejects(runGame({ seed: 1.5, agents: fixedAgents(idle) }), /seed/);
-  await assert.rejects(runGame({ seed: 1, agents: fixedAgents(idle), config: { powers: { Ash: 'nothing' } } }), /config.powers/);
+  const tape = await runGame({ seed: 1, agents: fixedAgents(idle), config: { powers: { Ash: 'nothing' } } });
+  assert.ok(tape.players.every(p => !('power' in p)), 'v5 ignores retired power configuration');
 });
 
 test('usage() of agents is summed into the tape', async () => {

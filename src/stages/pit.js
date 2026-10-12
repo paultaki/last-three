@@ -1,148 +1,67 @@
-// Stage 3: the Pit (spec 4.5). Runs only with more than 3 alive.
-//
-// Everyone drops into a flooding pit. One agent must stay at the bottom as the step (the base);
-// the others climb out over their shoulders. A rope can haul the base out, at a price for the
-// rescuer. Whoever is still down when the water covers the pit is eliminated, but never so many
-// that fewer than three contestants are left.
-
 import { SEATS } from '../game.js';
-import { PIT_LIFTS_PER_ROUND, PIT_ROUNDS, ROPE_COST_FOOTING, pitRules } from '../rules.js';
+import { PIT_ROUNDS, PIT_LIFTS_PER_ROUND, pitV5Rules } from '../rules.js';
 
-const MIN_ALIVE_AFTER_FLOOD = 3;
+const ordered = set => SEATS.filter(n => set.has(n));
+const stateView = (s, flood) => ({ base: s.base, anchor: s.anchor, down: ordered(s.down), out: ordered(s.out), ropeUsed: s.ropeUsed, flood, liftsPerRound: PIT_LIFTS_PER_ROUND });
+const role = (s, name) => s.out.has(name) ? 'out' : s.anchor === name ? 'rope anchor' : s.base === name ? 'base' : 'down';
+function actions(s, name) {
+  if (s.out.has(name)) return ['leave', ...(s.base && !s.ropeUsed ? ['reach_down'] : [])];
+  if (s.anchor === name) return ['wait', ...(s.down.size === 1 ? ['climb_last'] : [])];
+  if (s.base === name) return ['wait'];
+  return ['wait', 'climb', ...(!s.base && !s.anchor ? ['offer_back', ...ordered(s.down).filter(n => n !== name).map(n => `push_base:${n}`)] : [])];
+}
 
 export async function runPit(g) {
-  const state = { base: null, down: new Set(g.aliveList()), out: new Set(), ropeUsed: false };
-  g.beginStage('pit', `${state.down.size} contestants fall into a pit that is slowly flooding.`);
-  for (let round = 1; round <= PIT_ROUNDS && state.down.size > 0; round++) {
-    await pitRound(g, state, round);
-  }
-  if (state.down.size > 0) flood(g, state);
-  g.endStage();
-}
-
-const inSeatOrder = (set) => SEATS.filter((seat) => set.has(seat));
-
-/** Public by design: everyone sees who is down, who is out, who is the base, and whether the rope is gone. */
-const stateView = (state, flood) => ({
-  flood,
-  base: state.base,
-  down: inSeatOrder(state.down),
-  out: inSeatOrder(state.out),
-  ropeUsed: state.ropeUsed,
-  liftsPerRound: PIT_LIFTS_PER_ROUND,
-});
-
-function legalActionsFor(state, name) {
-  if (state.out.has(name)) return ['leave', ...(state.base && !state.ropeUsed ? ['reach_down'] : [])];
-  if (name === state.base) return ['wait'];
-  const down = inSeatOrder(state.down);
-  const choosing = state.base ? [] : ['offer_back', ...down.filter((n) => n !== name).map((n) => `push_base:${n}`)];
-  return ['wait', 'climb', ...choosing];
-}
-
-const roleOf = (state, name) => (state.out.has(name) ? 'out' : name === state.base ? 'base' : 'down');
-
-async function pitRound(g, state, round) {
-  g.beginRound('play', round, PIT_ROUNDS);
-  const names = g.aliveList();
-  const outAtStart = new Set(state.out);
-  const specFor = (name) => ({
-    phase: 'play',
-    roundsTotal: PIT_ROUNDS,
-    stageState: stateView(state, round - 1),
-    legalActions: legalActionsFor(state, name),
-    rules: pitRules(roleOf(state, name)),
-  });
-  const results = await g.ask(names, specFor, (name) => (state.out.has(name) ? 'leave' : 'wait'));
-  g.speak(names, results);
-  g.emitActions(names, results);
-  const chose = (action) => (name) => results[name].action === action;
-
-  // (a) A base, if there is none yet: volunteers first, otherwise somebody who was pushed.
-  if (!state.base) {
-    const base = chooseBase(g, state, names, results);
-    if (base) state.base = base;
-  }
-
-  // (b) Lifts: climbers (never the base) get out over the base's shoulders, a few per round.
-  const lifted = state.base ? lift(g, state, SEATS.filter((n) => state.down.has(n) && n !== state.base && chose('climb')(n))) : [];
-  if (!state.base) {
-    const wouldClimb = inSeatOrder(state.down).filter(chose('climb'));
-    if (wouldClimb.length) g.announce(`${wouldClimb.join(', ')} tried to climb but there is nobody to stand on.`);
-  }
-
-  // (c) The rope: only agents who were already out when the round began.
-  const reachers = SEATS.filter((n) => outAtStart.has(n) && chose('reach_down')(n));
-  const rescue = state.base && !state.ropeUsed && reachers.length ? haulBaseOut(g, state, reachers) : null;
-
-  g.emit('reveal', {
-    what: 'pit',
-    data: { ...stateView(state, round), lifted, roped: rescue?.by ?? null, rescued: rescue?.saved ?? null },
-  });
-}
-
-function chooseBase(g, state, names, results) {
-  const down = names.filter((n) => state.down.has(n));
-  const volunteers = down.filter((n) => results[n].action === 'offer_back');
-  if (volunteers.length) {
-    const base = g.rng.pick(volunteers);
-    g.announce(`${base} volunteers to be the base and stays at the bottom as the step.`);
-    return base;
-  }
-  const targets = new Set();
-  for (const pusher of down) {
-    const action = results[pusher].action;
-    if (!action.startsWith('push_base:')) continue;
-    const target = action.slice('push_base:'.length);
-    if (g.powerOf(target) === 'anchor') {
-      g.emit('ability_use', { name: target, power: 'anchor', detail: `${pusher} tried to push ${target} to be the base and failed.` });
-      g.announce(`${pusher} tried to push ${target} to be the base, but ${target} would not budge.`);
-    } else {
-      targets.add(target);
+  g.beginStage('pit', g.alive.size > 3 ? 'The water rises. Someone must be the step.' : 'Three remain; the Pit is skipped.');
+  if (g.alive.size <= 3) { g.endStage(); return; }
+  const s = { base: null, anchor: null, down: new Set(g.aliveList()), out: new Set(), ropeUsed: false };
+  for (let round = 1; round <= PIT_ROUNDS && s.down.size; round++) {
+    g.beginRound('play', round, PIT_ROUNDS);
+    const names = g.aliveList(), outBefore = new Set(s.out), anchorBefore = s.anchor;
+    const results = await g.ask(names, name => ({
+      phase: 'play', roundsTotal: PIT_ROUNDS, stageState: stateView(s, round - 1),
+      legalActions: actions(s, name), rules: pitV5Rules(role(s, name)),
+    }), name => s.out.has(name) ? 'leave' : 'wait');
+    g.speak(names, results);
+    g.emitActions(names, results);
+    const chose = action => name => results[name].action === action;
+    if (!s.base && !s.anchor) {
+      const down = ordered(s.down), volunteers = down.filter(chose('offer_back'));
+      const targets = new Set();
+      for (const name of down) if (results[name].action.startsWith('push_base:')) {
+        const target = results[name].action.slice(10);
+        targets.add(target);
+        g.breakPact(name, target, 'push_base');
+      }
+      const candidates = volunteers.length ? volunteers : down.filter(n => targets.has(n));
+      if (candidates.length) s.base = g.rng.pick(candidates);
     }
+    const support = s.base ?? s.anchor;
+    const climbers = support ? ordered(s.down).filter(n => n !== support && chose('climb')(n)) : [];
+    const lifted = ordered(new Set(climbers.length > PIT_LIFTS_PER_ROUND ? g.rng.shuffle(climbers).slice(0, PIT_LIFTS_PER_ROUND) : climbers));
+    for (const name of lifted) {
+      s.down.delete(name); s.out.add(name);
+      g.debt(name, support, s.anchor ? 'rope' : 'step');
+    }
+    let anchorOut = null;
+    if (anchorBefore && results[anchorBefore].action === 'climb_last') {
+      s.down.delete(anchorBefore); s.out.add(anchorBefore); s.anchor = null; anchorOut = anchorBefore;
+    }
+    const reachers = ordered(outBefore).filter(chose('reach_down'));
+    let roped = null, rescued = null;
+    if (s.base && !s.ropeUsed && reachers.length) {
+      roped = g.rng.pick(reachers); rescued = s.base;
+      s.down.delete(rescued); s.out.add(rescued);
+      s.out.delete(roped); s.down.add(roped);
+      s.base = null; s.anchor = roped; s.ropeUsed = true;
+      g.emit('reveal', { what: 'rope', data: { by: roped, saved: rescued, anchor: roped } });
+      g.debt(rescued, roped, 'rope');
+    }
+    g.emit('reveal', { what: 'pit', data: { ...stateView(s, round), lifted, roped, rescued, anchorOut } });
   }
-  const candidates = inSeatOrder(targets);
-  if (!candidates.length) return null;
-  const base = g.rng.pick(candidates);
-  g.announce(`${base} is forced to be the base and stays at the bottom as the step.`);
-  return base;
-}
-
-function lift(g, state, climbers) {
-  if (!climbers.length) return [];
-  const chosen = climbers.length > PIT_LIFTS_PER_ROUND ? g.rng.shuffle(climbers).slice(0, PIT_LIFTS_PER_ROUND) : climbers;
-  const lifted = inSeatOrder(new Set(chosen));
-  for (const name of lifted) {
-    state.down.delete(name);
-    state.out.add(name);
+  if (s.down.size) {
+    g.eliminate(ordered(s.down), { cause: 'pit', style: 'sink', luckyWhy: 'a plank supports a final survivor' });
+    await g.finishEliminations();
   }
-  g.announce(`${lifted.join(' and ')} climbed out over ${state.base}'s shoulders.`);
-  const stuck = climbers.filter((n) => !lifted.includes(n));
-  if (stuck.length) g.announce(`${stuck.join(', ')} tried to climb but had to wait for another turn.`);
-  return lifted;
-}
-
-function haulBaseOut(g, state, reachers) {
-  const by = g.rng.pick(reachers);
-  const saved = state.base;
-  state.down.delete(saved);
-  state.out.add(saved);
-  state.base = null;
-  state.ropeUsed = true;
-  g.ropeCost.set(by, (g.ropeCost.get(by) ?? 0) + ROPE_COST_FOOTING);
-  g.emit('reveal', { what: 'rope', data: { by, saved, cost: ROPE_COST_FOOTING } });
-  g.announce(`${by} threw the rope and hauled ${saved} out of the pit. It costs ${by} ${ROPE_COST_FOOTING} footing at the start of the last obstacle. The rope is gone.`);
-  return { by, saved };
-}
-
-/** The water covers the pit: whoever is still down is eliminated, but at least three stay alive. */
-function flood(g, state) {
-  g.announce(`The water covers the pit. ${inSeatOrder(state.down).join(', ')} ${state.down.size === 1 ? 'is' : 'are'} still down there.`);
-  g.eliminate(inSeatOrder(state.down), {
-    cause: 'pit',
-    style: 'sink',
-    featherDetail: 'The water rose, but the feather floated the holder out of the pit.',
-    luckyWhy: 'a plank floats by',
-    floor: MIN_ALIVE_AFTER_FLOOD,
-  });
+  g.endStage();
 }

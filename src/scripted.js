@@ -28,7 +28,7 @@ export function createScriptedAgents(seed, kinds, seats = ['Ash', 'Bex', 'Cole',
 function createBot(name, kind, rng) {
   const policy = POLICIES[kind];
   const epilogue = EPILOGUE[kind];
-  return { name, model: `scripted/${kind}`, act: (view) => (view.stage === 'chalk' && epilogue ? epilogue(view, rng) : policy(view, rng)) };
+  return { name, model: `scripted/${kind}`, act: (view) => (view.rulesVersion === 5 ? v5Bot(view, kind, rng) : view.stage === 'chalk' && epilogue ? epilogue(view, rng) : policy(view, rng)) };
 }
 
 const reply = (action, extra = {}) => ({ thought: '', say: null, whisper: null, forge: null, ...extra, action });
@@ -190,3 +190,44 @@ const POLICIES = {
   shover: shoverBot,
   broken: brokenBot,
 };
+
+
+// v5 bots consume only the engine view; no access to the tape or other agents' state.
+function v5Bot(v, kind, rng) {
+  if (kind === 'broken') return brokenBot(v, rng);
+  const answer = (action, extra = {}) => reply(action, { thought: 'I need the best prize and the jury will remember.', ...extra });
+  if (v.phase === 'intro') return answer('speak', { say: 'The prize buys me a fresh start without owing anyone.' });
+  if (v.phase === 'last_words') return answer('speak', { say: 'I will remember who left me here.' });
+  if (v.phase === 'guide_vote' || v.phase === 'guide_revote') return answer(randomLegal(v, rng));
+  if (v.phase === 'guide_call') {
+    const safe = knownSafeSide(v);
+    const lies = kind === 'liar' || (kind === 'shover' && rng.chance(0.35));
+    const side = lies ? (safe === 'L' ? 'R' : 'L') : safe;
+    return answer(`call:${side}`, { say: `Take ${side}.`, thought: lies ? 'I will send this rival through the weak pane.' : 'The jury must trust my calls.' });
+  }
+  if (v.phase === 'counter_call') return answer(kind === 'liar' ? `counter:${rng.pick(['L', 'R'])}` : 'wait');
+  if (v.stage === 'bridge' && v.phase === 'crossing') return answer(`step:${kind === 'random' && rng.chance(0.2) ? rng.pick(['L', 'R']) : v.stageState.guideCall}`);
+  if (v.phase === 'pacts' || v.phase === 'campaign') {
+    const accept = v.legalActions.find(a => a.startsWith('accept_pact:'));
+    const offer = v.legalActions.filter(a => a.startsWith('offer_pact:'));
+    return answer(accept ?? (offer.length && kind !== 'coward' ? rng.pick(offer) : v.legalActions[0]), { say: 'Stand with me while our interests match.' });
+  }
+  if (v.phase === 'ballot' || v.phase === 'revote') {
+    const partners = v.pacts.filter(p => p.includes(v.you)).flatMap(p => p.filter(n => n !== v.you));
+    const options = v.legalActions.filter(a => !partners.includes(a.slice(5)));
+    return answer(rng.pick(kind === 'saint' && options.length ? options : v.legalActions), { thought: 'This rival threatens my chance at the first prize.' });
+  }
+  if (v.stage === 'jury') {
+    if (v.phase === 'question') return answer(`question:${rng.pick(v.stageState.finalists)}`, { say: 'Why should I reward the choices that kept you alive?' });
+    if (v.phase === 'ranking') return answer(randomLegal(v, rng), { thought: 'I reward the contestant whose choices I respect most.' });
+    return answer(v.legalActions[0], { say: 'I made my choices openly. Judge what I did and what it cost.' });
+  }
+  if (v.stage === 'pit' && v.legalActions.includes('climb_last')) return answer('climb_last');
+  // Reuse the unchanged physical policies where the actions are shared with the historical game.
+  if (kind === 'liar') {
+    if (v.stage === 'bridge') return answer('hold');
+    if (v.stage === 'crusher') return answer(pushOther(v, rng));
+    if (v.stage === 'pit') return answer(pushBase(v, rng) ?? firstLegal(v, 'climb', 'wait', 'leave'));
+  }
+  return POLICIES[kind](v, rng);
+}

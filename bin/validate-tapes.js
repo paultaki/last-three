@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Validate every tape in web/tapes (or the directory given as the first argument).
+// Validate v1-v5 tapes with their version-specific rules, read-only, in web/tapes (or the directory given as the first argument).
 
 import fs from 'node:fs';
 import path from 'node:path';

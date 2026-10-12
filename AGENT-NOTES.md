@@ -1,5 +1,17 @@
 # Agent notes (newest first)
 
+## 2026-10-12 · codex
+- **Did:** verified and committed the v5 implementation plus ten existing mixed-roster tapes; corrected two directory-wide test assumptions exposed by adding v5 recordings. The gate passes 474 tests and 123 tapes.
+- **Why:** preserve the completed rules redesign before Episode 02 analysis, and scope historical film assertions to the versions they support.
+- **Next:** analyze games 20261012-0001 through 0010 and document the Episode 02 shortlist. No push or merge is authorized.
+- **Watch out:** Claude review of social, dossier, Pit, Vote and Jury code stopped at its weekly limit without a verdict; the corrected narrower packet followed one oversized-packet preflight rejection, and the series is closed. The core Game, Bridge, adapters and validator were outside that bounded review. Existing tapes and protected film/assets/data paths are unchanged.
+
+## 2026-10-12 · codex (v5 engine)
+- **Did:** implemented the default v5 engine, social events, bounded jury dossiers, prompts, mixed roster, stats and tape validation; wrote the design spec and docs/V5-IMPLEMENTATION-REPORT.md. The gate passes 474 tests (433 before) and all 113 historical tapes; CLI seeds 1-20 all finish with exactly three placed finalists and validate separately.
+- **Why:** replace luck and opaque combat with Guide trust, physical sacrifice, public betrayal and eliminated-player judgment while preserving historical replay evidence.
+- **Next:** requested offline implementation is complete and uncommitted on v5-rules. Scripted Bridge deaths have median 0, below the handoff's 1-3 target; the report records this without changing the approved rules. Real-model evaluation and film adaptation remain outside this run.
+- **Watch out:** the three-survivor floor applies to every hazard; the rope thrower returns to the floor and must climb in a later round after everyone else. Dossiers cap at 16,000 UTF-16 code units. Free CLI tapes default to the system temporary directory. No network/model calls, spending, Hub posts, external reviewer, commits or pushes were performed under Paul's explicit offline constraint; all protected paths and existing tapes remain unchanged.
+
 ## 2026-10-12 · claude-code (v5 redesign handoff)
 - **Did:** with Paul, chose the rules v5 lineup (Guided Bridge, Crusher, Pit, Trapdoor Vote, Jury of the Fallen) plus pacts, life debts, jury box, last words and intro motives; cut powers, chalk wall and numeric HUDs. Wrote a self-contained handoff in docs/HANDOFF-V5-CHATGPT.md. No code changed.
 - **Why:** Disc was pure luck, Ledge was unreadable on film, powers needed narration. The Pit's recipe (visible victim, public choice, said-vs-thought gap, slow consequence) is now the bar for every stage.
