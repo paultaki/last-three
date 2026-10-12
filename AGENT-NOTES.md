@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-12 · codex (twenty-game v5 findings)
+- **Did:** completed ten new mixed-roster v5 games, seeds 511-520, for $1.412538 additional gateway spend; analyzed all twenty games and replaced the Episode 02 recommendation with 20261012-0013. Updated docs/FINDINGS.md, docs/RUN-LOG.md and the separate local evidence reader with eight verified quote receipts; 0017 and 0015 are the alternatives.
+- **Why:** Paul's entertainment goal requires real sacrifice, backstabbing and visible costs. In 0013 Cole volunteers and dies at the lever, Fenn returns with the rope and drowns, and three debtors vote out savior Gus; Bex breaks a pact to reach the final and wins by first-place votes.
+- **Next:** Paul chooses the game before animation. The search is complete with twenty saved real v5 tapes; no push or merge is authorized. Any later jury-evidence improvement must be separately tested without rewriting these recordings.
+- **Watch out:** two prompt clarifications reduced observed silent questions from 37/46 to 3/49 and Bridge median from 5 to 3.5 across different seeds. Model accusations still conflict with events. In 0017 all dossiers drop the murder thought/call/death, Ash / Qwen is the murderer and finishes second to rope rescuer Fenn / GLM. The missing evidence prevents attributing the verdict to that murder. A final receipt check corrected the earlier mistaken killer attribution. The explicit Grok courier timed out with no verdict and its row is stopped; safety settings were not weakened. Final gate: 476 tests and 133 tapes. Existing tapes and protected film/assets/data paths are unchanged; lifetime gateway ledger $17.73794718.
+
 ## 2026-10-12 · codex (v5 drama search)
 - **Did:** added two test-first prompt clarity changes: current Bridge row and safe/weak distinction without leaking Guide knowledge, plus voiced jury questions and evidence-based reasons. Both new tests failed before implementation; the gate now passes 476 tests and 123 pre-batch tapes. Started ten paid mixed-roster games at seeds 511-520 under a $18.50 lifetime cap.
 - **Why:** the first ten games had 40 of 43 Bridge deaths after truthful calls and 37 of 46 jury questions without speech, obscuring deliberate betrayal and public confrontations.

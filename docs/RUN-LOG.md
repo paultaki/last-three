@@ -39,3 +39,23 @@ These paid runs were completed before the Episode 02 analysis. Each game uses al
 | 2026-10-12 | 20261012-0010 | 510 | 236 | 0.118556 | Ash / Qwen 3.8 Flash |
 
 Ten tape-attributed games: **$1.232970**, 2,248 recorded calls. Range: $0.104383-$0.164424 per game. Lifetime ledger read on 2026-10-12: **$16.32540931** (about $16.33). The gap from the prior rounded $15.09 baseline includes ledger activity not separately attributed here; do not silently assign it to these tapes. No extra paid games, auth refreshes or probes were made during analysis, so additional spend in this session is **$0**. The reported remaining gateway credit balance in the handoff was not checked live.
+
+
+## 2026-10-12: ten more v5 drama scenarios after prompt clarification
+
+Seeds 511-520, mixed roster unchanged, concurrency 3, per-game default cap $0.60, lifetime cap $18.50. Prompt revision `8890794` clarifies the current Bridge row and voiced, evidence-based jury responses. Ten played, zero failed/discarded, zero roster replacements. No original tape overwritten. Both new tests failed first; 476 tests and 123 existing tapes passed before paid dispatch, and 476 tests/133 tapes passed afterwards.
+
+| Date | Tape | Seed | Calls | Cost (USD) | Winner: seat / model |
+|---|---|---:|---:|---:|---|
+| 2026-10-12 | 20261012-0011 | 511 | 202 | 0.114348 | Dara / Kimi K2.6 |
+| 2026-10-12 | 20261012-0012 | 512 | 216 | 0.126906 | Hana / Kimi K2.6 |
+| 2026-10-12 | 20261012-0013 | 513 | 311 | 0.178300 | Bex / Gemini Flash-Lite |
+| 2026-10-12 | 20261012-0014 | 514 | 261 | 0.155263 | Eli / Haiku 5.5 |
+| 2026-10-12 | 20261012-0015 | 515 | 266 | 0.154453 | Fenn / Haiku 5.5 |
+| 2026-10-12 | 20261012-0016 | 516 | 206 | 0.116430 | Ash / Haiku 5.5 |
+| 2026-10-12 | 20261012-0017 | 517 | 244 | 0.126127 | Fenn / GLM 5.3 Flash |
+| 2026-10-12 | 20261012-0018 | 518 | 261 | 0.150443 | Cole / Kimi K2.6 |
+| 2026-10-12 | 20261012-0019 | 519 | 310 | 0.171992 | Eli / DeepSeek V4 Flash |
+| 2026-10-12 | 20261012-0020 | 520 | 211 | 0.117994 | Fenn / Kimi K2.6 |
+
+Ten tape-attributed games: **$1.412256**, 2,488 calls. Ledger delta including probes and rounding: **$1.41253787**, 2,496 calls; the $0.00028187 difference from rounded tape usage is not assigned to an invented game. Lifetime ledger: **$17.73794718**. Budget headroom to the selected $18.50 cap: $0.762053. All game spending remains below Paul's existing $5 additional allowance. The separate Grok CLI review timed out before a verdict; any Grok CLI account usage is outside this gateway ledger and was not verified. No extra batch after seed 520, no push or animation.
