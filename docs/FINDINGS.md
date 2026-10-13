@@ -645,3 +645,12 @@ Keep the eight-brand cast for this episode: it already supplies both kindness an
 Selected reason receipts with at least one verified earlier adverse episode: 555:1190-1194; 563:723/724/726/727; 568:735-739. 563:725 is generic positive pact strategy. These are selected semantic checks, not a complete classification of all one hundred reasons.
 
 New batch ledger delta **$2.96224191**, reported gateway cost **$2.85273486** plus separate ChatGPT BYOK upstream estimate **$0.30330660**, combined **$3.15604146**. Both estimates remain below the new $4.50 ceiling. Lifetime project ledger **$24.99837945**. There are 182 real saved games overall plus the sample. Next unused seed: **571**.
+
+### Episode 1 editorial selection and compilation (2026-10-13)
+
+| Option | Selection | Why |
+|---|---|---|
+| A, recommended | Game 549, 20261013-0029 | ChatGPT dies saving six; Kimi rescues Grok; Grok helps vote Kimi out; GLM knowingly cuts Claude then denies the pact break; Kimi reverses the rope direction in its jury reason and ranks Grok first. Grok wins 14-10-6. |
+| B, documentary montage | Games 546, 555, 563 | Qwen abandoned despite pleas, ChatGPT knowingly cutting its pact partner/savior Grok, GLM deliberately counter-calling weak glass for Grok then denying any call. Keep each game's own outcome, including ChatGPT's death in 555 and GLM's all-last jury ranking in 563. |
+
+[Visual comparison](http://127.0.0.1:8861/last-three-episode-01-options.html), [source quotes and editing facts](EPISODE-01-STORY-OPTIONS.md), [cast origin flags and sources](CAST-BRANDS.md). Private fields are model-supplied game self-reports. No extra runs, spending, tape edits, film edits or production changes were needed. The montage must visibly reset the game between chapters, and jury memory errors must be presented as errors rather than informed forgiveness.
