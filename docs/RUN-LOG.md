@@ -161,3 +161,9 @@ Twenty tape-attributed games: **$2.961973**, 4,901 calls. Ledger delta including
 Fetch audit: **$2.85273486 reported gateway cost** plus **$0.30330660 upstream inference estimate for 606 ChatGPT BYOK requests**, combined **$3.15604146**. Metadata sums and the catalog-price ledger are estimates rather than an invoice. ChatGPT reported zero gateway credit cost, zero reasoning tokens, reasoning disabled and stop completion on all 606 requests; no missing reasoning fields. Every HTTP response was 200; no auth refresh observed. Seven GLM format failures after repair still consume tokens and are included in the totals.
 
 Gate before: 476 tests / 163 tapes; gate after: **476 tests / 183 tapes**. All old tape bytes and source film/assets/data paths remain unchanged. No extra games, cast substitution, reasoning change, new rule or prompt, review dispatch, push, merge or animation. Total real v5 games **70**; next seed **571**. A separate eight-brand logo preview and verified SVG copies were created outside the protected film folders.
+
+## 2026-10-13 PDT: thirty more unchanged-cast v5 games
+
+Seeds 571-600, exact mixed roster, unchanged rules/prompts, concurrency 3, $0.60 per-game cap, $6 announced batch ceiling and retained $30 lifetime hard ceiling. Thirty played, zero failed/discarded, no substitutions. Pre-gate: 476 tests / 183 tapes. Post-gate: 476 tests / 213 tapes.
+
+Ledger delta $4.45323621; combined gateway/BYOK metadata estimate $4.11362191; lifetime ledger $29.45161566. Eight probes passed. Old recording hashes unchanged. Full run table, cost counters, reply limitations and verified scene shortlist: [THIRTY-GAME-DRAMA-SEARCH.md](THIRTY-GAME-DRAMA-SEARCH.md). Next unused seed 601. No new game after 600, push, merge, animation or media generation.

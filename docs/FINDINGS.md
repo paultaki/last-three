@@ -654,3 +654,9 @@ New batch ledger delta **$2.96224191**, reported gateway cost **$2.85273486** pl
 | B, documentary montage | Games 546, 555, 563 | Qwen abandoned despite pleas, ChatGPT knowingly cutting its pact partner/savior Grok, GLM deliberately counter-calling weak glass for Grok then denying any call. Keep each game's own outcome, including ChatGPT's death in 555 and GLM's all-last jury ranking in 563. |
 
 [Visual comparison](http://127.0.0.1:8861/last-three-episode-01-options.html), [source quotes and editing facts](EPISODE-01-STORY-OPTIONS.md), [cast origin flags and sources](CAST-BRANDS.md). Private fields are model-supplied game self-reports. No extra runs, spending, tape edits, film edits or production changes were needed. The montage must visibly reset the game between chapters, and jury memory errors must be presented as errors rather than informed forgiveness.
+
+## 2026-10-13: thirty-game follow-up, seeds 571-600
+
+All thirty requested games are saved. Best new whole-game alternative: 596, where ChatGPT dies at the lever and Grok/Claude are later voted out after their saves. Best sinister jury scene: 579, with three finalists contradicting actual pact-break receipts and GLM falsely claiming a prior Grok vote against it. Best rescue-to-vote reversal: 588, where Grok helps cut rope rescuer GLM and receives all five firsts. New deliberate-kill/punishment sequence: Kimi to ChatGPT in 581.
+
+The existing 558/555 composite draft remains preserved. Different roster deaths/finalists make these alternative spines, not automatically combinable scenes. Source receipts, all thirty runs, verified costs and limitations: [THIRTY-GAME-DRAMA-SEARCH.md](THIRTY-GAME-DRAMA-SEARCH.md). Gate 476 tests / 213 tapes; no rules, prompts, cast or old-recording changes.
