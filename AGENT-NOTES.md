@@ -1,6 +1,12 @@
 # Agent notes (newest first)
 
 ## 2026-10-13 · codex
+- **Did:** searched and compared real low-poly character product previews; recommended KayKit toy-like human selections from Series 4/5, with Quaternius Cube World and KayKit Adventurers as alternatives. Created a labeled image/browser comparison outside the repo and CHARACTER-STYLE-SHORTLIST.md with primary sources, current prices, licences and animation/file support.
+- **Why:** make the cast substantially more stylized while preserving readable reactions and eight recognizable brand identities. A lower polygon count alone does not remove realistic adult proportions.
+- **Next:** research and recommendations are complete. After the character direction is selected, the proposed proof is one branded character walking, reacting/pleading, gripping a rope and falling before a full replacement. No package admission, import or film implementation is included in this chunk. Local v5-rules only; no push.
+- **Watch out:** published rigs do not establish facial controls, lip sync, our viewer compatibility or rope-hand contact. Cube World shows four human bases, so eight contestants require variants. KayKit fantasy gear needs simplifying. Current Synty Store terms list AI-related video restrictions; applicable rights are not established by the preview. Only publisher reference images were downloaded outside the repo; protected film assets, tapes and model sources stayed unchanged. No purchases or paid calls.
+
+## 2026-10-13 · codex
 - **Did:** added sourced developer-origin flags to the separate eight-brand cast preview; built and visually checked two Episode 1 storyboards with logos, flags, public/private quote contrasts and exact tape links. Recommended continuous game 549; selected a three-chapter documentary montage from 546/555/563. Verified fourteen verbatim excerpts and four source-tape hashes. Gate: 476 tests and 183 tapes pass. Added EPISODE-01-STORY-OPTIONS.md and condensed findings. No additional spend.
 - **Why:** provide two concrete, easy-to-compare choices with relatable rescue, betrayal and jury consequences, preserving the actual recordings and their public/private contradictions.
 - **Next:** Paul chooses A (game 549) or B (three separate game chapters) before animation. Static comparison, SVG/PNG and receipts are saved in the existing visualization folder outside the repo. Local v5-rules commit only; no push or merge. Next unused seed remains 571.
