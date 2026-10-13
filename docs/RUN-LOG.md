@@ -89,3 +89,17 @@ Paul requested another batch. Seeds 521-540, mixed roster unchanged, prompt revi
 | 2026-10-12 | 20261013-0020 | 540 | 251 | 0.153341 | Gus / GLM 5.3 Flash |
 
 Twenty tape-attributed games: **$2.792764**, 4,893 calls. Ledger delta including eight probes and rounding: **$2.79303536**, 4,901 calls. Difference from rounded tape usage: $0.00027136. Lifetime ledger: **$20.53098254**. Headroom to the chosen $21.30 cap: $0.76901746; headroom to the original $5 additional allowance: $0.79442677. Combined ten-plus-twenty new-game ledger spend: **$4.20557323**. No auth refresh, extra batch, new review dispatch, push, merge or animation was performed in this batch.
+
+## 2026-10-12 PDT: GPT Luna compatibility checks and mixed-roster change
+
+Paul requested replacing a less recognizable contestant with GPT Luna. Replaced gpt-oss-120b in future `mixed` games with `openai/gpt-5.6-luna`; the other seven models are unchanged. The live gateway catalog supports reasoning off and low effort. These checks used the existing adapter's `reasoning: {enabled: false}`, the existing 800-token limit, actual stage prompts from a free scripted game, and a $21.00 lifetime ledger cap with a $0.04 check-bucket cap. No complete paid game or new tape was produced.
+
+| Prompt | Legal reply | Input / output tokens | Reasoning tokens | Calls | Project ledger estimate (USD) |
+|---|---|---:|---:|---:|---:|
+| Bridge Guide call | call:L | 2,533 / 47 | 0 | 1 | 0.0005630 |
+| Pit play | leave | 1,399 / 47 | 0 | 1 | 0.0003362 |
+| Jury question | question:Cole, with a voiced question | 7,719 / 73 | 0 | 1 | 0.0016314 |
+
+All three returned HTTP 200 and stop completion, with no retries or repairs. Ledger bucket `luna-compat-20261013`: **$0.0025306**, three calls. Lifetime project ledger: **$20.53351314**. Remaining original additional allowance by the project ledger: **$0.79189617**. Raw usage reports BYOK, zero gateway credit cost and **$0.0031127** total upstream inference cost, including cache creation pricing. The project ledger estimate is not an invoice or confirmed gateway credit debit. No credentials were printed or committed.
+
+The updated roster assertion failed before the implementation change; `npm run check` then passed **476 tests and 153 tapes**. All forty existing v5 games preserve their original recorded cast. New seeds begin at 541. Reasoning low was not enabled or tested. No rule, prompt, existing tape, film asset, push or merge changed.

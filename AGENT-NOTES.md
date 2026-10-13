@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-12 · codex
+- **Did:** replaced gpt-oss-120b with GPT-5.6 Luna in the mixed roster, updated the roster regression test first and verified three live Bridge/Pit/jury replies. All returned legal actions, no repair calls and zero reported reasoning tokens. Gate: 476 tests and 153 tapes pass.
+- **Why:** Paul requested a recognizable GPT contestant. Luna supports none and low reasoning; the existing adapter requests reasoning off, so this needs only a roster change. No new game mechanics or adapter logic.
+- **Next:** future mixed games use Luna, starting at unused seed 541. No full game was run for this change. Paul is selecting a clearer replacement Episode 1; earlier Episode 02 labels are superseded. Local commit only, no push or merge.
+- **Watch out:** all forty recorded v5 games retain their actual gpt-oss cast; never relabel them as Luna. Low reasoning is available but was not tested or enabled. The compatibility checks added $0.0025306 to the project ledger (lifetime $20.53351314); gateway metadata reports BYOK and $0.0031127 upstream inference cost, not a gateway credit charge. Roughly $0.79 remains under the original $5 additional allowance. Existing tapes and protected paths are untouched; previous reviewer timeout remains no verdict.
+
 ## 2026-10-12 · codex (forty-game v5 search)
 - **Did:** ran twenty additional mixed-roster games at seeds 521-540 for $2.793035; analyzed all forty real v5 tapes, verified eight ranked quote receipts and updated FINDINGS/RUN-LOG plus the separate local evidence reader. Recommended 20261013-0016 (seed 536), with original 20261012-0013 and 20261013-0009 as alternatives. Gate: 476 tests, 153 tapes pass.
 - **Why:** Paul requested a larger drama search. In 536 all three direct saviors die; Kimi votes out both the lever volunteer and its step savior/pact partner, denies the recorded pact, and receives that victim's first-place jury vote. It has three vote eliminations with no random tie-break. Original 0013 retains the clearest voiced rope scene.

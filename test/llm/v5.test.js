@@ -7,8 +7,8 @@ import { runGame } from '../../src/engine.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 const removed = /\b(?:power|powers|chalk|forge|forging|forger|feather|wedge)\b/i;
 
-test('v5 mixed roster exactly matches the requested eight models', () => {
-  assert.deepEqual(MIXED_ROSTER, ['anthropic/claude-haiku-5.5', 'openai/gpt-oss-120b', 'google/gemini-2.5-flash-lite', 'spacexai/grok-4.1-fast-non-reasoning', 'deepseek/deepseek-v4-flash', 'alibaba/qwen3.8-flash', 'moonshotai/kimi-k2.6', 'zai/glm-5.3-flash']);
+test('v5 mixed roster replaces gpt-oss with GPT Luna and preserves the other seven models', () => {
+  assert.deepEqual(MIXED_ROSTER, ['anthropic/claude-haiku-5.5', 'openai/gpt-5.6-luna', 'google/gemini-2.5-flash-lite', 'spacexai/grok-4.1-fast-non-reasoning', 'deepseek/deepseek-v4-flash', 'alibaba/qwen3.8-flash', 'moonshotai/kimi-k2.6', 'zai/glm-5.3-flash']);
 });
 
 test('v5 every generated prompt excludes removed mechanics and discloses jury from the first turn', async () => {

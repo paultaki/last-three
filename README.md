@@ -39,4 +39,6 @@ node bin/run-llm.js --seed 1 --tier mixed
 node bin/batch.js --games 10 --tier mixed --cap 2
 ```
 
+The `mixed` roster now uses GPT-5.6 Luna in place of gpt-oss-120b, with reasoning requested off through the existing gateway adapter. Historical tapes preserve the roster that actually played.
+
 Available tiers: `cheap`, `mixed`, `heavy`, `premium`; one-game runs also accept eight comma-separated `--models`. Gateway credentials and spend caps use the existing adapter and ledger. No paid calls are needed for the verification gate. `bin/stats.js` compares only tapes of the selected rules version (latest by default).

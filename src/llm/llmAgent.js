@@ -15,10 +15,10 @@ export const DEFAULT_ROSTER = [
   'meta/llama-4-maverick',
 ];
 
-/** Mixed roster, in the requested order. */
+/** Mixed roster: GPT Luna replaces gpt-oss; game calls request thinking off. */
 export const MIXED_ROSTER = [
   'anthropic/claude-haiku-5.5',
-  'openai/gpt-oss-120b',
+  'openai/gpt-5.6-luna',
   'google/gemini-2.5-flash-lite',
   'spacexai/grok-4.1-fast-non-reasoning',
   'deepseek/deepseek-v4-flash',
