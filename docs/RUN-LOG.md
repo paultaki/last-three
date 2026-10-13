@@ -127,3 +127,37 @@ Ten tapes: **$1.502356**, 2,566 calls. Ledger delta including eight probes and r
 The fetch audit reports **$1.46462628 gateway cost** for the other models and **$0.15025375 upstream inference cost for Luna's BYOK calls**, total **$1.61488003** in reported costs. Luna has zero gateway credit cost and 299 BYOK requests. The project ledger uses catalog token prices and is an estimate, not an invoice or complete account-billing reconciliation. Both reported estimates remain below this batch's $2.50 ceiling. All 2,574 HTTP responses were 200; no auth refresh was observed. Luna had reasoning disabled in every request, zero reported reasoning tokens, zero missing reasoning fields and 299 stop completions.
 
 Pre-batch gate: 476 tests / 153 tapes. Post-batch gate: **476 tests / 163 tapes**. Existing tape bytes and protected paths are unchanged; no rule or prompt changes, extra games, new review dispatch, push, merge or animation. Total v5 games: 50. New seeds begin at 551.
+
+
+## 2026-10-12 games, documented 2026-10-13: twenty more of the same brand cast
+
+Paul requested twenty games and one recognizable logo per maker. Same roster as seeds 541-550, roster commit `12bd594`, unchanged prompt revision `8890794` and rules v5. Seeds 551-570, concurrency 3, per-game cap $0.60, separate $4.50 maximum ledger delta, lifetime cap $26.53613754. All eight probes passed; substitutions were not permitted. Twenty completed, zero failed/discarded. Public labels use brands, while tapes retain exact model IDs.
+
+| Local start date | Tape | Seed | Calls | Tape ledger estimate (USD) | Winner: seat / brand |
+|---|---|---:|---:|---:|---|
+| 2026-10-12 | 20261013-0031 | 551 | 193 | 0.113383 | Fenn / DeepSeek |
+| 2026-10-12 | 20261013-0032 | 552 | 196 | 0.123189 | Bex / Qwen |
+| 2026-10-12 | 20261013-0033 | 553 | 241 | 0.136666 | Ash / DeepSeek |
+| 2026-10-12 | 20261013-0034 | 554 | 269 | 0.158216 | Dara / Grok |
+| 2026-10-12 | 20261013-0035 | 555 | 337 | 0.209373 | Cole / GLM |
+| 2026-10-12 | 20261013-0036 | 556 | 266 | 0.163647 | Fenn / Claude |
+| 2026-10-12 | 20261013-0037 | 557 | 296 | 0.183305 | Bex / GLM |
+| 2026-10-12 | 20261013-0038 | 558 | 284 | 0.173452 | Cole / GLM |
+| 2026-10-12 | 20261013-0039 | 559 | 189 | 0.109323 | Hana / Grok |
+| 2026-10-12 | 20261013-0040 | 560 | 203 | 0.125244 | Bex / Kimi |
+| 2026-10-12 | 20261013-0041 | 561 | 264 | 0.157061 | Hana / DeepSeek |
+| 2026-10-12 | 20261013-0042 | 562 | 277 | 0.164112 | Hana / GLM |
+| 2026-10-12 | 20261013-0043 | 563 | 200 | 0.122107 | Cole / ChatGPT |
+| 2026-10-12 | 20261013-0044 | 564 | 234 | 0.143820 | Dara / Kimi |
+| 2026-10-12 | 20261013-0045 | 565 | 266 | 0.169136 | Hana / GLM |
+| 2026-10-12 | 20261013-0046 | 566 | 257 | 0.153009 | Cole / DeepSeek |
+| 2026-10-12 | 20261013-0047 | 567 | 197 | 0.110600 | Ash / DeepSeek |
+| 2026-10-12 | 20261013-0048 | 568 | 205 | 0.123778 | Bex / Kimi |
+| 2026-10-12 | 20261013-0049 | 569 | 230 | 0.142831 | Cole / ChatGPT |
+| 2026-10-12 | 20261013-0050 | 570 | 297 | 0.179721 | Eli / Kimi |
+
+Twenty tape-attributed games: **$2.961973**, 4,901 calls. Ledger delta including eight probes and rounding: **$2.96224191**, 4,909 calls. Difference from rounded tape totals: $0.00026891. Lifetime ledger **$24.99837945**; headroom to the selected cap: $1.53775809.
+
+Fetch audit: **$2.85273486 reported gateway cost** plus **$0.30330660 upstream inference estimate for 606 ChatGPT BYOK requests**, combined **$3.15604146**. Metadata sums and the catalog-price ledger are estimates rather than an invoice. ChatGPT reported zero gateway credit cost, zero reasoning tokens, reasoning disabled and stop completion on all 606 requests; no missing reasoning fields. Every HTTP response was 200; no auth refresh observed. Seven GLM format failures after repair still consume tokens and are included in the totals.
+
+Gate before: 476 tests / 163 tapes; gate after: **476 tests / 183 tapes**. All old tape bytes and source film/assets/data paths remain unchanged. No extra games, cast substitution, reasoning change, new rule or prompt, review dispatch, push, merge or animation. Total real v5 games **70**; next seed **571**. A separate eight-brand logo preview and verified SVG copies were created outside the protected film folders.
