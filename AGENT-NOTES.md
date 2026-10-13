@@ -1,6 +1,12 @@
 # Agent notes (newest first)
 
 ## 2026-10-12 · codex
+- **Did:** ran all ten requested GPT Luna mixed games at seeds 541-550 with no discards or substitutions; ledger delta $1.502624, combined reported gateway/BYOK cost $1.614880. Luna won two, reached five finals, had zero invalid decisions and reported zero reasoning tokens across 299 requests. Updated fifty-game findings, ten run rows and the separate local evidence reader. Gate: 476 tests, 163 tapes pass.
+- **Why:** complete the full new-model scenario search. Recommend 20261013-0029 (seed 549) for the replacement Episode 1: Luna volunteers and dies saving six, Kimi rescues Grok, Grok votes its rescuer out and wins; GLM admits betraying Haiku, then denies it and finishes third. Seeds 544 and 546 are the new alternatives.
+- **Next:** the ten-game request and analysis are complete. Paul chooses the recording before animation. New seeds start at 551. Future authorized roster changes should include representative full-game evaluation, beyond compatibility probes. Local v5-rules only; no push or merge.
+- **Watch out:** in 549 Kimi reverses the rope rescue in her jury reason and still ranks Grok first; early rope and ballot proof are omitted from every dossier, although correct Life debts persist in prompts. GLM's later Haiku vote/break are retained. In 546 Luna's confessed intended betrayal is never enacted; no ballot occurs. Truthful Luna is falsely blamed in 550. All old tape bytes and protected paths are preserved. This explicit new batch had its own $2.50 ceiling, exceeding the exhausted older $5 allowance within the new authorization; lifetime ledger $22.03613754. No low-reasoning test or extra batch. Prior reviewer timeout remains no verdict.
+
+## 2026-10-12 · codex
 - **Did:** replaced gpt-oss-120b with GPT-5.6 Luna in the mixed roster, updated the roster regression test first and verified three live Bridge/Pit/jury replies. All returned legal actions, no repair calls and zero reported reasoning tokens. Gate: 476 tests and 153 tapes pass.
 - **Why:** Paul requested a recognizable GPT contestant. Luna supports none and low reasoning; the existing adapter requests reasoning off, so this needs only a roster change. No new game mechanics or adapter logic.
 - **Next:** future mixed games use Luna, starting at unused seed 541. No full game was run for this change. Paul is selecting a clearer replacement Episode 1; earlier Episode 02 labels are superseded. Local commit only, no push or merge.

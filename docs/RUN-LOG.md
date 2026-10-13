@@ -103,3 +103,27 @@ Paul requested replacing a less recognizable contestant with GPT Luna. Replaced 
 All three returned HTTP 200 and stop completion, with no retries or repairs. Ledger bucket `luna-compat-20261013`: **$0.0025306**, three calls. Lifetime project ledger: **$20.53351314**. Remaining original additional allowance by the project ledger: **$0.79189617**. Raw usage reports BYOK, zero gateway credit cost and **$0.0031127** total upstream inference cost, including cache creation pricing. The project ledger estimate is not an invoice or confirmed gateway credit debit. No credentials were printed or committed.
 
 The updated roster assertion failed before the implementation change; `npm run check` then passed **476 tests and 153 tapes**. All forty existing v5 games preserve their original recorded cast. New seeds begin at 541. Reasoning low was not enabled or tested. No rule, prompt, existing tape, film asset, push or merge changed.
+
+
+## 2026-10-12 PDT: ten GPT Luna mixed-roster v5 games
+
+Paul explicitly requested ten games after the Luna replacement. The previous additional allowance had $0.79189617 left; this new request was run under a separate **$2.50 maximum ledger delta**, lifetime cap $23.03351314, per-game cap $0.60, concurrency 3. Seeds 541-550, roster commit `12bd594`, unchanged v5 engine and prompt revision `8890794`. All eight intended models passed probes; no reserve substitution was permitted. Ten completed, zero failed/discarded. UTC identifiers 20261013-0021 through 0030. No complete paid game was run in the preceding compatibility check.
+
+| Local date | Tape | Seed | Calls | Tape ledger estimate (USD) | Winner: seat / model |
+|---|---|---:|---:|---:|---|
+| 2026-10-12 | 20261013-0021 | 541 | 190 | 0.107644 | Ash / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0022 | 542 | 263 | 0.162617 | Cole / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0023 | 543 | 267 | 0.161892 | Eli / Kimi K2.6 |
+| 2026-10-12 | 20261013-0024 | 544 | 274 | 0.168846 | Bex / GPT-5.6 Luna |
+| 2026-10-12 | 20261013-0025 | 545 | 284 | 0.145382 | Hana / Grok 4.1 fast |
+| 2026-10-12 | 20261013-0026 | 546 | 248 | 0.135139 | Cole / GPT-5.6 Luna |
+| 2026-10-12 | 20261013-0027 | 547 | 252 | 0.148737 | Hana / Kimi K2.6 |
+| 2026-10-12 | 20261013-0028 | 548 | 270 | 0.171135 | Dara / Grok 4.1 fast |
+| 2026-10-12 | 20261013-0029 | 549 | 327 | 0.195296 | Gus / Grok 4.1 fast |
+| 2026-10-12 | 20261013-0030 | 550 | 191 | 0.105668 | Fenn / Haiku 5.5 |
+
+Ten tapes: **$1.502356**, 2,566 calls. Ledger delta including eight probes and rounding: **$1.50262440**, 2,574 calls. Difference from rounded tape usage: $0.00026840. Lifetime ledger: **$22.03613754**; batch headroom to its selected cap: $0.99737560.
+
+The fetch audit reports **$1.46462628 gateway cost** for the other models and **$0.15025375 upstream inference cost for Luna's BYOK calls**, total **$1.61488003** in reported costs. Luna has zero gateway credit cost and 299 BYOK requests. The project ledger uses catalog token prices and is an estimate, not an invoice or complete account-billing reconciliation. Both reported estimates remain below this batch's $2.50 ceiling. All 2,574 HTTP responses were 200; no auth refresh was observed. Luna had reasoning disabled in every request, zero reported reasoning tokens, zero missing reasoning fields and 299 stop completions.
+
+Pre-batch gate: 476 tests / 153 tapes. Post-batch gate: **476 tests / 163 tapes**. Existing tape bytes and protected paths are unchanged; no rule or prompt changes, extra games, new review dispatch, push, merge or animation. Total v5 games: 50. New seeds begin at 551.
