@@ -59,3 +59,33 @@ Seeds 511-520, mixed roster unchanged, concurrency 3, per-game default cap $0.60
 | 2026-10-12 | 20261012-0020 | 520 | 211 | 0.117994 | Fenn / Kimi K2.6 |
 
 Ten tape-attributed games: **$1.412256**, 2,488 calls. Ledger delta including probes and rounding: **$1.41253787**, 2,496 calls; the $0.00028187 difference from rounded tape usage is not assigned to an invented game. Lifetime ledger: **$17.73794718**. Budget headroom to the selected $18.50 cap: $0.762053. All game spending remains below Paul's existing $5 additional allowance. The separate Grok CLI review timed out before a verdict; any Grok CLI account usage is outside this gateway ledger and was not verified. No extra batch after seed 520, no push or animation.
+
+
+## 2026-10-12 PDT: twenty more unchanged-prompt v5 scenarios
+
+Paul requested another batch. Seeds 521-540, mixed roster unchanged, prompt revision 8890794, concurrency 3, per-game cap $0.60, lifetime cap $21.30. Twenty completed, zero failed/discarded, zero roster substitutions. Identifiers use the UTC date 20261013. The pre-run gate passed 476 tests/133 tapes; the final gate passed 476 tests/153 tapes. No code, prompt, rule, original tape or film asset changed.
+
+| Local date | Tape | Seed | Calls | Cost (USD) | Winner: seat / model |
+|---|---|---:|---:|---:|---|
+| 2026-10-12 | 20261013-0001 | 521 | 254 | 0.157269 | Hana / Qwen 3.8 Flash |
+| 2026-10-12 | 20261013-0002 | 522 | 254 | 0.135981 | Fenn / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0003 | 523 | 227 | 0.135542 | Bex / DeepSeek V4 Flash |
+| 2026-10-12 | 20261013-0004 | 524 | 204 | 0.114521 | Bex / Kimi K2.6 |
+| 2026-10-12 | 20261013-0005 | 525 | 251 | 0.150895 | Fenn / Haiku 5.5 |
+| 2026-10-12 | 20261013-0006 | 526 | 251 | 0.148495 | Ash / Haiku 5.5 |
+| 2026-10-12 | 20261013-0007 | 527 | 211 | 0.118901 | Eli / Qwen 3.8 Flash |
+| 2026-10-12 | 20261013-0008 | 528 | 293 | 0.169873 | Hana / DeepSeek V4 Flash |
+| 2026-10-12 | 20261013-0009 | 529 | 196 | 0.112383 | Eli / Kimi K2.6 |
+| 2026-10-12 | 20261013-0010 | 530 | 246 | 0.122903 | Fenn / Qwen 3.8 Flash |
+| 2026-10-12 | 20261013-0011 | 531 | 273 | 0.155563 | Hana / DeepSeek V4 Flash |
+| 2026-10-12 | 20261013-0012 | 532 | 245 | 0.139814 | Dara / Kimi K2.6 |
+| 2026-10-12 | 20261013-0013 | 533 | 298 | 0.172001 | Hana / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0014 | 534 | 198 | 0.108835 | Eli / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0015 | 535 | 208 | 0.111750 | Eli / DeepSeek V4 Flash |
+| 2026-10-12 | 20261013-0016 | 536 | 324 | 0.192088 | Hana / Kimi K2.6 |
+| 2026-10-12 | 20261013-0017 | 537 | 302 | 0.170486 | Gus / Kimi K2.6 |
+| 2026-10-12 | 20261013-0018 | 538 | 203 | 0.111833 | Gus / GLM 5.3 Flash |
+| 2026-10-12 | 20261013-0019 | 539 | 204 | 0.110290 | Bex / DeepSeek V4 Flash |
+| 2026-10-12 | 20261013-0020 | 540 | 251 | 0.153341 | Gus / GLM 5.3 Flash |
+
+Twenty tape-attributed games: **$2.792764**, 4,893 calls. Ledger delta including eight probes and rounding: **$2.79303536**, 4,901 calls. Difference from rounded tape usage: $0.00027136. Lifetime ledger: **$20.53098254**. Headroom to the chosen $21.30 cap: $0.76901746; headroom to the original $5 additional allowance: $0.79442677. Combined ten-plus-twenty new-game ledger spend: **$4.20557323**. No auth refresh, extra batch, new review dispatch, push, merge or animation was performed in this batch.
