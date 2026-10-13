@@ -1,5 +1,11 @@
 # Agent notes (newest first)
 
+## 2026-10-13 · codex (composite story selection)
+- **Did:** verified all twenty seeds 551-570 are saved; drafted the requested continuous composite using DeepSeek's failed Gemini deception in 558 and the intact rescue/vote/jury spine of 555. Checked twenty literal quote receipts against seven source hashes, brand mappings, the Grok/ChatGPT rescue debt and pact, actual vote deaths and jury scores. Created docs/EPISODE-01-COMPOSITE-CUT.md, its receipt manifest and a six-card rendered storyboard outside the repo.
+- **Why:** Paul selected real independent sequences edited to feel like one game, with sinister actual choices and recognizable brand logos. The earlier A/B choice is superseded; no repeat paid batch is needed. Clear lever and rope-anchor rules resolve the prior narrative omissions.
+- **Next:** source selection and cut draft complete; composite animation, voices and music remain to implement separately. Preserve existing films and recordings, use fixed brand actors and an explicit composite label. No more game runs were made. Visual storyboard: /Users/paul/.codex/visualizations/2026/10/13/01a12842-3fbd-77e2-bb5f-eb9ad828cab0/composite-storyboard.png.
+- **Watch out:** v5 has no old secret powers or shrinking ledge. Borrowing 558's one surviving Gemini sequence does not assert its whole source match had eight survivors. Do not combine GLM's fatal Grok/Qwen Bridge scenes with those brands' later rescue scenes. Kimi's pact break precedes the DeepSeek vote. Jury omissions/mistakes remain real; its win does not prove informed forgiveness. This is a documentary-source-based composite cut draft, not newly rendered film. Protected film/tape/engine/assets unchanged; docs-only local commit, no push or extra spend.
+
 ## 2026-10-13 · codex
 - **Did:** searched and compared real low-poly character product previews; recommended KayKit toy-like human selections from Series 4/5, with Quaternius Cube World and KayKit Adventurers as alternatives. Created a labeled image/browser comparison outside the repo and CHARACTER-STYLE-SHORTLIST.md with primary sources, current prices, licences and animation/file support.
 - **Why:** make the cast substantially more stylized while preserving readable reactions and eight recognizable brand identities. A lower polygon count alone does not remove realistic adult proportions.
