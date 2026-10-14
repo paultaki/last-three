@@ -24,14 +24,14 @@ export function resolvePacts(g, names, results) {
   }
 }
 
-export async function runPacts(g, after) {
+export async function runPacts(g, after, rounds = PACT_ROUNDS) {
   g.offers.clear();
   g.beginStage('pacts', `Pact window after ${after}.`);
-  for (let round = 1; round <= PACT_ROUNDS; round++) {
-    g.beginRound('pacts', round, PACT_ROUNDS);
+  for (let round = 1; round <= rounds; round++) {
+    g.beginRound('pacts', round, rounds);
     const names = g.aliveList();
     const results = await g.ask(names, name => ({
-      phase: 'pacts', roundsTotal: PACT_ROUNDS, stageState: { offers: [...g.offers].flatMap(([from, targets]) => [...targets].map(to => ({ from, to }))) },
+      phase: 'pacts', roundsTotal: rounds, stageState: { offers: [...g.offers].flatMap(([from, targets]) => [...targets].map(to => ({ from, to }))) },
       legalActions: pactActions(g, name), rules: pactRules(),
     }), () => 'wait');
     g.speak(names, results);
@@ -43,12 +43,12 @@ export async function runPacts(g, after) {
 }
 
 export async function runOpening(g) {
-  g.beginStage('opening', 'Eight rivals face the jury they will create.');
+  g.beginStage('opening', g.v6 ? 'Eight rivals. Only three will walk out.' : 'Eight rivals face the jury they will create.');
   g.beginRound('intro', 1, 1);
   const names = g.aliveList();
   const results = await g.ask(names, () => ({
     phase: 'intro', roundsTotal: 1, legalActions: ['speak'], allowBreak: false,
-    rules: 'Why are you here? Invent one sentence about what the prize means to you, at most 25 words in say. Remember that the eliminated jury will rank the final three.',
+    rules: g.v6 ? 'Why are you here? Invent one sentence about what surviving means to you, at most 25 words in say.' : 'Why are you here? Invent one sentence about what the prize means to you, at most 25 words in say. Remember that the eliminated jury will rank the final three.',
   }), () => 'speak');
   g.think(names, results);
   g.emitActions(names, results);

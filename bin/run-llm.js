@@ -114,8 +114,8 @@ export function degenerateAgents(tape) {
     .map(([name, r]) => ({ name, model: tape.players.find((p) => p.name === name)?.model ?? '?', ...r }));
 }
 
-export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() }) {
-  const { runGame, SEATS } = await import('../src/engine.js');
+export async function playLlmGame({ seed, models, ledger, id = allocateTapeId(), rules = 5, order }) {
+  const { runGame, SEATS } = await import(rules === 6 ? '../src/engine-v6.js' : '../src/engine.js');
   const { validateTape } = await import('../src/tape.js');
   const { makeRng } = await import('../src/rng.js');
   const seats = SEATS ?? FALLBACK_SEATS;
@@ -127,7 +127,7 @@ export async function playLlmGame({ seed, models, ledger, id = allocateTapeId() 
   const agents = Object.fromEntries(
     seats.map((name, i) => [name, createLlmAgent({ name, model: seated[i], ledger, gameId: id })]),
   );
-  const config = { id, createdAt: new Date().toISOString() };
+  const config = { id, createdAt: new Date().toISOString(), ...(order ? { order } : {}) };
   const tape = await runGame({ seed, agents, config });
   const capError = Object.values(agents).map((a) => a.capError()).find(Boolean);
   if (capError) throw new SpendCapError(`${capError.message}; tape ${id} discarded`, capError);

@@ -64,6 +64,7 @@ export function validateTape(tape) {
   if (!tape || typeof tape !== 'object') fail('Tape must be an object');
   validateHeader(tape);
   if (tape.rulesVersion === 5) { validateV5Tape(tape); validateUsage(tape.usage); return; }
+  if (tape.rulesVersion === 6) { validateV6Tape(tape); validateUsage(tape.usage); return; }
   const names = validatePlayers(tape.players);
   const deaths = validateEvents(tape.events, names);
   validateStartPlayers(tape);
@@ -437,4 +438,26 @@ function validateUsage(usage) {
   for (const key of ['inputTokens', 'outputTokens', 'usd', 'calls']) {
     if (!Number.isFinite(usage[key]) || usage[key] < 0) fail(`Invalid usage.${key}: must be a finite, non-negative number`);
   }
+}
+
+/** Rules v6: rooms until three remain, no jury. Checks structure, deaths and the final three. */
+function validateV6Tape(tape) {
+  if (!Array.isArray(tape.players) || tape.players.length !== PLAYER_COUNT) fail(`Must have exactly ${PLAYER_COUNT} players`);
+  const names = new Set(tape.players.map(p => p?.name));
+  if (names.size !== PLAYER_COUNT || tape.players.some(p => !p?.name || !p?.model)) fail('v6 players need distinct names and models');
+  if (!Array.isArray(tape.events) || !tape.events.length) fail('v6 tape has no events');
+  tape.events.forEach((e, k) => { if (e?.i !== k) fail(`v6 event ${k} has index ${e?.i}`); });
+  if (tape.events[0].type !== 'game_start' || tape.events.at(-1).type !== 'game_end') fail('v6 tape must start with game_start and end with game_end');
+  const dead = new Set();
+  for (const e of tape.events) {
+    if (e.type === 'death') {
+      if (!names.has(e.name) || dead.has(e.name)) fail(`v6 death of ${e.name} is unknown or repeated`);
+      dead.add(e.name);
+    }
+    if (['jury_box_enter', 'jury_ballot', 'vote_reveal'].includes(e.type)) fail(`v6 tape has jury/vote event ${e.type}`);
+  }
+  const survivors = tape.result?.survivors;
+  if (!Array.isArray(survivors) || survivors.length !== 3) fail('v6 must end with exactly three survivors');
+  for (const n of survivors) if (!names.has(n) || dead.has(n)) fail(`v6 survivor ${n} is unknown or dead`);
+  if (dead.size !== names.size - 3) fail('v6 deaths and survivors do not add up');
 }

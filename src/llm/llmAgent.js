@@ -118,7 +118,7 @@ export function createLlmAgent({ name, model, ledger, gameId, chatFn = chat, max
       const user = userPrompt({ ...view, watchedEvents: watched.splice(0) });
       const first = parseResponse(await askOrEmpty(system, user), view);
       if (first.response) return first.response;
-      const retry = parseResponse(await askOrEmpty(system, `${user}\n\n${view.rulesVersion === 5 ? REPAIR_NOTE.replace(', \"forge\": null', '') : REPAIR_NOTE}`), view);
+      const retry = parseResponse(await askOrEmpty(system, `${user}\n\n${view.rulesVersion >= 5 ? REPAIR_NOTE.replace(', \"forge\": null', '') : REPAIR_NOTE}`), view);
       if (retry.response) return retry.response;
       throw new Error(`${name} (${model}): unusable reply twice (${first.error}; ${retry.error})`);
     },

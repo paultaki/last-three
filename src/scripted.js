@@ -28,7 +28,7 @@ export function createScriptedAgents(seed, kinds, seats = ['Ash', 'Bex', 'Cole',
 function createBot(name, kind, rng) {
   const policy = POLICIES[kind];
   const epilogue = EPILOGUE[kind];
-  return { name, model: `scripted/${kind}`, act: (view) => (view.rulesVersion === 5 ? v5Bot(view, kind, rng) : view.stage === 'chalk' && epilogue ? epilogue(view, rng) : policy(view, rng)) };
+  return { name, model: `scripted/${kind}`, act: (view) => (view.rulesVersion >= 5 ? v5Bot(view, kind, rng) : view.stage === 'chalk' && epilogue ? epilogue(view, rng) : policy(view, rng)) };
 }
 
 const reply = (action, extra = {}) => ({ thought: '', say: null, whisper: null, forge: null, ...extra, action });
@@ -223,6 +223,13 @@ function v5Bot(v, kind, rng) {
     return answer(v.legalActions[0], { say: 'I made my choices openly. Judge what I did and what it cost.' });
   }
   if (v.stage === 'pit' && v.legalActions.includes('climb_last')) return answer('climb_last');
+  if (v.rulesVersion >= 6 && ['lever', 'cups', 'jackets', 'bomb', 'vault'].includes(v.stage)) {
+    const harm = v.legalActions.filter(x => /^(push_lever|poison|steal|pass|swap):/.test(x) || x === 'steal');
+    const pick = kind === 'saint' ? (v.legalActions.find(x => ['hold_lever', 'drink', 'sleep', 'split', 'wait'].includes(x)) ?? randomLegal(v, rng))
+      : kind === 'coward' ? (v.legalActions.find(x => ['guard', 'drink', 'split', 'wait'].includes(x)) ?? randomLegal(v, rng))
+      : harm.length && kind !== 'random' ? rng.pick(harm) : randomLegal(v, rng);
+    return answer(pick, { say: kind === 'liar' ? 'Trust me on this one.' : null });
+  }
   // Reuse the unchanged physical policies where the actions are shared with the historical game.
   if (kind === 'liar') {
     if (v.stage === 'bridge') return answer('hold');

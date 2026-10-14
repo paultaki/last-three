@@ -18,6 +18,8 @@ function readOptions() {
       'per-game-cap': { type: 'string' },
       concurrency: { type: 'string', default: '2' },
       tier: { type: 'string', default: 'cheap' },
+      rules: { type: 'string', default: '5' },
+      rotate: { type: 'boolean', default: false },
     },
   });
   const games = Number(values.games);
@@ -29,6 +31,8 @@ function readOptions() {
     startSeed,
     concurrency,
     tier: values.tier,
+    rules: Number(values.rules),
+    rotate: values.rotate,
     capUsd: values.cap === undefined ? undefined : Number(values.cap),
     perGameCapUsd: values['per-game-cap'] === undefined ? DEFAULT_PER_GAME_CAP_USD : Number(values['per-game-cap']),
   };
@@ -39,7 +43,15 @@ function readOptions() {
  * stops starting new games when the cap is reached or the next game is projected to exceed it.
  * @returns {Promise<{played: number, failed: number, stopped: string|null}>}
  */
-export async function runBatch({ games, startSeed, concurrency, ledger, models, tier = 'cheap', log = console.log }) {
+// v6 test batches rotate the room order so every room gets played while the cast is still big.
+export const V6_ROTATIONS = [
+  ['bridge', 'lever', 'cups', 'jackets', 'bomb', 'vault'],
+  ['vault', 'bomb', 'jackets', 'cups', 'lever', 'bridge'],
+  ['cups', 'jackets', 'vault', 'bomb', 'bridge', 'lever'],
+  ['jackets', 'bomb', 'bridge', 'vault', 'lever', 'cups'],
+];
+
+export async function runBatch({ games, startSeed, concurrency, ledger, models, tier = 'cheap', rules = 5, rotate = false, log = console.log }) {
   const costs = [];
   let next = 0;
   let inFlight = 0;
@@ -56,7 +68,8 @@ export async function runBatch({ games, startSeed, concurrency, ledger, models, 
     const seed = startSeed + index;
     const before = ledger.totals().usd;
     try {
-      const tape = await playLlmGame({ seed, models, ledger });
+      const order = rules === 6 && rotate ? V6_ROTATIONS[index % V6_ROTATIONS.length] : undefined;
+      const tape = await playLlmGame({ seed, models, ledger, rules, order });
       saveTape(tape, null, { tier });
       played += 1;
       costs.push(tape.usage.usd);

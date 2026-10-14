@@ -4,7 +4,7 @@
 
 import { makeRng } from './rng.js';
 import { POWERS, POWER_IDS, powerById } from './powers.js';
-import { v5CommonText, limitWords, WHISPER_WORD_LIMIT, LAST_WORDS_LIMIT, PACT_BREAK_REASONS, commonText, mapKnowledge, sanitizeChalkNotes } from './rules.js';
+import { v5CommonText, v6CommonText, limitWords, WHISPER_WORD_LIMIT, LAST_WORDS_LIMIT, PACT_BREAK_REASONS, commonText, mapKnowledge, sanitizeChalkNotes } from './rules.js';
 
 export const SEATS = ['Ash', 'Bex', 'Cole', 'Dara', 'Eli', 'Fenn', 'Gus', 'Hana'];
 export const TEXT_LIMIT = 280;
@@ -18,6 +18,10 @@ const DEATH_LINES = {
   chute: 'dropped through a trapdoor',
   tumble: 'tumbled off the ledge',
   sink: 'sank beneath the rising water',
+  poison: 'drank the poisoned cup',
+  blast: 'was blown up by the bomb',
+  drown: 'went down with the ship',
+  vault: 'lost at the vault',
 };
 
 // Never copy more of a hostile string than this before trimming and cutting it down.
@@ -106,6 +110,7 @@ export class Game {
       }
     }
     this.v5 = config.rulesVersion !== 4;
+    this.v6 = config.rulesVersion === 6;
     this.seed = seed;
     this.agents = agents;
     this.config = config;
@@ -128,7 +133,9 @@ export class Game {
     this.cursor = new Map(SEATS.map((s) => [s, 0]));
     this.inbox = new Map(SEATS.map((s) => [s, []]));
     this.power = this.v5 ? {} : this.#assignPowers(config.powers);
-    this.common = this.v5 ? v5CommonText(SEATS) : commonText(SEATS, this.chalk.length > 0);
+    this.common = this.v6 ? v6CommonText(SEATS) : this.v5 ? v5CommonText(SEATS) : commonText(SEATS, this.chalk.length > 0);
+    this.grudges = []; // v6: public record of who harmed whom
+    this.secrets = new Map(); // v6: name -> private knowledge lines set by the current room
     this.guide = null;
     this.pacts = new Map();
     this.offers = new Map();
@@ -222,8 +229,8 @@ export class Game {
   // ---- views and asking ----------------------------------------------------------------
 
   #knowledgeFor(name) {
-    if (this.v5) return name === this.guide && this.stage === 'bridge' && this.bridgeSafe
-      ? this.bridgeSafe.map((side, row) => `Row ${row + 1} safe side: ${side}`) : [];
+    if (this.v5) return [...(name === this.guide && this.stage === 'bridge' && this.bridgeSafe
+      ? this.bridgeSafe.map((side, row) => `Row ${row + 1} safe side: ${side}`) : []), ...(this.secrets.get(name) ?? [])];
     const id = this.power[name];
     const out = [];
     if (id === 'map') out.push(...mapKnowledge());
@@ -245,7 +252,7 @@ export class Game {
     return structuredClone({
       you: name,
       ...(this.v5 ? {
-        rulesVersion: 5, juryBox: [...this.juryBox],
+        rulesVersion: this.v6 ? 6 : 5, ...(this.v6 ? { grudges: this.grudges } : { juryBox: [...this.juryBox] }),
         pacts: [...this.pacts.values()], lifeDebts: this.lifeDebts,
         publicEvents: this.publicEvents.slice(since).slice(-LOG_LIMIT),
         ...(spec.dossier ? { dossier: spec.dossier } : {}),
@@ -474,11 +481,11 @@ export class Game {
     this.alive.delete(name);
     this.deaths.push({ name, stage: this.stage, cause, style });
     const death = this.emit('death', { name, cause, style, ...(place ? { place } : {}) });
-    if (this.v5) {
+    if (this.v5 && !this.v6) {
       this.juryBox.push(name);
       this.emit('jury_box_enter', { name, deathEvent: death.i });
-      this.pendingLastWords.push({ name, deathEvent: death.i });
     }
+    if (this.v5) this.pendingLastWords.push({ name, deathEvent: death.i });
     if (place) this.places.set(name, place);
     this.announce(`${name} ${DEATH_LINES[style]}.`);
   }
@@ -530,6 +537,14 @@ export class Game {
     return true;
   }
 
+  /** v6: a public, permanent record that `by` harmed `victim`. */
+  grudge(by, victim, how) {
+    if (!by || by === victim) return;
+    const entry = { by, victim, how, stage: this.stage };
+    this.grudges.push(entry);
+    this.emit('grudge', entry);
+  }
+
   debt(debtor, creditor, reason) {
     if (debtor === creditor) return;
     const debt = { debtor, creditor, reason };
@@ -543,7 +558,7 @@ export class Game {
       this.phase = 'last_words';
       const results = await this.ask([name], () => ({
         phase: 'last_words', roundsTotal: this.round ?? 1, allowBreak: false,
-        legalActions: ['speak'], rules: 'You have been eliminated and joined the jury. Give your last words to camera in say, at most 20 words.',
+        legalActions: ['speak'], rules: this.v6 ? 'You have been eliminated. Give your last words to camera in say, at most 20 words. Name names if you like.' : 'You have been eliminated and joined the jury. Give your last words to camera in say, at most 20 words.',
       }), () => 'speak');
       this.think([name], results);
       this.emitActions([name], results);
