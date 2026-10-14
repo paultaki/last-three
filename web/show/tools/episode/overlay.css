@@ -1,0 +1,120 @@
+/* Episode graphics layered over the clean film frame. */
+#ep {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  font-family: "Inter Display", "Arial Black", Arial, sans-serif;
+  container-type: inline-size;
+}
+#ep [hidden] {
+  display: none !important;
+}
+.ep-nobubble .speech-bubble,
+.ep-nobubble .speech-leader {
+  display: none !important;
+}
+.ep-counter {
+  position: absolute;
+  top: 8.5%;
+  left: 4%;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6cqw;
+  padding: 0.5cqw 1.3cqw 0.6cqw;
+  background: #f5c518;
+  color: #0b1218;
+  border-radius: 0.6cqw;
+  box-shadow: 0 0.5cqw 1.6cqw #0007;
+  transform: scale(var(--pop, 1));
+  transform-origin: top left;
+}
+.ep-counter.flash {
+  background: #ff3b30;
+  color: #fff;
+}
+.ep-counter b {
+  font-size: 3.4cqw;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.ep-counter span {
+  font-size: 1.3cqw;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+.ep-card {
+  position: absolute;
+  left: 4%;
+  bottom: 9%;
+  display: grid;
+  gap: 0.3cqw;
+  padding: 1.2cqw 2.2cqw 1.3cqw 1.6cqw;
+  background: #0b1218ee;
+  border-left: 0.6cqw solid #f5c518;
+  border-radius: 0.4cqw;
+  color: #fff;
+  transform: translateX(calc((1 - var(--in, 1)) * -120%));
+  opacity: var(--in, 1);
+}
+.ep-card strong {
+  font-size: 4.2cqw;
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.ep-card .ep-model {
+  justify-self: start;
+  font-size: 1.5cqw;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 0.15cqw 0.7cqw;
+  background: #fff;
+  color: #0b1218;
+  border-radius: 0.3cqw;
+}
+.ep-card em {
+  font-style: normal;
+  font-size: 1.9cqw;
+  font-weight: 800;
+  color: #f5c518;
+  letter-spacing: 0.06em;
+}
+.ep-title,
+.ep-black {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.ep-title {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: radial-gradient(circle at 50% 55%, #1b2a36, #000 70%);
+  color: #fff;
+}
+.ep-title h1 {
+  margin: 0;
+  font-size: 11cqw;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  transform: scale(var(--grow, 1));
+  text-shadow: 0 0.6cqw 3cqw #000;
+}
+.ep-title h1::after {
+  content: "";
+  display: block;
+  height: 0.7cqw;
+  margin: 1.6cqw auto 0;
+  width: 40%;
+  background: #f5c518;
+}
+.ep-title p {
+  margin: 2cqw 0 0;
+  font-size: 2cqw;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #f5c518;
+}

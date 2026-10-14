@@ -6,6 +6,7 @@ import {
 } from "./cinematography.js";
 import { contextBeat, finalists } from "./performance.js";
 import { consequence } from "./direction.js";
+import { episode } from "./episode.js";
 import {
   visibleActor,
   isStepWorthy,
@@ -54,10 +55,11 @@ export function dialogue(s, cut) {
   if (["thought", "whisper"].includes(e.type) && !cut) return null;
   const name = visibleActor(s, cut);
   if (!name || !e.text) return null;
+  const text = episode.lines.get(s.i) ?? String(e.text);
   return {
     name,
-    text: String(e.text),
-    pages: passages(e.text),
+    text,
+    pages: passages(text),
     kind: e.type,
     label:
       e.type === "thought"

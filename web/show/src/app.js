@@ -4,6 +4,7 @@ import { direction, directedList } from "./direction.js";
 import { FilmOverlay, filmDuration, editList } from "./film.js";
 import { Arena } from "./scene.js";
 import { Score } from "./audio.js";
+import { setEpisode } from "./episode.js";
 import {
   stateAt,
   chapters,
@@ -471,6 +472,13 @@ async function init() {
   window.__show = {
     seek,
     load,
+    episode: (config) => {
+      setEpisode(config);
+      seek(index);
+    },
+    director: (on) => {
+      if (cut !== !!on) $("director").click();
+    },
     preview: (ms) => {
       playing = false;
       previewFrozen = true;

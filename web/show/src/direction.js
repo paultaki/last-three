@@ -1,4 +1,5 @@
 import { isStepWorthy } from "../../lib/state.js";
+import { episode } from "./episode.js";
 // Editorial context comes from earlier recorded events, never invented dialogue.
 export const FEATURE_TAPE = "20261009-0025";
 const receipts = {
@@ -73,7 +74,7 @@ export function direction(tape, s, cut) {
     s.stage === "pit" && [378, 434, 436, 440, 443, 445].includes(s.i);
   const r = receipts[s.i],
     match = expected[s.i];
-  if (r && e.type === match[0] && e.name === match[1]) {
+  if (r && !episode.active && e.type === match[0] && e.name === match[1]) {
     const source = tape.events[r[0]];
     const privateSource = ["thought", "whisper"].includes(source?.type);
     if (
