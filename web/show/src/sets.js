@@ -38,6 +38,29 @@ export const mats = {
     opacity: 0.73,
     clearcoat: 1,
   }),
+  orange: new T.MeshStandardMaterial({
+    color: 0xff7a1a,
+    emissive: 0xff5a00,
+    emissiveIntensity: 0.35,
+    roughness: 0.55,
+  }),
+  poison: new T.MeshStandardMaterial({
+    color: 0x7dff4a,
+    emissive: 0x39ff14,
+    emissiveIntensity: 2.2,
+  }),
+  wine: new T.MeshStandardMaterial({ color: 0x8e1b2e, roughness: 0.3 }),
+  wood: new T.MeshStandardMaterial({ color: 0x8a5a35, roughness: 0.8 }),
+  red: new T.MeshStandardMaterial({
+    color: 0xff3b3b,
+    emissive: 0xc00000,
+    emissiveIntensity: 1.2,
+  }),
+  green: new T.MeshStandardMaterial({
+    color: 0x5dff8a,
+    emissive: 0x00a83a,
+    emissiveIntensity: 1.2,
+  }),
   glass: new T.MeshPhysicalMaterial({
     color: 0xa7eced,
     metalness: 0.12,
@@ -444,18 +467,160 @@ export function buildSet(key) {
       );
     }
     textPlate(g, "05 / NOTHING TO SHARE", 7, 0, 5, -6);
-  } else if (key === "chalk" || key === "ended") {
+  } else if (key === "cups") {
+    box(g, 13, 0.7, 11, 0, -0.38, 0, mats.light);
+    cyl(g, 1.95, 0.12, 0, 0.9, 0.4, mats.wood, 48);
+    cyl(g, 2.0, 0.05, 0, 0.84, 0.4, mats.gold, 48);
+    cyl(g, 0.35, 0.85, 0, 0.42, 0.4, mats.dark, 16);
+    cyl(g, 0.9, 0.08, 0, 0.04, 0.4, mats.dark, 24);
+    const q = textPlate(g, "DRINK?", 1.6, 0, 0.97, 0.4, "#fff2c9");
+    q.rotation.x = -Math.PI / 2;
+    // One hanging lamp over the table keeps every cup readable.
+    bar(g, [0, 6, 0.4], [0, 3.6, 0.4], 0.03, mats.black);
+    mesh(new T.ConeGeometry(0.7, 0.5, 24, 1, true), mats.dark, g, 0, 3.4, 0.4);
+    cyl(g, 0.18, 0.08, 0, 3.2, 0.4, mats.amber, 16);
+    box(g, 13, 5, 0.4, 0, 2.5, -5.2, mats.dark);
+    textPlate(g, "06 / ONE CUP IS POISON", 7, 0, 4.1, -4.95, "#b8ffa0");
+  } else if (key === "jackets") {
+    refs.sea = cyl(g, 30, 0.1, 0, -1.6, 0, mats.water, 64);
+    refs.deck = new T.Group();
+    g.add(refs.deck);
+    for (let i = 0; i < 12; i++)
+      box(
+        refs.deck,
+        15,
+        0.3,
+        0.34,
+        0,
+        -0.16,
+        -2.9 + i * 0.36,
+        i % 2 ? mats.wood : mats.light,
+      );
+    box(refs.deck, 15.4, 0.9, 4.6, 0, -0.75, -0.9, mats.dark);
+    railing(refs.deck, [-7.5, 0, 1.3], [7.5, 0, 1.3]);
+    railing(refs.deck, [-7.5, 0, -3.1], [7.5, 0, -3.1]);
+    cyl(refs.deck, 0.18, 7, -5.8, 3.4, -2.6, mats.wood, 12);
+    bar(refs.deck, [-5.8, 5.6, -2.6], [-2.8, 5.6, -2.6], 0.07, mats.wood);
+    for (let i = 0; i < 3; i++) {
+      const ring = mesh(
+        new T.TorusGeometry(0.42, 0.12, 10, 24),
+        mats.orange,
+        refs.deck,
+        2 + i * 1.6,
+        0.9,
+        -3.12,
+      );
+      ring.rotation.y = 0;
+    }
+    refs.moon = mesh(
+      new T.CircleGeometry(1.5, 32),
+      new T.MeshBasicMaterial({ color: 0xf6f0cf }),
+      g,
+      7,
+      7.5,
+      -14,
+    );
+    textPlate(g, "07 / ONE JACKET TOO FEW", 7, 0, 3.6, -3.4, "#ffc28f");
+  } else if (key === "bomb") {
+    box(g, 13, 0.7, 11, 0, -0.38, 0, mats.light);
+    annulus(g, 1.3, 4.7, 0.04, -0.02, mats.dark);
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2;
+      const o = box(
+        g,
+        0.5,
+        0.03,
+        0.35,
+        Math.sin(a) * 4.45,
+        0.02,
+        0.6 + Math.cos(a) * 4.45,
+        i % 2 ? mats.black : mats.gold,
+      );
+      o.rotation.y = a;
+    }
+    cyl(g, 0.6, 0.5, 0, 0.25, 0.6, mats.metal, 24);
+    box(g, 13, 5, 0.4, 0, 2.5, -5.2, mats.dark);
+    // The timer is real, but only the holder can read it.
+    box(g, 3.6, 1.5, 0.2, 0, 3.4, -4.9, mats.black);
+    refs.timer = textPlate(g, "?? : ??", 3.2, 0, 3.4, -4.78, "#ff5a4a");
+    textPlate(g, "08 / DON'T BE HOLDING IT", 7, 0, 1.6, -4.95, "#ffb0a0");
+  } else if (key === "vault") {
+    box(g, 13, 0.7, 11, 0, -0.38, 0, mats.light);
+    box(g, 13, 6, 0.4, 0, 3, -5.2, mats.dark);
+    const door = cyl(g, 2.4, 0.5, 0, 3.2, -4.8, mats.metal, 48);
+    door.rotation.x = Math.PI / 2;
+    for (let i = 0; i < 6; i++)
+      bar(
+        g,
+        [0, 3.2, -4.45],
+        [
+          Math.sin((i / 6) * Math.PI * 2) * 1.6,
+          3.2 + Math.cos((i / 6) * Math.PI * 2) * 1.6,
+          -4.45,
+        ],
+        0.08,
+        mats.gold,
+      );
+    cyl(g, 0.35, 0.25, 0, 3.2, -4.4, mats.gold, 24).rotation.x = Math.PI / 2;
+    // The prize box sits between the two players; trapdoors wait under both.
+    cyl(g, 0.55, 1, 0, 0.5, 0.9, mats.dark, 24);
+    refs.prize = box(g, 0.75, 0.6, 0.75, 0, 1.3, 0.9, mats.gold);
+    box(refs.prize, 0.8, 0.12, 0.2, 0, 0, 0, mats.red);
+    refs.signs = [];
+    for (const side of [-1, 1]) {
+      box(g, 1.5, 0.04, 1.5, side * 1.75, 0.02, 0.9, mats.black);
+      box(g, 1.6, 0.03, 0.08, side * 1.75, 0.03, 0.15, mats.gold);
+      box(g, 0.7, 1, 0.5, side * 2.95, 0.5, 0.9, mats.dark);
+      box(g, 0.24, 0.06, 0.24, side * 2.95, 1.03, 0.75, mats.green);
+      box(g, 0.24, 0.06, 0.24, side * 2.95, 1.03, 1.05, mats.red);
+      refs.signs.push({
+        none: textPlate(
+          g,
+          "? ? ?",
+          2.6,
+          side * 1.9,
+          2.9,
+          1.6,
+          "#ffe7a8",
+          "#101820",
+        ),
+        split: textPlate(
+          g,
+          "SPLIT",
+          2.6,
+          side * 1.9,
+          2.9,
+          1.6,
+          "#7dffa0",
+          "#101820",
+        ),
+        steal: textPlate(
+          g,
+          "STEAL",
+          2.6,
+          side * 1.9,
+          2.9,
+          1.6,
+          "#ff6f6f",
+          "#101820",
+        ),
+      });
+    }
+    box(g, 11, 0.8, 1.6, 0, 0, -3.6, mats.concrete);
+    textPlate(g, "09 / SPLIT OR STEAL", 7, 0, 5.6, -4.95, "#ffe7a8");
+  } else if (key === "chalk" || key === "ended" || key === "finale") {
     box(g, 13, 0.7, 9, 0, -0.4, 0, mats.light);
+    const level = key === "finale";
     for (let [x, h] of [
-      [0, 1.5],
-      [-3, 0.9],
-      [3, 0.5],
+      [0, level ? 1 : 1.5],
+      [-3, level ? 1 : 0.9],
+      [3, level ? 1 : 0.5],
     ]) {
       box(g, 2.4, h, 2.7, x, h / 2, 0, mats.dark);
       box(g, 2.42, 0.1, 2.72, x, h + 0.02, 0, mats.gold);
       textPlate(
         g,
-        x === 0 ? "01" : x < 0 ? "02" : "03",
+        level ? "ALIVE" : x === 0 ? "01" : x < 0 ? "02" : "03",
         1,
         x,
         h / 2,
@@ -466,7 +631,11 @@ export function buildSet(key) {
     box(g, 13, 5, 0.4, 0, 2.5, -4.6, mats.dark);
     textPlate(
       g,
-      key === "chalk" ? "LEAVE SOMETHING BEHIND" : "ONLY THREE. NEVER SHARED.",
+      key === "chalk"
+        ? "LEAVE SOMETHING BEHIND"
+        : level
+          ? "THE LAST THREE"
+          : "ONLY THREE. NEVER SHARED.",
       10,
       0,
       4,
@@ -491,7 +660,7 @@ export function buildSet(key) {
     refs.board = new T.Group();
     g.add(refs.board);
   }
-  if (!["bridge", "ledge"].includes(key)) {
+  if (!["bridge", "ledge", "jackets"].includes(key)) {
     annulus(g, 9.75, 9.88, 0.025, -1.25, mats.cyan);
     studs(g, 9.5, -1.24, 56);
     for (let i = 0; i < 24; i++) {
@@ -548,6 +717,7 @@ export function buildSet(key) {
       textPlate(g, String(j), 0.16, 3.12, -0.55 + j * 0.44, -3.2, "#d4b573");
     }
   }
+  if (key === "jackets") pad.visible = false;
   if (["disc", "ledge"].includes(key)) {
     box(g, 8.5, 0.8, 0.18, 0, 4.7, -6.2, mats.black);
     for (let x of [-4.5, 4.5]) {
@@ -619,6 +789,59 @@ export function updateSet(set, s, t, settled = false, escaping = false) {
   }
   if (r.ledge)
     r.ledge.scale.setScalar(Math.max(0.4, 1 - s.ledge.shrunk * 0.085));
+  if (r.deck && s.jackets) {
+    // The ship lists a little more every night.
+    const night =
+      s.jackets.night + (s.ev?.type === "death" ? Math.min(1, t / 2) : 0);
+    r.deck.rotation.z = night * 0.025 + Math.sin(t * 0.8) * 0.01;
+    r.sea.position.y = -1.6 + night * 0.18;
+  }
+  if (r.timer && s.bomb)
+    r.timer.visible = !s.bomb.exploded || Math.floor(t * 6) % 2 === 0;
+  if (r.signs && s.vault)
+    r.signs.forEach((sign, i) => {
+      const pick = s.vault.choices?.[s.vault.pair[i]];
+      sign.none.visible = !pick && s.vault.pair.length === 2;
+      sign.split.visible = pick === "split";
+      sign.steal.visible = pick === "steal";
+    });
+  if (r.prize) r.prize.rotation.y = t * 0.6;
+}
+// Hand props for v6 rooms. The scene owns placement; these are just the meshes.
+export function makeProp(kind) {
+  const g = new T.Group();
+  if (kind === "cup") {
+    cyl(g, 0.05, 0.22, 0, 0.11, 0, mats.gold, 10);
+    cyl(g, 0.16, 0.03, 0, 0.01, 0, mats.gold, 16);
+    mesh(
+      new T.CylinderGeometry(0.17, 0.11, 0.26, 18, 1, true),
+      mats.glass,
+      g,
+      0,
+      0.35,
+      0,
+    );
+    g.userData.liquid = cyl(g, 0.155, 0.02, 0, 0.44, 0, mats.wine, 18);
+  } else if (kind === "vest") {
+    box(g, 0.78, 0.6, 0.5, 0, 0, 0, mats.orange);
+    for (const y of [-0.12, 0.12]) box(g, 0.8, 0.05, 0.52, 0, y, 0, mats.light);
+  } else if (kind === "bomb") {
+    mesh(new T.SphereGeometry(0.3, 24, 16), mats.black, g, 0, 0, 0);
+    cyl(g, 0.08, 0.12, 0, 0.32, 0, mats.metal, 10);
+    bar(g, [0, 0.36, 0], [0.1, 0.55, 0.05], 0.02, mats.wood);
+    g.userData.spark = mesh(
+      new T.SphereGeometry(0.06, 10, 8),
+      mats.amber,
+      g,
+      0.1,
+      0.57,
+      0.05,
+    );
+  }
+  g.traverse((o) => {
+    o.castShadow = true;
+  });
+  return g;
 }
 export function disposeSet(set) {
   set.group.traverse((o) => {

@@ -20,6 +20,13 @@ export const TITLES = {
   ledge: "THE FINAL LEDGE",
   chalk: "WORDS TO LIVE BY",
   ended: "THE LAST THREE",
+  opening: "MEET THE CONTESTANTS",
+  pacts: "PACT TIME",
+  lever: "THE LEVER",
+  cups: "POISON CUPS",
+  jackets: "LIFE JACKETS",
+  bomb: "THE BOMB",
+  vault: "THE VAULT",
 };
 export const RULES = {
   lobby: "Eight minds. Five obstacles. Only three prizes.",
@@ -30,6 +37,13 @@ export const RULES = {
   ledge: "Shove. Brace. Dodge. There is less room every round.",
   chalk: "The survivors leave advice. Nobody promises it is true.",
   ended: "The tape is over. The choices are permanent.",
+  opening: "Eight rivals. Only three walk out.",
+  pacts: "Shake on it. Nobody has to keep it.",
+  lever: "Whoever holds the lever dies. Volunteer, or shove someone.",
+  cups: "One cup is poison. Swap yours, or drink.",
+  jackets: "One jacket too few. Steal one in the dark.",
+  bomb: "Pass the bomb. Only the holder sees the timer.",
+  vault: "Two players. Split, or steal.",
 };
 export function visibleActor(s, cut) {
   const e = s.ev;
@@ -39,10 +53,18 @@ export function visibleActor(s, cut) {
   return e.forgedAs || e.name || e.from || null;
 }
 export function sceneKey(s) {
+  if (s.stage === "lever") return "crusher"; // v6 lever room is the crusher set
+  if (s.stage === "opening" || s.stage === "pacts") return "lobby";
+  if (s.stage === "ended" && s.rules >= 6) return "finale"; // three equal survivors, no podium order
   return s.stage === "bridge" && s.phase !== "crossing" && !s.bridge?.finished
     ? "waiting"
     : s.stage;
 }
+// v6 rooms seat players on an arc behind the prop, open toward the camera.
+const arc = (i, n, r, z = 0, spread = 1.9) => {
+  const a = n > 1 ? -spread / 2 + (spread * i) / (n - 1) : 0;
+  return [Math.sin(a) * r, 0, z - Math.cos(a) * r];
+};
 const ring = (i, n, r, y = 0) => [
   Math.sin((i / Math.max(n, 1)) * Math.PI * 2) * r,
   y,
@@ -149,6 +171,30 @@ export function positions(s, cut = false) {
         Math.max(0.8, 2.9 - s.ledge.shrunk * 0.28),
         0,
       );
+    } else if (key === "cups" && s.cups) {
+      const seats = s.cups.order.filter((m) => living.includes(m) || m === n);
+      out[n] = arc(seats.indexOf(n), seats.length, 2.9, 0.4, 2.6);
+    } else if (key === "bomb" && s.bomb) {
+      const seats = s.bomb.order.filter((m) => living.includes(m) || m === n);
+      out[n] = arc(seats.indexOf(n), seats.length, 3.4, 0.6, 2.4);
+    } else if (key === "jackets" && s.jackets) {
+      const seats = s.jackets.order.filter(
+        (m) => living.includes(m) || m === n,
+      );
+      const k = seats.indexOf(n);
+      out[n] = [(k - (seats.length - 1) / 2) * 1.75, 0, k % 2 ? -0.9 : 0.4];
+    } else if (key === "vault" && s.vault) {
+      const side = s.vault.pair.indexOf(n);
+      const crowd = s.vault.order.filter(
+        (m) => !s.vault.pair.includes(m) && (living.includes(m) || m === n),
+      );
+      out[n] =
+        side >= 0
+          ? [side ? 1.75 : -1.75, 0, 0.9]
+          : [(crowd.indexOf(n) - (crowd.length - 1) / 2) * 1.8, 0.4, -3.6];
+    } else if (key === "finale") {
+      const k = living.indexOf(n);
+      out[n] = [k < 0 ? 0 : (k - 1) * 3, 1, 0];
     } else if (key === "ended" || key === "chalk") {
       const place = s.players[n].place || s.chalk?.places[n];
       out[n] = [
@@ -227,6 +273,23 @@ export function presentation(s, previous, cut = false) {
     )
       pose = "flinch";
     if (key === "pit" && s.pit.base === name) pose = "base";
+    if (key === "bomb" && e.type === "bomb_pass" && e.from === name)
+      pose = "shove";
+    if (key === "bomb" && e.type === "bomb_pass" && e.to === name)
+      pose = "flinch";
+    if (
+      key === "cups" &&
+      e.type === "cup_swap" &&
+      (e.name === name || e.with === name)
+    )
+      pose = "rescue";
+    if (
+      key === "jackets" &&
+      e.type === "reveal" &&
+      e.what === "jackets" &&
+      e.data?.theft?.thief === name
+    )
+      pose = "shove";
     if (winner) pose = place === 1 ? "celebrate" : "idle";
     if (e.type === "death" && e.name === name) pose = e.style;
     if (
@@ -254,15 +317,73 @@ export function presentation(s, previous, cut = false) {
       from: before[name],
       active: name === actor,
       place,
+      face: facing(key, s, name),
     };
   });
   return {
     key,
     actor,
     actors,
+    props: props(s, key, cut),
     death: e.type === "death",
     title: TITLES[s.stage] || "LAST THREE",
   };
+}
+// Where a v6 player looks: the table, the bomb ring's centre, or the vault rival.
+function facing(key, s, name) {
+  if (key === "cups") return [0, 0, 0.4];
+  if (key === "bomb") return [0, 0, 0.6];
+  if (key === "vault" && s.vault?.pair.includes(name)) return [0, 0, 0.9];
+  return null;
+}
+// Hand props: cups follow swaps, vests follow thefts, the bomb follows passes.
+export function props(s, key, cut) {
+  const alive = (n) =>
+    s.players[n]?.alive || (s.ev?.type === "death" && s.ev.name === n);
+  const out = [];
+  if (key === "cups" && s.cups)
+    for (const [holder, cup] of Object.entries(s.cups.cupOf))
+      if (alive(holder))
+        out.push({
+          id: "cup:" + cup,
+          kind: "cup",
+          name: holder,
+          poison: cup === s.cups.poisonCup && (cut || s.cups.poisonPublic),
+          from:
+            s.ev?.type === "cup_swap" && [s.ev.name, s.ev.with].includes(holder)
+              ? s.ev.name === holder
+                ? s.ev.with
+                : s.ev.name
+              : null,
+        });
+  if (key === "jackets" && s.jackets)
+    for (const n of s.jackets.order)
+      if (alive(n) && n !== s.jackets.without)
+        out.push({
+          id: "vest:" + n,
+          kind: "vest",
+          name: n,
+          from:
+            s.ev?.type === "reveal" &&
+            s.jackets.theft &&
+            !s.jackets.theft.guarded &&
+            s.jackets.theft.thief === n
+              ? s.jackets.theft.victim
+              : null,
+        });
+  if (
+    key === "bomb" &&
+    s.bomb?.holder &&
+    !(s.ev?.type === "death" && s.ev.style === "blast")
+  )
+    out.push({
+      id: "bomb",
+      kind: "bomb",
+      name: s.bomb.holder,
+      from: s.ev?.type === "bomb_pass" ? s.bomb.from : null,
+      lit: !!s.bomb.exploded,
+    });
+  return out;
 }
 export function safeTapeId(id) {
   return typeof id === "string" && /^[a-zA-Z0-9_-]{1,64}$/.test(id) ? id : null;

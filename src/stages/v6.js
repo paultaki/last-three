@@ -74,14 +74,13 @@ export async function runCups(g) {
     const target = poured[pourer].action.slice(7);
     g.emit('cup_poured', { name: pourer, target, valid: poured[pourer].valid, visibility: 'private' });
     g.secrets.set(pourer, [`You put the poison in ${target}'s cup.`]);
-    breakIfPartner(g, pourer, target, 'poison');
 
     g.beginRound('swap', 1, 1);
     const names = g.aliveList();
     const results = await turn(g, names, 'swap', name => ['drink', ...others(g, name).map(n => `swap:${n}`)],
       () => 'drink', cupsRules('swap', pourer), { pourer });
     let holder = target, handedBy = pourer;
-    const swaps = [];
+    const swaps = [], betrayals = [];
     for (const name of g.rng.shuffle(names.filter(n => results[n].action.startsWith('swap:')))) {
       const other = results[name].action.slice(5);
       swaps.push({ name, with: other });
@@ -89,13 +88,16 @@ export async function runCups(g) {
       if (holder === name) {
         holder = other;
         handedBy = name; // the swapper pushed the poison onto `other`
-        breakIfPartner(g, name, other, 'cup_swap');
+        betrayals.push([name, other]);
       } else if (holder === other) {
         holder = name;
         handedBy = null; // `name` took the poison themselves
       }
     }
     g.emit('reveal', { what: 'cups', data: { pourer, poisoned: target, swaps, victim: holder } });
+    // Breaking pacts any earlier would announce where the poison is.
+    breakIfPartner(g, pourer, target, 'poison');
+    for (const [by, victim] of betrayals) breakIfPartner(g, by, victim, 'cup_swap');
     if (handedBy) g.grudge(handedBy, holder, handedBy === pourer ? 'poison' : 'cup_swap');
     g.eliminate([holder], { cause: 'poison', style: 'poison', luckyWhy: 'the poison was too weak' });
     await g.finishEliminations();
@@ -125,13 +127,13 @@ export async function runJackets(g) {
         const victim = action.slice(6);
         const guarded = results[victim].action === 'guard';
         theft = { thief: bare, victim, guarded };
-        if (!guarded) {
-          g.grudge(bare, victim, 'steal_jacket');
-          breakIfPartner(g, bare, victim, 'steal_jacket');
-          bare = victim;
-        }
+        if (!guarded) bare = victim;
       }
       g.emit('reveal', { what: 'jackets', data: { night, theft, without: bare } });
+      if (theft && !theft.guarded) {
+        g.grudge(theft.thief, theft.victim, 'steal_jacket');
+        breakIfPartner(g, theft.thief, theft.victim, 'steal_jacket');
+      }
     }
     g.eliminate([bare], { cause: 'drowned', style: 'drown', luckyWhy: 'a floating crate' });
     await g.finishEliminations();

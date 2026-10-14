@@ -13,7 +13,12 @@ import {
 import { contactBeat, deathProgress } from "./direction.js";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { BONE_ALIASES, loadIthappySeat, setExpression, expressionFor } from "./ithappy.js";
+import {
+  BONE_ALIASES,
+  loadIthappySeat,
+  setExpression,
+  expressionFor,
+} from "./ithappy.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
@@ -21,6 +26,7 @@ import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import {
   buildSet,
+  makeProp,
   updateSet,
   disposeSet,
   mats,
@@ -188,7 +194,11 @@ export class Arena {
       let rig,
         faces = null;
       if (ithappy) {
-        ({ rig, faces } = await loadIthappySeat(loader, "assets/ithappy/", ithappy.seats[i]));
+        ({ rig, faces } = await loadIthappySeat(
+          loader,
+          "assets/ithappy/",
+          ithappy.seats[i],
+        ));
         puppet.add(rig);
         rig.updateMatrixWorld(true);
         const b = new T.Box3().setFromObject(rig);
@@ -269,7 +279,8 @@ export class Arena {
   setState(s, prev, cut) {
     this.state = s;
     for (const [k, member] of this.cast.entries())
-      if (member.faces) setExpression(member, expressionFor(s, s.order?.[k], cut));
+      if (member.faces)
+        setExpression(member, expressionFor(s, s.order?.[k], cut));
     this.prev = prev;
     this.view = presentation(s, prev, cut);
     if (this.film) this.view = blockFilm(this.view, s, prev);
@@ -423,6 +434,72 @@ export class Arena {
     }
     if (a.active) this.rotate(c, "head", Y, Math.sin(t * 2) * 0.12);
   }
+  // v6 hand props ride on their holders; a prop changing hands travels during the beat.
+  placeProps(v, p, t) {
+    const set = this.set;
+    set.props ??= new Map();
+    const seen = new Set();
+    const spot = (name, kind) => {
+      const c = this.cast[this.state.order.indexOf(name)];
+      if (!c) return null;
+      const at = c.group.position.clone();
+      const yaw = c.group.rotation.y;
+      if (kind === "cup") {
+        // On the table edge in front of the holder.
+        const dir = new T.Vector3(-at.x, 0, 0.4 - at.z).normalize();
+        return {
+          at: new T.Vector3(0, 0.96, 0.4).addScaledVector(dir, -1.6),
+          yaw,
+        };
+      }
+      if (kind === "vest")
+        return {
+          at: at.add(new T.Vector3(0, c.puppet.position.y + 1.18, 0)),
+          yaw,
+          follow: c,
+        };
+      return {
+        at: at.add(
+          new T.Vector3(Math.sin(yaw) * 0.55, 1.25, Math.cos(yaw) * 0.55),
+        ),
+        yaw,
+      };
+    };
+    for (const prop of v.props || []) {
+      let o = set.props.get(prop.id);
+      if (!o) {
+        o = makeProp(prop.kind);
+        set.props.set(prop.id, o);
+        set.group.add(o);
+      }
+      seen.add(prop.id);
+      const to = spot(prop.name, prop.kind);
+      if (!to) {
+        o.visible = false;
+        continue;
+      }
+      o.visible = true;
+      const from =
+        prop.from && !this.reduced ? spot(prop.from, prop.kind) : null;
+      o.position.copy(from ? from.at.clone().lerp(to.at, p) : to.at);
+      if (from)
+        o.position.y +=
+          Math.sin(p * Math.PI) * (prop.kind === "bomb" ? 1.6 : 0.4);
+      o.rotation.set(0, to.yaw, 0);
+      if (to.follow) {
+        o.scale.set(to.follow.puppet.scale.x, to.follow.puppet.scale.y, 1);
+        o.rotation.x = to.follow.puppet.rotation.x;
+        o.rotation.z = to.follow.puppet.rotation.z;
+      }
+      if (o.userData.liquid)
+        o.userData.liquid.material = prop.poison ? mats.poison : mats.wine;
+      if (o.userData.spark)
+        o.userData.spark.scale.setScalar(
+          prop.lit ? 3 : 1 + 0.4 * Math.sin(t * 20),
+        );
+    }
+    for (const [id, o] of set.props) if (!seen.has(id)) o.visible = false;
+  }
   render(seconds = 0, beatMs = seconds * 1000) {
     if (!this.view || this.cast.length < 8) return;
     this.renderer.info.reset();
@@ -505,6 +582,11 @@ export class Arena {
           : v.key === "ledge"
             ? Math.atan2(-a.position[0], -a.position[2])
             : 0.12;
+      if (a.face)
+        c.group.rotation.y = Math.atan2(
+          a.face[0] - a.position[0],
+          a.face[2] - a.position[2],
+        );
       if (v.key === "crusher" && a.pose === "hold")
         c.group.rotation.y = Math.PI;
       if (v.key === "crusher" && a.pose === "walk" && a.position[2] < -4.9) {
@@ -723,6 +805,21 @@ export class Arena {
         c.puppet.rotation.z = p * (a.pose === "chute" ? 6 : 2);
         if (a.pose === "tumble") c.group.position.x += p * 2.5;
       }
+      if (a.pose === "poison") {
+        c.puppet.rotation.x = -p * 1.45;
+        c.group.position.y -= p * 0.15;
+      }
+      if (a.pose === "drown") {
+        c.group.position.z += p * 2.2;
+        c.group.position.y -= p * p * 3.2;
+        c.puppet.rotation.x = p * 0.9;
+      }
+      if (a.pose === "blast") {
+        c.group.position.y += Math.sin(p * Math.PI) * 3;
+        c.group.position.x += p * 3;
+        c.puppet.rotation.z = p * 7;
+      }
+      if (a.pose === "vault") c.group.position.y -= p * p * 5;
       c.ring.material.opacity = a.active ? 0.95 : 0.32;
       c.ring.scale.setScalar(a.active ? 1.15 : 1);
       c.ring.visible = !this.film && (!v.death || !a.active);
@@ -734,6 +831,7 @@ export class Arena {
       label.classList.toggle("speaking", a.active);
       label.hidden = this.film || !a.visible || (v.death && a.active);
     });
+    this.placeProps(v, p, t);
     if (this.film) {
       this.set.group.updateMatrixWorld(true);
       v.actors.forEach((a) => {
@@ -836,7 +934,7 @@ export class Arena {
       eye = [10, 9, 17];
       target = [0, 1, 0];
     }
-    if (["ended", "chalk"].includes(v.key)) {
+    if (["ended", "chalk", "finale"].includes(v.key)) {
       eye = [8, 7, 17];
       target = [0, 1.7, 0];
     }
@@ -944,7 +1042,7 @@ export class Arena {
         return {
           name: a.name,
           label: podium.some((p) => p.name === a.name)
-            ? `${["", "1ST", "2ND", "3RD"][a.place]} · ${a.name}`
+            ? `${v.key === "finale" ? "ALIVE" : ["", "1ST", "2ND", "3RD"][a.place]} · ${a.name}`
             : a.name,
           color: a.color,
           x: point.x * 0.5 + 0.5,

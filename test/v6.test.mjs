@@ -59,3 +59,14 @@ test('poison cup secrets stay private and the victim holds the poison', async ()
   const reveal = tape.events.find(e => e.type === 'reveal' && e.what === 'cups');
   assert.equal(tape.events.find(e => e.type === 'death' && e.stage === 'cups').name, reveal.data.victim);
 });
+
+test('nothing public between the pour and the reveal names the poisoned player', async () => {
+  for (let seed = 1; seed <= 30; seed++) {
+    const tape = await play(seed, ['cups', 'lever', 'jackets', 'bomb', 'vault', 'bridge']);
+    const pour = tape.events.findIndex(e => e.type === 'cup_poured');
+    const reveal = tape.events.findIndex(e => e.type === 'reveal' && e.what === 'cups');
+    const { name: pourer, target } = tape.events[pour];
+    for (const e of tape.events.slice(pour + 1, reveal))
+      if (e.type === 'pact_broken') assert(!(e.by === pourer && e.members.includes(target) && e.reason === 'poison'), `seed ${seed}`);
+  }
+});

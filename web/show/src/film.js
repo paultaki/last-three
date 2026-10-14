@@ -177,6 +177,11 @@ export function filmShot(view, state, cut, p, directing = {}, ms = 0) {
       return { eye: [6, 5, 7], target: [0, 0.3, 0] };
     if (view.key === "pit")
       return { eye: [6.5, 5.8, 8.4], target: [2.6, 2.2, -2.5] };
+    // Falls and overboard deaths keep the room in frame instead of chasing the body.
+    if (view.key === "vault")
+      return { eye: [5, 5.5, 10], target: [0, 0.6, 0.9] };
+    if (view.key === "jackets")
+      return { eye: [7, 4.5, 11], target: [0, 0, 0.5] };
     const [x, y, z] = actor.position;
     const down = ["shatter", "chute", "tumble"].includes(actor.pose)
       ? p * 2.5
@@ -218,8 +223,13 @@ export class FilmOverlay {
     this.context.querySelector("strong").textContent = context?.title || "";
     this.context.querySelector("p").textContent = context?.detail || "";
     this.finish.hidden = podium[0]?.place !== 1;
+    const firsts = podium.filter((p) => p.place === 1).map((p) => p.name);
     this.finish.querySelector("strong").textContent =
-      podium[0]?.place === 1 ? `${podium[0].name} wins.` : "";
+      firsts.length > 1
+        ? `${firsts.slice(0, -1).join(", ")} and ${firsts.at(-1)} survive.`
+        : firsts.length
+          ? `${firsts[0]} wins.`
+          : "";
     this.names.replaceChildren();
     this.evidence.hidden = true;
     this.outcome.hidden = true;

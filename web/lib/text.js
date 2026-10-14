@@ -10,9 +10,16 @@ export const STAGE_TITLES = {
   disc: 'The Trapdoor Disc',
   ledge: 'The Final Ledge',
   chalk: 'The Chalk Wall',
+  opening: 'Meet the Contestants',
+  pacts: 'Pact Time',
+  lever: 'The Lever',
+  cups: 'Poison Cups',
+  jackets: 'Life Jackets',
+  bomb: 'The Bomb',
+  vault: 'The Vault',
 };
 
-export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', pit: 'Pit', disc: 'Disc', ledge: 'Ledge', chalk: 'Chalk', results: 'Results', start: 'Start' };
+export const STAGE_SHORT = { bridge: 'Bridge', crusher: 'Crusher', pit: 'Pit', disc: 'Disc', ledge: 'Ledge', chalk: 'Chalk', lever: 'Lever', cups: 'Cups', jackets: 'Jackets', bomb: 'Bomb', vault: 'Vault', results: 'Results', start: 'Start' };
 
 export const POWER_NAMES = {
   glass_eye: 'Glass Eye',
@@ -104,9 +111,29 @@ const DEATH_LINES = {
     (n) => `${n} tumbled off the ledge`,
     (n) => `${n} took a long, slow bow into the dark`,
   ],
+  poison: [
+    (n) => `${n} drank the wrong cup`,
+    (n) => `${n} finished the drink and the game`,
+    (n) => `${n} should have checked the cup`,
+  ],
+  drown: [
+    (n) => `${n} went down with the ship`,
+    (n) => `${n} sank without a jacket`,
+    (n) => `${n} was left in the water`,
+  ],
+  blast: [
+    (n) => `${n} was holding the bomb at the wrong second`,
+    (n) => `${n} went up with the bomb`,
+    (n) => `${n} caught the bomb, and the blast`,
+  ],
+  vault: [
+    (n) => `${n} dropped through the vault floor`,
+    (n) => `${n} lost the vault, and everything else`,
+    (n) => `${n} fell for the split`,
+  ],
 };
 
-export const DEATH_ONOMATOPOEIA = { shatter: 'CRASH!', flatten: 'SPLAT!', chute: 'WHEEE!', tumble: 'BONK!', sink: 'GLUB!' };
+export const DEATH_ONOMATOPOEIA = { shatter: 'CRASH!', flatten: 'SPLAT!', chute: 'WHEEE!', tumble: 'BONK!', sink: 'GLUB!', poison: 'GULP!', drown: 'GLUB!', blast: 'BOOM!', vault: 'CLANG!' };
 
 export function deathCaption(name, style, key = 0, place) {
   const list = DEATH_LINES[style] || [(n) => `${n} is out`];
@@ -127,6 +154,12 @@ export function roundLabel(stage, phase, round, total) {
   if (stage === 'disc') return phase === 'swap' ? 'Round 2: swap tiles or wait' : 'Round 1: pick a tile';
   if (stage === 'ledge') return `Ledge, round ${round}`;
   if (stage === 'chalk') return 'Epilogue: a message for the next contestants';
+  if (stage === 'opening' || stage === 'pacts') return null;
+  if (stage === 'lever') return round === total ? `Last round: someone must take the lever` : `The ceiling drops (round ${round} of ${total || 3})`;
+  if (stage === 'cups') return phase === 'pour' ? 'The pourer chooses a cup' : 'Swap cups, or drink';
+  if (stage === 'jackets') return `Night ${round} of ${total || 3}`;
+  if (stage === 'bomb') return `Pass ${round}`;
+  if (stage === 'vault') return phase === 'choose' ? 'Split or steal?' : `The others talk (round ${round} of ${total || 2})`;
   return round != null ? `Round ${round}` : '';
 }
 
@@ -139,7 +172,21 @@ function actionText(ev, state) {
   if (ev.valid === false) {
     return { pub: null, cut: `${name} tried "${raw}" (not allowed, default used)` };
   }
+  const stage = ev.stage || (state && state.stage);
+  if (stage === 'cups' && verb === 'swap') return { pub: null, cut: `${name} reaches for ${arg}'s cup` };
+  if (stage === 'jackets' && verb === 'steal') return { pub: null, cut: `${name} creeps toward ${arg}'s jacket` };
+  if (stage === 'jackets' && verb === 'guard') return { pub: null, cut: `${name} stays awake to guard their jacket` };
+  if (stage === 'vault' && (verb === 'split' || verb === 'steal')) return { pub: null, cut: `${name} picks ${verb.toUpperCase()}` };
   switch (verb) {
+    case 'offer_pact':
+      return { pub: `${name} offers ${arg} a pact` };
+    case 'accept_pact':
+    case 'break_pact':
+    case 'speak':
+    case 'drink':
+    case 'sleep':
+    case 'pass':
+      return { pub: null, cut: null }; // their own events say what happened
     case 'volunteer':
       return { pub: `${name} volunteers for the front of the line` };
     case 'swap':
@@ -216,11 +263,13 @@ export function describeEvent(ev, next, prev) {
   switch (ev.type) {
     case 'game_start': {
       const n = Array.isArray(ev.players) ? ev.players.length : Object.keys(players).length;
+      if (next && next.rules >= 6) return { pub: `${n} contestants walk on. Only three walk out.`, kind: 'stage' };
       const count = next && next.rules >= 3 ? 'Five' : 'Four';
       return { pub: `${n} contestants walk on. ${count} obstacles. Three prizes. Nobody shares.`, kind: 'stage' };
     }
     case 'stage_start': {
       const title = STAGE_TITLES[ev.stage] || ev.stage;
+      if (ev.stage === 'pacts') return { pub: 'Pact time. Who do you trust now?', kind: 'stage' };
       return { pub: ev.note ? (String(ev.note).toLowerCase().includes(title.toLowerCase().replace(/^the /, '')) ? ev.note : `${title}: ${ev.note}`) : title, kind: 'stage' };
     }
     case 'round_start':
@@ -275,6 +324,45 @@ export function describeEvent(ev, next, prev) {
         }
         case 'pit':
           return d && typeof d === 'object' ? describePit(d, next, prev) : null;
+        case 'lever': {
+          if (!d || !d.holder) return { pub: 'Nobody takes the lever. The ceiling keeps coming.', kind: 'reveal' };
+          const pushers = d.pushes && Array.isArray(d.pushes[d.holder]) ? d.pushes[d.holder] : [];
+          const volunteered = Array.isArray(d.volunteers) && d.volunteers.includes(d.holder);
+          return { pub: volunteered ? `${d.holder} takes the lever. Everyone else lives.` : `${joinNames(pushers)} shove${pushers.length === 1 ? 's' : ''} ${d.holder} onto the lever.`, kind: 'reveal' };
+        }
+        case 'pourer':
+          return d && d.pourer ? { pub: `${d.pourer} pours the drinks. One cup is poison, and only ${d.pourer} knows which.`, kind: 'reveal' } : null;
+        case 'cups': {
+          if (!d || !d.victim) return null;
+          if (d.victim === d.poisoned) return { pub: `The poison was in ${d.victim}'s cup all along.`, kind: 'reveal' };
+          return { pub: `The poison was poured for ${d.poisoned}. After the swaps, ${d.victim} is holding it.`, kind: 'reveal' };
+        }
+        case 'jackets': {
+          if (!d) return null;
+          const t = d.theft;
+          if (!d.night) return d.without ? { pub: `${d.without} has no life jacket.`, kind: 'reveal' } : null;
+          if (t && t.guarded) return { pub: `Night ${d.night}: ${t.thief} reaches for ${t.victim}'s jacket, but ${t.victim} is awake.`, kind: 'reveal' };
+          if (t) return { pub: `Night ${d.night}: ${t.thief} steals ${t.victim}'s jacket in the dark!`, kind: 'reveal' };
+          return { pub: `Night ${d.night}: nobody steals. ${d.without} still has no jacket.`, kind: 'reveal' };
+        }
+        case 'bomb':
+          if (d && d.exploded) return { pub: `BOOM. ${d.passedBy ? `${d.passedBy} passed it, and the` : 'The'} bomb goes off on ${d.exploded}.`, kind: 'reveal' };
+          return d && d.holder ? { pub: `${d.holder} starts with the bomb. Only the holder sees the timer.`, kind: 'reveal' } : null;
+        case 'vault_pair': {
+          const pair = d && Array.isArray(d.pair) ? d.pair : [];
+          if (pair.length < 2) return null;
+          const why = d.why === 'revenge' ? ` ${pair[1]} hurt ${pair[0]} earlier.` : d.why === 'most_blood' ? ` ${pair[0]} has the most blood on their hands.` : '';
+          return { pub: `${pair[0]} and ${pair[1]} face off at the vault.${why}`, kind: 'reveal' };
+        }
+        case 'vault': {
+          const c = d && d.choices && typeof d.choices === 'object' ? d.choices : {};
+          const names = Object.keys(c);
+          if (names.length !== 2) return null;
+          const stealers = names.filter((n) => c[n] === 'steal');
+          if (!stealers.length) return { pub: 'Both split. Both walk away.', kind: 'reveal' };
+          if (stealers.length === 2) return { pub: 'Both steal. The vault takes them both.', kind: 'reveal' };
+          return { pub: `${stealers[0]} steals. ${names.find((n) => n !== stealers[0])} trusted them.`, kind: 'reveal' };
+        }
         default:
           return null;
       }
@@ -295,6 +383,28 @@ export function describeEvent(ev, next, prev) {
     }
     case 'lucky_save':
       return { pub: luckyText(ev), kind: 'lucky', name: ev.name };
+    case 'intro_motive':
+      return typeof ev.text === 'string' && ev.text.trim() ? { pub: `${ev.name}: ${q(ev.text.trim())}`, kind: 'say', name: ev.name } : null;
+    case 'last_words':
+      return typeof ev.text === 'string' && ev.text.trim() ? { pub: `${ev.name}'s last words: ${q(ev.text.trim())}`, kind: 'say', name: ev.name } : null;
+    case 'pact_formed': {
+      const m = Array.isArray(ev.members) ? ev.members : [];
+      return m.length === 2 ? { pub: `${m[0]} and ${m[1]} shake on a pact.`, kind: 'pact' } : null;
+    }
+    case 'pact_broken': {
+      const m = Array.isArray(ev.members) ? ev.members : [];
+      const other = m.find((n) => n !== ev.by);
+      if (!ev.by || !other) return null;
+      return { pub: ev.reason === 'explicit' ? `${ev.by} breaks the pact with ${other}.` : `${ev.by} betrayed a partner. The pact with ${other} is over.`, kind: 'pact', name: ev.by };
+    }
+    case 'grudge':
+      return { pub: null, cut: `${ev.victim} has a score to settle with ${ev.by}.`, kind: 'pact', name: ev.victim };
+    case 'cup_poured':
+      return { pub: null, cut: `${ev.name} secretly poisons ${ev.target}'s cup.`, kind: 'secret', name: ev.name };
+    case 'cup_swap':
+      return { pub: `${ev.name} swaps cups with ${ev.with}.`, kind: 'action', name: ev.name };
+    case 'bomb_pass':
+      return { pub: `${ev.from} passes the bomb to ${ev.to}.`, kind: 'action', name: ev.from };
     case 'death': {
       const style = ev.style || 'shatter';
       return { pub: deathCaption(ev.name, style, ev.i || 0, typeof ev.place === 'number' ? ev.place : null), kind: 'death', name: ev.name, style };
@@ -309,6 +419,7 @@ export function describeEvent(ev, next, prev) {
       return typeof ev.text === 'string' && ev.text.trim() ? { pub: `${ev.name} scratches a message for the next contestants: \u201c${ev.text.trim()}\u201d`, kind: 'chalk', name: ev.name } : null;
     case 'stage_end': {
       if (ev.stage === 'chalk') return { pub: 'The wall is done.', kind: 'stage' };
+      if (ev.stage === 'opening' || ev.stage === 'pacts') return null;
       const title = STAGE_TITLES[ev.stage] || ev.stage;
       const n = Array.isArray(ev.survivors) ? ev.survivors.length : null;
       return { pub: n == null ? `${title} cleared.` : `${title} cleared. ${n} left.`, kind: 'stage' };
@@ -316,6 +427,8 @@ export function describeEvent(ev, next, prev) {
     case 'game_end': {
       const places = Array.isArray(ev.places) ? ev.places.filter((p) => p && typeof p.place === 'number').sort((a, b) => a.place - b.place) : [];
       if (!places.length) return { pub: 'The game is over.', kind: 'end' };
+      const firsts = places.filter((p) => p.place === 1);
+      if (firsts.length > 1) return { pub: `${joinNames(firsts.map((p) => p.name))} are the last three.`, kind: 'end' };
       const [first] = places;
       return { pub: `${first.name} wins! ${places.map((p) => `${ordinal(p.place)} ${p.name}`).join(', ')}.`, kind: 'end' };
     }

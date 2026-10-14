@@ -4,6 +4,9 @@
 import { describeEvent } from './text.js';
 
 export const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+// Rules v6 rooms. The lever room reuses the crusher's state and set.
+export const V6_STAGES = ['lever', 'cups', 'jackets', 'bomb', 'vault'];
+const ROOMS = [...STAGES, ...V6_STAGES];
 export const EPILOGUE = 'chalk'; // rules v4: not an obstacle, so it is not in STAGES
 const CHALK_MAX = 3;
 const PIT_ROUNDS_DEFAULT = 5;
@@ -137,6 +140,11 @@ function initial(tape) {
     ropeCost: {},
     disc: null,
     ledge: null,
+    cups: null,
+    jackets: null,
+    bomb: null,
+    vault: null,
+    grudges: [],
     chalk: shown.length ? newChalk(shown) : null,
   };
 }
@@ -186,6 +194,20 @@ function newLedge(aliveList, players, ropeCost = {}, spent = {}) {
   }
   return { footing, shrinkIn: null, shrunk: 0 };
 }
+
+// Every cup starts in front of its owner; swaps move cups, and the poison stays in its cup.
+const newCups = (aliveList) => ({
+  order: aliveList.slice(),
+  pourer: null,
+  poisonCup: null, // private until the reveal: the show only paints it in Director's cut
+  poisonPublic: false,
+  cupOf: Object.fromEntries(aliveList.map((n) => [n, n])),
+  lastSwap: null,
+  victim: null,
+});
+const newJackets = (aliveList) => ({ order: aliveList.slice(), without: null, night: 0, total: null, guards: [], theft: null });
+const newBomb = (aliveList) => ({ order: aliveList.slice(), holder: null, from: null, passes: 0, exploded: null, total: null });
+const newVault = (aliveList) => ({ order: aliveList.slice(), pair: [], why: null, picked: {}, choices: null });
 
 const newPit = (aliveList) => ({
   total: PIT_ROUNDS_DEFAULT,
@@ -247,10 +269,14 @@ export function reduce(s, ev, idx, derivedInfo) {
       next.acts = {};
       next.speech = [];
       next.flash = null;
-      next.stageIdx = STAGES.indexOf(stage);
+      next.stageIdx = ROOMS.indexOf(stage);
       next.stageSurvivors = null;
       if (stage === 'bridge') next.bridge = newBridge(alive);
-      else if (stage === 'crusher') next.crusher = newCrusher();
+      else if (stage === 'crusher' || stage === 'lever') next.crusher = newCrusher();
+      else if (stage === 'cups') next.cups = newCups(alive);
+      else if (stage === 'jackets') next.jackets = newJackets(alive);
+      else if (stage === 'bomb') next.bomb = newBomb(alive);
+      else if (stage === 'vault') next.vault = newVault(alive);
       else if (stage === 'pit') next.pit = newPit(alive);
       else if (stage === 'disc') next.disc = newDisc(alive);
       else if (stage === 'ledge') next.ledge = newLedge(alive, s.players, s.ropeCost, s.spent);
@@ -286,7 +312,7 @@ export function reduce(s, ev, idx, derivedInfo) {
     }
 
     case 'round_start': {
-      if (ev.stage && ev.stage !== s.stage && STAGES.includes(ev.stage)) next.stage = ev.stage;
+      if (ev.stage && ev.stage !== s.stage && ROOMS.includes(ev.stage)) next.stage = ev.stage;
       next.phase = ev.phase || null;
       next.round = toNum(ev.round);
       next.roundsTotal = toNum(ev.roundsTotal);
@@ -313,6 +339,14 @@ export function reduce(s, ev, idx, derivedInfo) {
         next.bridge = b;
       } else if (next.stage === 'crusher' && s.crusher) {
         next.crusher = { ...s.crusher, holder: null, holdChosen: false, jam: false, door: false, deathsThisRound: 0 };
+      } else if (next.stage === 'lever' && s.crusher) {
+        // The ceiling drops a notch every round: 3, 2, then 1 on the forced final round.
+        const total = toNum(ev.roundsTotal) || 3;
+        next.crusher = { ...s.crusher, ceiling: Math.max(1, total + 1 - (toNum(ev.round) || 1)), holder: null, holdChosen: false };
+      } else if (next.stage === 'jackets' && s.jackets) {
+        next.jackets = { ...s.jackets, night: toNum(ev.round) || s.jackets.night + 1, total: toNum(ev.roundsTotal) || s.jackets.total, guards: [], theft: null };
+      } else if (next.stage === 'cups' && s.cups) {
+        next.cups = { ...s.cups, lastSwap: null };
       } else if (next.stage === 'pit' && s.pit) {
         const total = toNum(ev.roundsTotal);
         next.pit = { ...s.pit, total: total || s.pit.total, baseNew: false, lifted: [], roped: null, rescued: null, pushFail: null, floated: [] };
@@ -363,11 +397,38 @@ export function reduce(s, ev, idx, derivedInfo) {
       if (s.stage === 'bridge' && s.bridge) applyBridgeAction(next, s, name, verb, arg, ev, idx, d);
       else if (s.stage === 'crusher' && s.crusher) applyCrusherAction(next, s, name, verb, arg);
       else if (s.stage === 'disc' && s.disc) applyDiscAction(next, s, name, verb, arg);
+      else if (s.stage === 'jackets' && s.jackets && verb === 'guard') next.jackets = { ...s.jackets, guards: uniq([...s.jackets.guards, name]) };
+      else if (s.stage === 'vault' && s.vault && (verb === 'split' || verb === 'steal')) next.vault = { ...s.vault, picked: { ...s.vault.picked, [name]: verb } };
       break;
     }
 
     case 'reveal':
       applyReveal(next, s, ev, idx);
+      break;
+
+    case 'cup_poured':
+      if (s.cups && oneName(ev.target, s.players)) next.cups = { ...s.cups, poisonCup: ev.target };
+      break;
+
+    case 'cup_swap': {
+      const a = oneName(ev.name, s.players);
+      const b = oneName(ev.with, s.players);
+      if (s.cups && a && b) {
+        const cupOf = { ...s.cups.cupOf };
+        [cupOf[a], cupOf[b]] = [cupOf[b], cupOf[a]];
+        next.cups = { ...s.cups, cupOf, lastSwap: { name: a, with: b, i: idx } };
+      }
+      break;
+    }
+
+    case 'bomb_pass': {
+      const to = oneName(ev.to, s.players);
+      if (s.bomb && to) next.bomb = { ...s.bomb, from: oneName(ev.from, s.players), holder: to, passes: s.bomb.passes + 1 };
+      break;
+    }
+
+    case 'grudge':
+      if (oneName(ev.by, s.players) && oneName(ev.victim, s.players)) next.grudges = [...s.grudges, { by: ev.by, victim: ev.victim, how: ev.how || null, i: idx }];
       break;
 
     case 'ability_use': {
@@ -420,7 +481,7 @@ export function reduce(s, ev, idx, derivedInfo) {
         next.chalk = { ...c, done: true, last: null, skipped: [...c.skipped, ...silent] };
       } else if ((ev.stage || s.stage) === 'bridge' && s.bridge) {
         next.bridge = { ...s.bridge, finished: true, line: survivors.slice(), stepping: {} };
-      } else if ((ev.stage || s.stage) === 'crusher' && s.crusher) {
+      } else if (['crusher', 'lever'].includes(ev.stage || s.stage) && s.crusher) {
         next.crusher = { ...s.crusher, escaped: true, door: true };
       } else if ((ev.stage || s.stage) === 'pit' && s.pit) {
         // whoever is alive got out one way or another
@@ -570,6 +631,35 @@ function applyReveal(next, s, ev, idx) {
         door: s.crusher.door || !!holder || jam,
       };
     }
+  } else if (what === 'lever' && s.crusher) {
+    const holder = oneName(data && data.holder, s.players);
+    next.crusher = { ...s.crusher, holder, holdChosen: !!holder };
+  } else if (what === 'pourer' && s.cups) {
+    next.cups = { ...s.cups, pourer: oneName(data && data.pourer, s.players) };
+  } else if (what === 'cups' && s.cups) {
+    const poisoned = oneName(data && data.poisoned, s.players);
+    next.cups = { ...s.cups, poisonCup: poisoned || s.cups.poisonCup, poisonPublic: true, victim: oneName(data && data.victim, s.players) };
+  } else if (what === 'jackets' && s.jackets) {
+    const d = data && typeof data === 'object' ? data : {};
+    const t = d.theft && typeof d.theft === 'object' ? d.theft : null;
+    next.jackets = {
+      ...s.jackets,
+      without: oneName(d.without, s.players) || s.jackets.without,
+      theft: t && oneName(t.thief, s.players) && oneName(t.victim, s.players) ? { thief: t.thief, victim: t.victim, guarded: t.guarded === true } : null,
+    };
+  } else if (what === 'bomb' && s.bomb) {
+    const d = data && typeof data === 'object' ? data : {};
+    const holder = oneName(d.holder, s.players);
+    const exploded = oneName(d.exploded, s.players);
+    next.bomb = { ...s.bomb, holder: holder || s.bomb.holder, exploded: exploded || s.bomb.exploded, total: toNum(d.totalPasses) ?? s.bomb.total };
+  } else if (what === 'vault_pair' && s.vault) {
+    const d = data && typeof data === 'object' ? data : {};
+    next.vault = { ...s.vault, pair: arrNames(d.pair, s.players).slice(0, 2), why: typeof d.why === 'string' ? d.why : null };
+  } else if (what === 'vault' && s.vault) {
+    const src = data && data.choices && typeof data.choices === 'object' ? data.choices : {};
+    const choices = {};
+    for (const [n, c] of Object.entries(src)) if (s.players[n] && (c === 'split' || c === 'steal')) choices[n] = c;
+    next.vault = { ...s.vault, choices };
   } else if (what === 'rope' && s.pit) {
     const by = oneName(data && data.by, s.players);
     if (by) {
@@ -639,7 +729,7 @@ function applyDeath(next, s, ev, idx) {
     delete b.at[name];
     next.bridge = b;
   }
-  if (s.crusher && fate.stage === 'crusher') {
+  if (s.crusher && (fate.stage === 'crusher' || fate.stage === 'lever')) {
     next.crusher = { ...s.crusher, crushed: true, deathsThisRound: s.crusher.deathsThisRound + 1 };
   }
   if (s.pit && fate.stage === 'pit') {
@@ -652,7 +742,7 @@ function applyDeath(next, s, ev, idx) {
 }
 
 function styleFor(cause) {
-  return { glass: 'shatter', crusher: 'flatten', pit: 'sink', trapdoor: 'chute', ledge: 'tumble' }[cause] || 'shatter';
+  return { glass: 'shatter', crusher: 'flatten', pit: 'sink', trapdoor: 'chute', ledge: 'tumble', poison: 'poison', drowned: 'drown', bomb: 'blast', vault: 'vault' }[cause] || 'shatter';
 }
 
 // ---------------------------------------------------------------- public API
@@ -674,7 +764,7 @@ export function chapters(tape) {
   const out = [];
   const events = Array.isArray(tape && tape.events) ? tape.events : [];
   events.forEach((ev, idx) => {
-    if (ev && ev.type === 'stage_start' && (STAGES.includes(ev.stage) || ev.stage === EPILOGUE)) out.push({ id: ev.stage, i: idx });
+    if (ev && ev.type === 'stage_start' && (ROOMS.includes(ev.stage) || ev.stage === EPILOGUE)) out.push({ id: ev.stage, i: idx });
     else if (ev && ev.type === 'game_end') out.push({ id: 'results', i: idx });
   });
   if (events.length && (!out.length || out[0].i > 0)) out.unshift({ id: 'start', i: 0 });
@@ -693,7 +783,9 @@ export function isStepWorthy(ev, cut) {
     case 'action': {
       const { verb } = parseAction(ev.action);
       if (ev.valid === false) return !!cut;
-      return !['hold', 'wait', 'stay', 'leave'].includes(verb) || ev.primary === true;
+      // v6: night moves and vault picks stay hidden until their reveal; cup and bomb moves have their own events.
+      if (['guard', 'steal', 'split'].includes(verb) || (ev.stage === 'cups' && verb === 'swap')) return !!cut;
+      return !['hold', 'wait', 'stay', 'leave', 'speak', 'sleep', 'drink', 'pass'].includes(verb) || ev.primary === true;
     }
     default:
       return true;

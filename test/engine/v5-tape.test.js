@@ -28,7 +28,7 @@ test('v5 validator accepts the default game and all shipped historical tapes wit
   }
   assert.ok(count >= 113);
   for (const version of [1, 2, 3, 4]) assert.ok(versions.has(version));
-  assert.ok([...versions].every(version => [1, 2, 3, 4, 5].includes(version)));
+  assert.ok([...versions].every(version => [1, 2, 3, 4, 5, 6].includes(version)));
 });
 
 test('v5 validator rejects legacy stages, assignments, bad visibility, and jury box leakage', () => {
