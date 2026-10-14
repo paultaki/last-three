@@ -3,7 +3,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame, RULES_VERSION } from '../../src/engine.js';
+import { runGame, RULES_VERSION } from './legacy-runner.js';
 import { runLedge } from '../../src/stages/ledge.js';
 import { runChalk } from '../../src/stages/chalk.js';
 import { CHALK_NOTE_LIMIT, ROPE_COST_FOOTING, chalkRules, commonText, sanitizeChalkNotes, sanitizeChalkText } from '../../src/rules.js';

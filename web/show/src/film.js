@@ -6,7 +6,7 @@ import {
 } from "./cinematography.js";
 import { contextBeat, finalists } from "./performance.js";
 import { consequence } from "./direction.js";
-import { episode } from "./episode.js";
+import { episode } from "./line-override.js";
 import {
   visibleActor,
   isStepWorthy,

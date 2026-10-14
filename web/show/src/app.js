@@ -4,7 +4,7 @@ import { direction, directedList } from "./direction.js";
 import { FilmOverlay, filmDuration, editList } from "./film.js";
 import { Arena } from "./scene.js";
 import { Score } from "./audio.js";
-import { setEpisode } from "./episode.js";
+import { setEpisode } from "./line-override.js";
 import {
   stateAt,
   chapters,

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runCrusher } from '../../src/stages/crusher.js';
+import { runCrusher } from '../../src/stages/crusher-v4.js';
 import { SEATS, fixedAgents, idle, makeGame, ofType, reply, spy } from './helpers.js';
 
 /** Everyone idles (stay) except the listed seats, which play the given action every round. */

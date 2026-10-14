@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BOT_KINDS, createScriptedAgents } from '../../src/scripted.js';
-import { runGame } from '../../src/engine.js';
+import { runGame } from './legacy-runner.js';
 import { SEATS, ofType, powersWith, spy } from './helpers.js';
 import { claimedPowers, claimedSafeSide } from '../../src/stats.js';
 

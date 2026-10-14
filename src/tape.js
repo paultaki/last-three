@@ -1,5 +1,6 @@
 // Tape format (spec section 7) and its validator. validateTape throws a clear Error on the first problem.
 
+import { validateV5Tape } from './tape-v5.js';
 import { POWER_IDS } from './powers.js';
 import { CHALK_MAX_NOTES, CHALK_NOTE_LIMIT, ROPE_COST_FOOTING, isCleanChalkText } from './rules.js';
 
@@ -62,6 +63,7 @@ const present = (value) => value !== undefined && value !== null;
 export function validateTape(tape) {
   if (!tape || typeof tape !== 'object') fail('Tape must be an object');
   validateHeader(tape);
+  if (tape.rulesVersion === 5) { validateV5Tape(tape); validateUsage(tape.usage); return; }
   const names = validatePlayers(tape.players);
   const deaths = validateEvents(tape.events, names);
   validateStartPlayers(tape);

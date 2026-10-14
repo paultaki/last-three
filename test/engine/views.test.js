@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame } from '../../src/engine.js';
+import { runGame } from './legacy-runner.js';
 import { POWER_IDS, POWERS } from '../../src/powers.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { SEATS, fixedAgents, idle, makeGame, ofType, powersWith, reply, spy } from './helpers.js';
@@ -120,7 +120,7 @@ test('publicLog carries only what happened since that agent\'s last ask; whisper
     whisper: view.you === 'Bex' && view.round === 1 && view.phase === 'waiting' ? { to: 'Ash', text: 'psst' } : null,
   });
   const g = makeGame({ agents: fixedAgents(spy(chatty, views)) });
-  const { runBridge } = await import('../../src/stages/bridge.js');
+  const { runBridge } = await import('../../src/stages/bridge-v4.js');
   await runBridge(g);
   const ash = views.filter((v) => v.you === 'Ash' && v.phase === 'waiting');
   assert.deepEqual(ash[0].publicLog.filter((l) => l.includes('r1-')), [], 'round 1 view predates round 1 speech');

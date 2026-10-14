@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame } from '../../src/engine.js';
+import { runGame } from './legacy-runner.js';
 import { validateTape } from '../../src/tape.js';
 import { fixedAgents, makeOracle, ofType, pitEscape, powersWith, reply } from './helpers.js';
 

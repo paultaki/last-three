@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { stateAt } from "../../web/show/src/model.js";
 import { dialogue } from "../../web/show/src/film.js";
 import { direction } from "../../web/show/src/direction.js";
-import { episode, setEpisode } from "../../web/show/src/episode.js";
+import { episode, setEpisode } from "../../web/show/src/line-override.js";
 import { SHOTS, TAPE } from "../../web/show/tools/episode/episode.mjs";
 
 const tape = JSON.parse(

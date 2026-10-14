@@ -1,111 +1,93 @@
-// Stage 1: the Glass Bridge (spec 4.1).
-
-import { BRIDGE_ROWS, BRIDGE_WAIT_ROUNDS, bridgeCrossingRules, bridgeWaitingRules } from '../rules.js';
-
-const SIDES = ['L', 'R'];
-const otherSide = (side) => (side === 'L' ? 'R' : 'L');
+import { BRIDGE_ROWS, BRIDGE_WAIT_ROUNDS, guidedBridgeRules } from '../rules.js';
 
 export async function runBridge(g) {
-  g.beginStage('bridge', 'Eight contestants step into the Glass Bridge.');
-  g.bridgeSafe = Array.from({ length: BRIDGE_ROWS }, () => (g.rng.chance(0.5) ? 'L' : 'R'));
-  const line = g.rng.shuffle(g.aliveList());
-  g.emit('reveal', { what: 'line', data: { line: [...line] } });
-  g.announce(`The line forms (front first): ${line.join(', ')}.`);
-
-  for (let round = 1; round <= BRIDGE_WAIT_ROUNDS; round++) {
-    await waitingRound(g, line, round);
+  g.beginStage('bridge', 'Elect a Guide to call the safe path.');
+  g.bridgeSafe = Array.from({ length: BRIDGE_ROWS }, () => g.rng.chance(0.5) ? 'L' : 'R');
+  const names = g.aliveList();
+  g.beginRound('campaign', 1, 1);
+  await publicTurn(g, names, 'campaign', () => ['campaign'], () => 'campaign');
+  let candidates = names;
+  let tallies, tied, method;
+  for (let ballot = 1; ballot <= 2; ballot++) {
+    const phase = ballot === 1 ? 'guide_vote' : 'guide_revote';
+    g.beginRound(phase, ballot, 2);
+    const results = await publicTurn(g, names, phase, () => candidates.map(n => `guide_vote:${n}`), () => `guide_vote:${g.rng.pick(candidates)}`, { candidates }, [], false);
+    tallies = Object.fromEntries(candidates.map(n => [n, 0]));
+    for (const name of names) {
+      const target = results[name].action.slice(11);
+      tallies[target]++;
+      g.emit('guide_vote', { name, target, ballot });
+    }
+    const high = Math.max(...Object.values(tallies));
+    tied = candidates.filter(n => tallies[n] === high);
+    if (tied.length === 1) { method = ballot === 1 ? 'vote' : 'revote'; break; }
+    candidates = tied;
   }
-
-  // The viewer redraws the line from this reveal, so the crossing opens with it.
-  g.round = null;
-  g.emit('reveal', { what: 'line', data: { line: [...line] } });
-
-  const weakPanes = [];
+  g.guide = tied.length === 1 ? tied[0] : g.rng.pick(tied);
+  g.emit('guide_elected', { name: g.guide, tallies, tied, method: method ?? 'seeded' });
+  const line = g.rng.shuffle(names.filter(n => n !== g.guide));
+  const revealLine = () => g.emit('reveal', { what: 'line', data: { line: [...line] } });
+  revealLine();
+  for (let round = 1; round <= BRIDGE_WAIT_ROUNDS; round++) {
+    g.beginRound('waiting', round, BRIDGE_WAIT_ROUNDS);
+    const walkers = names.filter(n => n !== g.guide);
+    const results = await publicTurn(g, walkers, 'waiting', name => ['hold', 'volunteer', ...walkers.filter(n => n !== name).map(n => `swap:${n}`)], () => 'hold', { front: line[0], wallRoundsLeft: BRIDGE_WAIT_ROUNDS - round }, line);
+    for (const name of walkers) {
+      const action = results[name].action;
+      const partner = action.slice(5);
+      if (action.startsWith('swap:') && walkers.indexOf(name) < walkers.indexOf(partner) && results[partner].action === `swap:${name}`) {
+        const a = line.indexOf(name), b = line.indexOf(partner);
+        [line[a], line[b]] = [line[b], line[a]];
+      }
+    }
+    for (const name of walkers) if (results[name].action === 'volunteer') {
+      line.splice(line.indexOf(name), 1); line.unshift(name);
+    }
+    revealLine();
+  }
+  const weakPanesRevealed = [];
   for (let row = 1; row <= BRIDGE_ROWS; row++) {
-    await crossingRow(g, line, row, weakPanes);
-    if (g.alive.size === 1) break; // the game is decided; no point crossing further
+    const walker = line[0];
+    const safe = g.bridgeSafe[row - 1];
+    const state = { guide: g.guide, front: walker, rowsCrossed: row - 1, weakPanesRevealed: [...weakPanesRevealed] };
+    g.beginRound('guide_call', row, BRIDGE_ROWS);
+    const called = await publicTurn(g, [g.guide], 'guide_call', () => ['call:L', 'call:R'], () => `call:${safe}`, state, line);
+    const side = called[g.guide].action.slice(5);
+    g.emit('guide_call', { name: g.guide, walker, row, side });
+    if (side !== safe) g.breakPact(g.guide, walker, 'false_guide_call');
+    state.guideCall = side;
+    g.beginRound('counter_call', row, BRIDGE_ROWS);
+    const counters = g.aliveList(); // Anyone may shout a counter-call, including the walker and Guide.
+    const replies = await publicTurn(g, counters, 'counter_call', () => ['wait', 'counter:L', 'counter:R'], () => 'wait', state, line);
+    state.counterCalls = [];
+    for (const name of counters) if (replies[name].action.startsWith('counter:')) {
+      const counter = { name, walker, row, side: replies[name].action.slice(8) };
+      state.counterCalls.push(counter);
+      g.emit('counter_call', counter);
+    }
+    g.beginRound('crossing', row, BRIDGE_ROWS);
+    const steps = await publicTurn(g, [walker], 'crossing', () => ['step:L', 'step:R'], () => `step:${side}`, state, line);
+    if (steps[walker].action.slice(5) !== safe) {
+      const { died } = g.eliminate([walker], { cause: 'glass', style: 'shatter', luckyWhy: 'the final three are caught by the safety ledge' });
+      if (died.length) {
+        line.shift();
+        g.emit('action', { name: line[0], action: `step:${safe}`, valid: true, auto: true });
+      }
+    }
+    const weak = safe === 'L' ? 'R' : 'L';
+    weakPanesRevealed.push({ row, weak });
+    g.emit('reveal', { what: 'weak_pane', data: { row, weak } });
+    await g.finishEliminations();
   }
   g.endStage();
 }
 
-async function waitingRound(g, line, round) {
-  g.beginRound('waiting', round, BRIDGE_WAIT_ROUNDS);
-  const names = g.aliveList();
-  const specFor = (name) => ({
-    phase: 'waiting',
-    roundsTotal: BRIDGE_WAIT_ROUNDS,
-    line: [...line],
-    stageState: {
-      rowsCrossed: 0,
-      weakPanesRevealed: [],
-      front: line[0],
-      wallRoundsLeft: BRIDGE_WAIT_ROUNDS - round,
-    },
-    legalActions: ['hold', 'volunteer', ...names.filter((n) => n !== name).map((n) => `swap:${n}`)],
-    rules: bridgeWaitingRules(BRIDGE_WAIT_ROUNDS - round),
-  });
-  const results = await g.ask(names, specFor, () => 'hold');
+async function publicTurn(g, names, phase, actions, fallback, state = {}, line = [], allowBreak = true) {
+  const results = await g.ask(names, name => ({
+    phase, roundsTotal: phase === 'waiting' ? BRIDGE_WAIT_ROUNDS : phase === 'campaign' ? 1 : phase.startsWith('guide_v') || phase === 'guide_revote' ? 2 : BRIDGE_ROWS,
+    stageState: state, line: [...line], legalActions: actions(name), rules: guidedBridgeRules(phase), allowBreak,
+  }), fallback);
   g.speak(names, results);
   g.emitActions(names, results);
-
-  const chosen = (name) => (results[name].valid ? results[name].action : 'hold');
-  // 1. Mutual swaps. Each agent names one target, so mutual pairs never overlap.
-  for (const name of names) {
-    const action = chosen(name);
-    if (!action.startsWith('swap:')) continue;
-    const partner = action.slice(5);
-    if (names.indexOf(name) < names.indexOf(partner) && chosen(partner) === `swap:${name}`) {
-      const a = line.indexOf(name);
-      const b = line.indexOf(partner);
-      [line[a], line[b]] = [line[b], line[a]];
-      g.announce(`${name} and ${partner} swapped places in the line.`);
-    }
-  }
-  // 2. Volunteers, in seat order, each jumping to the front.
-  for (const name of names) {
-    if (chosen(name) !== 'volunteer') continue;
-    line.splice(line.indexOf(name), 1);
-    line.unshift(name);
-    g.announce(`${name} volunteered and moved to the front.`);
-  }
-  g.emit('reveal', { what: 'line', data: { line: [...line] } });
-}
-
-async function crossingRow(g, line, row, weakPanes) {
-  g.beginRound('crossing', row, BRIDGE_ROWS);
-  const names = g.aliveList();
-  const front = line[0];
-  const specFor = (name) => ({
-    phase: 'crossing',
-    roundsTotal: BRIDGE_ROWS,
-    line: [...line],
-    stageState: { rowsCrossed: row - 1, weakPanesRevealed: weakPanes.map((p) => ({ ...p })), front, wallRoundsLeft: 0 },
-    legalActions: name === front ? ['step:L', 'step:R'] : ['wait'],
-    rules: bridgeCrossingRules(name === front),
-  });
-  const fallbackFor = (name) => (name === front ? `step:${g.rng.pick(SIDES)}` : 'wait');
-  const results = await g.ask(names, specFor, fallbackFor);
-  g.speak(names, results);
-  g.emitActions(names, results);
-
-  // Only the front agent's decision counts.
-  const safe = g.bridgeSafe[row - 1];
-  const stepped = results[front].action.slice(5);
-  if (stepped !== safe) {
-    const { died } = g.eliminate([front], {
-      cause: 'glass',
-      style: 'shatter',
-      featherDetail: 'The pane shattered but the feather held the holder up.',
-      luckyWhy: 'the glass holds',
-    });
-    if (died.length) {
-      line.shift();
-      g.emit('action', { name: line[0], action: `step:${safe}`, valid: true, auto: true });
-      g.announce(`${line[0]} stepped onto the safe pane automatically and is now at the front.`);
-    }
-  }
-  const weak = otherSide(safe);
-  weakPanes.push({ row, weak });
-  g.emit('reveal', { what: 'weak_pane', data: { row, weak } });
-  g.announce(`Row ${row}: the ${weak === 'L' ? 'left' : 'right'} pane was the weak one.`);
+  return results;
 }

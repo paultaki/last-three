@@ -3,7 +3,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame, SEATS } from '../../src/engine.js';
+import { runGame, SEATS } from './legacy-runner.js';
 import * as rules from '../../src/rules.js';
 import { ROPE_COST_FOOTING, sanitizeChalkNotes, sanitizeChalkText } from '../../src/rules.js';
 import { createScriptedAgents } from '../../src/scripted.js';

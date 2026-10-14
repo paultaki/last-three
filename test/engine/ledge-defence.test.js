@@ -1,7 +1,7 @@
 // Rules v2: nobody may make the same defensive move (brace or dodge) two rounds in a row.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame, RULES_VERSION } from '../../src/engine.js';
+import { runGame, RULES_VERSION } from './legacy-runner.js';
 import { runLedge } from '../../src/stages/ledge.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { validateTape } from '../../src/tape.js';

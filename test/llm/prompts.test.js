@@ -50,7 +50,8 @@ test('systemPrompt is static and states objective and schema', () => {
   assert.equal(systemPrompt(), systemPrompt());
   assert.match(systemPrompt(), /Nothing else matters/);
   assert.match(systemPrompt(), /"whisper"/);
-  assert.match(systemPrompt(), /forger/);
+  assert.doesNotMatch(systemPrompt(), /power|chalk|forg/i);
+  assert.match(systemPrompt(), /jury and rank the final three/);
   assert.match(systemPrompt(), /rivals, not your friends/);
   assert.match(systemPrompt(), /Never help a rival for free/);
 });

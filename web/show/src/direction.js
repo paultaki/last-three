@@ -1,5 +1,5 @@
 import { isStepWorthy } from "../../lib/state.js";
-import { episode } from "./episode.js";
+import { episode } from "./line-override.js";
 // Editorial context comes from earlier recorded events, never invented dialogue.
 export const FEATURE_TAPE = "20261009-0025";
 const receipts = {

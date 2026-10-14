@@ -51,7 +51,7 @@ export function spy(policy, store) {
 }
 
 export function makeGame({ seed = 1, powers = {}, agents = fixedAgents(), config = {}, dead = [] } = {}) {
-  const g = new Game({ seed, agents, config: { ...config, powers: powersWith(powers) } });
+  const g = new Game({ seed, agents, config: { ...config, rulesVersion: 4, powers: powersWith(powers) } });
   for (const name of dead) g.alive.delete(name);
   return g;
 }

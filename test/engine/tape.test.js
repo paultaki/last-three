@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame } from '../../src/engine.js';
+import { runGame } from './legacy-runner.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { validateTape } from '../../src/tape.js';
 

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame } from '../../src/engine.js';
-import { runBridge } from '../../src/stages/bridge.js';
+import { runGame } from './legacy-runner.js';
+import { runBridge } from '../../src/stages/bridge-v4.js';
 import { fixedAgents, idle, makeGame, ofType, powersWith, reply, spy } from './helpers.js';
 
 const opposite = (side) => (side === 'L' ? 'R' : 'L');

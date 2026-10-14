@@ -54,7 +54,7 @@ export const SCENARIOS = {
 
 /** Returns { name: tape } with `id` set to `pit-<name>`. Scenarios the engine never produced are left out. */
 export async function buildPitTapes({ maxSeed = 420, only = null } = {}) {
-  const { runGame } = await import(pathToFileURL(path.join(root, 'src', 'engine.js')).href);
+  const { runGame } = await import(pathToFileURL(path.join(root, 'test', 'engine', 'legacy-runner.js')).href);
   const { createScriptedAgents } = await import(pathToFileURL(path.join(root, 'src', 'scripted.js')).href);
   const wanted = new Set(only || Object.keys(SCENARIOS));
   const found = {};

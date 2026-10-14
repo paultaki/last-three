@@ -5,14 +5,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { runGame } from '../../src/engine.js';
-import { runBridge } from '../../src/stages/bridge.js';
+import { runGame } from './legacy-runner.js';
+import { runBridge } from '../../src/stages/bridge-v4.js';
 import { ledgeRules, mapKnowledge } from '../../src/rules.js';
 import { validateTape } from '../../src/tape.js';
 import { fixedAgents, idle, makeGame, ofType, powersWith, reply, spy, SEATS } from './helpers.js';
 
 const helpersUrl = new URL('./helpers.js', import.meta.url).href;
-const engineUrl = new URL('../../src/engine.js', import.meta.url).href;
+const engineUrl = new URL('./legacy-runner.js', import.meta.url).href;
 
 async function playRound1(policy, { forger = 'Dara', seed = 3 } = {}) {
   const views = [];

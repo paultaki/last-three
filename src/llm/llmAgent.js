@@ -15,6 +15,18 @@ export const DEFAULT_ROSTER = [
   'meta/llama-4-maverick',
 ];
 
+/** Mixed roster: GPT Luna replaces gpt-oss; game calls request thinking off. */
+export const MIXED_ROSTER = [
+  'anthropic/claude-haiku-5.5',
+  'openai/gpt-5.6-luna',
+  'google/gemini-2.5-flash-lite',
+  'spacexai/grok-4.1-fast-non-reasoning',
+  'deepseek/deepseek-v4-flash',
+  'alibaba/qwen3.8-flash',
+  'moonshotai/kimi-k2.6',
+  'zai/glm-5.3-flash',
+];
+
 /** Heavyweight 8-seat roster: stronger (about 20x pricier) models, better bluffers. */
 export const HEAVY_ROSTER = [
   'anthropic/claude-sonnet-5.5',
@@ -63,6 +75,7 @@ const approxTokens = (s) => Math.ceil(s.length / 4);
 export function createLlmAgent({ name, model, ledger, gameId, chatFn = chat, maxTokens = MAX_TOKENS }) {
   const totals = { inputTokens: 0, outputTokens: 0, usd: 0, calls: 0 };
   let capError = null;
+  const watched = [];
 
   async function ask(system, user) {
     await ledger?.ready?.();
@@ -95,12 +108,17 @@ export function createLlmAgent({ name, model, ledger, gameId, chatFn = chat, max
   return {
     name,
     model,
+    observe(event) {
+      if (event.visibility !== 'public') return;
+      watched.push(structuredClone(event));
+      if (watched.length > 40) watched.shift();
+    },
     async act(view) {
-      const system = systemPrompt();
-      const user = userPrompt(view);
+      const system = systemPrompt(view.rulesVersion ?? 5);
+      const user = userPrompt({ ...view, watchedEvents: watched.splice(0) });
       const first = parseResponse(await askOrEmpty(system, user), view);
       if (first.response) return first.response;
-      const retry = parseResponse(await askOrEmpty(system, `${user}\n\n${REPAIR_NOTE}`), view);
+      const retry = parseResponse(await askOrEmpty(system, `${user}\n\n${view.rulesVersion === 5 ? REPAIR_NOTE.replace(', \"forge\": null', '') : REPAIR_NOTE}`), view);
       if (retry.response) return retry.response;
       throw new Error(`${name} (${model}): unusable reply twice (${first.error}; ${retry.error})`);
     },

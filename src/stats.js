@@ -1,6 +1,7 @@
 // Tapes -> per-model behaviour table. Lie detection is a heuristic (see notes).
 
 const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+const V5_STAGES = ['bridge', 'crusher', 'pit', 'vote', 'jury'];
 const ELIMINATED_PLACE = 4;
 const FIRST_PERSON = String.raw`\b(?:I(?:'m| am|'ve| have| hold| got| can| could| possess| control| carry| own)|my)\b`;
 const CLAIM_WINDOW = 50;
@@ -108,18 +109,20 @@ export function safeSidesByRow(rawEvents) {
   return safe;
 }
 
-const emptyModel = (model) => ({
+const emptyModel = (model, rulesVersion) => ({
   model,
   games: 0,
   meanPlace: 0,
   wins: 0,
   top3: 0,
-  deathsByStage: Object.fromEntries(STAGES.map((s) => [s, 0])),
+  deathsByStage: Object.fromEntries((rulesVersion === 5 ? V5_STAGES : STAGES).map((s) => [s, 0])),
   volunteers: 0,
   frontOfBridge: 0,
   holdLever: 0,
   pushLever: 0,
   shoves: 0,
+  guideCalls: 0, guideLies: 0, pactsFormed: 0, pactsBroken: 0,
+  livesSaved: 0, lifeDebts: 0, votesAgainstCreditor: 0, ropeThrows: 0, anchorDrownings: 0,
   lies: { power: 0, side: 0 },
   placeSum: 0,
 });
@@ -153,7 +156,7 @@ function addTape(rows, tape) {
   const rowOf = (name) => rows.get(tape.players.find((p) => p.name === name)?.model);
   const powerOf = (name) => tape.players.find((p) => p.name === name)?.power;
   for (const p of tape.players) {
-    if (!rows.has(p.model)) rows.set(p.model, emptyModel(p.model));
+    if (!rows.has(p.model)) rows.set(p.model, emptyModel(p.model, tape.rulesVersion));
     const row = rows.get(p.model);
     row.games += 1;
     const place = tape.result.places.find((x) => x.name === p.name)?.place ?? null;
@@ -163,13 +166,17 @@ function addTape(rows, tape) {
   }
   const stepped = new Set();
   for (const e of withContext(tape.events)) {
-    if (e.type === 'death' && STAGES.includes(e.stage)) rowOf(e.name).deathsByStage[e.stage] += 1;
+    if (e.type === 'death' && [...STAGES, ...V5_STAGES].includes(e.stage)) {
+      const counts = rowOf(e.name).deathsByStage;
+      counts[e.stage] = (counts[e.stage] ?? 0) + 1;
+    }
     if (e.type !== 'action' || e.valid === false || e.auto) continue;
     countAction(rowOf(e.name), e);
     if (e.stage === 'bridge' && String(e.action).startsWith('step:')) stepped.add(e.name);
   }
   for (const name of stepped) rowOf(name).frontOfBridge += 1;
-  countLies(tape.events, tape.players.map((p) => p.name), rowOf, powerOf);
+  if (tape.rulesVersion === 5) countV5(tape, rowOf);
+  else countLies(tape.events, tape.players.map((p) => p.name), rowOf, powerOf);
 }
 
 /**
@@ -189,10 +196,33 @@ export function computeStats(tapes) {
     games: tapes.length,
     models,
     notes: [
+      ...(tapes.some(t => t.rulesVersion === 5) ? ['V5 Guide lies compare each call to the revealed weak pane, not a speech heuristic. Life debts and pact breaks come from engine events; votesAgainstCreditor counts individual revealed ballots including runoffs.'] : []),
       'Lie detection is a heuristic. Power lies are first-person claims of a power the speaker does not hold; side lies are confident left/right safety claims that contradict the revealed pane. Hedged claims, questions, negations and forged messages are skipped, and an honest mistake counts the same as a lie.',
       'Small samples: a model that appears in 8 games has far less evidence behind it than one in 24. Seat, secret power and opponents are not controlled for, and Budget and Heavyweight games are pooled in one table, so treat differences of a few tenths of a place as noise.',
       'meanPlace counts an eliminated player as place 4.',
       'frontOfBridge counts games in which the player took at least one real crossing step.',
     ],
   };
+}
+
+
+function countV5(tape, rowOf) {
+  const safe = safeSidesByRow(tape.events), debts = new Map();
+  let anchor = null;
+  for (const e of tape.events) {
+    if (e.type === 'guide_call') {
+      rowOf(e.name).guideCalls++;
+      if (safe.get(e.row) !== toSide(e.side)) rowOf(e.name).guideLies++;
+    }
+    if (e.type === 'pact_formed') for (const name of e.members) rowOf(name).pactsFormed++;
+    if (e.type === 'pact_broken') rowOf(e.by).pactsBroken++;
+    if (e.type === 'life_debt') {
+      rowOf(e.creditor).livesSaved++; rowOf(e.debtor).lifeDebts++;
+      if (!debts.has(e.debtor)) debts.set(e.debtor, new Set());
+      debts.get(e.debtor).add(e.creditor);
+    }
+    if (e.type === 'vote_reveal' && debts.get(e.name)?.has(e.target)) rowOf(e.name).votesAgainstCreditor++;
+    if (e.type === 'reveal' && e.what === 'rope') { anchor = e.data.by; rowOf(anchor).ropeThrows++; }
+    if (e.type === 'death' && e.stage === 'pit' && e.name === anchor) rowOf(anchor).anchorDrownings++;
+  }
 }

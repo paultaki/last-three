@@ -72,11 +72,14 @@ test("crusher slam curves start at the recorded raised height", () => {
   };
   assert.equal(crusherCeiling(flatten, 0), 4.3);
 });
-test("successful crusher dives are immediately followed by stage end in supported tapes", () => {
+test("legacy film crusher dives are immediately followed by stage end in v1-v4 tapes", () => {
   const dir = new URL("../../web/tapes/", import.meta.url);
   let dives = 0;
   for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".json"))) {
-    const events = JSON.parse(fs.readFileSync(new URL(file, dir))).events || [];
+    const recorded = JSON.parse(fs.readFileSync(new URL(file, dir)));
+    // The Episode 01 film supports v1-v4. V5 adds social events after a dive.
+    if (recorded.rulesVersion > 4) continue;
+    const events = recorded.events || [];
     for (let i = 0; i < events.length; i++) {
       const e = events[i];
       if (e.type !== "reveal" || e.what !== "ceiling" || e.data?.dive !== true)

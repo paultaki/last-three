@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runGame, SEATS } from '../../src/engine.js';
+import { runGame, SEATS } from './legacy-runner.js';
 import { createScriptedAgents } from '../../src/scripted.js';
 import { validateTape } from '../../src/tape.js';
 

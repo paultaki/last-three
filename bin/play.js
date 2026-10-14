@@ -4,13 +4,12 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
 import { runGame } from '../src/engine.js';
 import { BOT_KINDS, createScriptedAgents } from '../src/scripted.js';
 import { validateTape } from '../src/tape.js';
 
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const STAGES = ['bridge', 'crusher', 'pit', 'disc', 'ledge'];
+const STAGES = ['bridge', 'crusher', 'pit', 'vote', 'jury'];
 const USAGE = `Usage: node bin/play.js [--seed N] [--kinds ${BOT_KINDS.join(',')}] [--out file] [--id name]`;
 
 function parseArgs(argv) {
@@ -32,7 +31,7 @@ function parseArgs(argv) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const id = opts.id ?? `scripted-${opts.seed}`;
-  const outPath = opts.out ?? path.join(ROOT, 'web', 'tapes', `${id}.json`);
+  const outPath = opts.out ?? path.join(tmpdir(), 'last-three-scripted', `${id}.json`);
 
   console.log(`Running game with seed ${opts.seed}...`);
   const agents = createScriptedAgents(opts.seed, opts.kinds);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runBridge } from '../../src/stages/bridge.js';
+import { runBridge } from '../../src/stages/bridge-v4.js';
 import { fixedAgents, idle, makeGame, ofType, reply, spy } from './helpers.js';
 
 const opposite = (side) => (side === 'L' ? 'R' : 'L');
