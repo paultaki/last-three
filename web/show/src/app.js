@@ -349,7 +349,7 @@ async function init() {
   };
   $("presentation").onclick = () => setFilm(!film);
   $("clean-frame").onclick = toggleClean;
-  await arena.loadCast(params.get("cast") === "city");
+  await arena.loadCast(params.get("cast"));
   $("cast-status").textContent = arena.city
     ? "SYNTY CAST / LOCAL PREVIEW"
     : "ORIGINAL STAND-IN CAST";

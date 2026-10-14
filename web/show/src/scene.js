@@ -13,6 +13,7 @@ import {
 import { contactBeat, deathProgress } from "./direction.js";
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { BONE_ALIASES, loadIthappySeat, setExpression, expressionFor } from "./ithappy.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
@@ -161,8 +162,15 @@ export class Arena {
     this.renderer.setSize(width, height);
     if (this.composer) this.composer.setSize(width, height);
   }
-  async loadCast(city) {
-    let sources = null;
+  async loadCast(kind) {
+    const city = kind === true || kind === "city";
+    let sources = null,
+      ithappy = null;
+    if (kind === "ithappy") {
+      const r = await fetch("cast-ithappy.json");
+      if (!r.ok) throw new Error("cast-ithappy.json is missing.");
+      ithappy = await r.json();
+    }
     if (city) {
       const r = await fetch("assets/cast/cast.json");
       if (!r.ok)
@@ -177,8 +185,18 @@ export class Arena {
       const puppet = new T.Group();
       group.add(puppet);
       this.scene.add(group);
-      let rig;
-      if (sources) {
+      let rig,
+        faces = null;
+      if (ithappy) {
+        ({ rig, faces } = await loadIthappySeat(loader, "assets/ithappy/", ithappy.seats[i]));
+        puppet.add(rig);
+        rig.updateMatrixWorld(true);
+        const b = new T.Box3().setFromObject(rig);
+        const scale = 2.05 / (b.max.y - b.min.y);
+        rig.scale.multiplyScalar(scale);
+        rig.position.y -= b.min.y * scale;
+        rig.updateMatrixWorld(true);
+      } else if (sources) {
         rig = (await loader.loadAsync("assets/cast/" + sources[i].file)).scene;
         puppet.add(rig);
         rig.updateMatrixWorld(true);
@@ -207,7 +225,7 @@ export class Arena {
           o.castShadow = true;
           o.receiveShadow = true;
           o.frustumCulled = false;
-          if (o.material?.map) {
+          if (o.material?.map && city) {
             if (this.cityMap) {
               o.material.map.dispose();
               o.material.map = this.cityMap;
@@ -218,8 +236,12 @@ export class Arena {
             );
           }
         }
-        if (o.isBone)
-          bones[o.name.toLowerCase()] = { bone: o, base: o.quaternion.clone() };
+        if (o.isBone) {
+          const entry = { bone: o, base: o.quaternion.clone() };
+          bones[o.name.toLowerCase()] = entry;
+          const alias = BONE_ALIASES[o.name.toLowerCase()];
+          if (alias && !bones[alias]) bones[alias] = entry;
+        }
       });
       const ring = mesh(
         new T.RingGeometry(0.55, 0.61, 40),
@@ -240,12 +262,14 @@ export class Arena {
       label.style.setProperty("--seat", COLORS[i]);
       this.labelHost.append(label);
       this.labels.push(label);
-      this.cast.push({ group, puppet, rig, bones, ring });
+      this.cast.push({ group, puppet, rig, bones, ring, faces });
     }
-    this.city = !!sources;
+    this.city = !!sources || !!ithappy;
   }
   setState(s, prev, cut) {
     this.state = s;
+    for (const [k, member] of this.cast.entries())
+      if (member.faces) setExpression(member, expressionFor(s, s.order?.[k], cut));
     this.prev = prev;
     this.view = presentation(s, prev, cut);
     if (this.film) this.view = blockFilm(this.view, s, prev);
